@@ -1,0 +1,38 @@
+{
+  "id": "prefetch",
+  "name": "Prefetch (.pf files)",
+  "category": "file",
+  "subcategory": "execution-evidence",
+  "os_min": "Windows XP",
+  "location": "C:\\Windows\\Prefetch\\{EXECUTABLENAME}-{HASH}.pf. Prefetching (and therefore .pf creation) is controlled by HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management\\PrefetchParameters\\EnablePrefetcher, and is disabled by default on systems whose boot volume is an SSD.",
+  "purpose": "Windows' prefetcher records which files and directories an executable references during its first ~10 seconds of launch, storing that data in a .pf file so future launches can be sped up by pre-loading those resources. Because a .pf file is created/updated only when the named executable actually runs, Prefetch is one of the strongest single-artifact indicators of program execution and its history (run count, run times).",
+  "key_fields": [
+    "Executable name (limited to 29 characters in the filename)",
+    "Run count — total number of times the executable has been launched since the .pf file was created",
+    "Last-run timestamp, plus (format version 26 and later, i.e. Windows 8 and newer) up to 7 additional previous run timestamps for a maximum of 8 stored execution times; format version 23 (Vista/Windows 7) records only the single last-run timestamp with no run history array",
+    "Volume information — source volume path, serial number, and creation time",
+    "List of files and directories referenced during the executable's startup phase",
+    "Prefetch file format version number (17 = XP/2003, 23 = Vista/7/2008/2012, 26 = Windows 8/8.1, 30 = Windows 10) — identifies which decompression/parsing logic applies (Windows 10 .pf files are compressed and require Windows 8+ APIs to decompress)"
+  ],
+  "normal_baseline": "One .pf file per distinct executable path that has been run, up to a Microsoft-documented cap of 128 retained files in the Prefetch folder (oldest purged once the cap is reached); run counts and run-time clusters that line up with normal user/application behavior (e.g. daily logon scripts, frequently used applications).",
+  "anomalies": [
+    "A .pf file for an executable run from a Temp, Downloads, or other user-writable/unusual path, especially with a low run count consistent with a one-off tool execution",
+    "A high run count concentrated in a very short time window, consistent with automated/scripted repeated execution rather than normal interactive use",
+    "Referenced-files list inside the .pf naming unusual DLLs, staging directories, or files that no longer exist on disk — useful for recovering paths of since-deleted malware components",
+    "A .pf file whose executable no longer exists at the referenced path (deleted post-execution) while the .pf itself remains — direct evidence of a since-removed binary having run",
+    "Complete absence of expected Prefetch activity on a system that should have it enabled — always confirm EnablePrefetcher's registry value and whether the boot volume is an SSD (which disables prefetching by default) before treating an empty/sparse Prefetch folder as suspicious"
+  ],
+  "parsing_tools": [
+    "PECmd (Eric Zimmerman)",
+    "WinPrefetchView (Nirsoft)"
+  ],
+  "attack_techniques": [
+    "T1070.004"
+  ],
+  "anti_forensic_notes": "Prefetch files are ordinary files on disk (not registry-embedded), so they can be deleted individually or in bulk with simple filesystem operations — a documented anti-forensic technique corresponding to ATT&CK T1070.004 (Indicator Removal: File Deletion). Deletion of .pf files does not remove all trace, however: the NTFS Master File Table ($MFT) retains a record of the deleted file's name, size, and timestamps, and the $UsnJrnl records the deletion event itself. Because prefetching is off by default on SSD-booted systems and can be disabled entirely via EnablePrefetcher, a sparse or empty Prefetch folder is not inherently suspicious and must be evaluated against the system's actual configuration before being treated as evidence of tampering.",
+  "related_artifacts": [
+    "amcache",
+    "shimcache",
+    "bam-dam"
+  ]
+}

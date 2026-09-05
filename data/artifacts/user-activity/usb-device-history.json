@@ -1,0 +1,40 @@
+{
+  "id": "usb-device-history",
+  "name": "USB Device History",
+  "category": "registry",
+  "subcategory": "user-activity/removable-media",
+  "os_min": "Windows XP",
+  "location": "SYSTEM hive: CurrentControlSet\\Enum\\USBSTOR and CurrentControlSet\\Enum\\USB; per-device Properties\\{83da6326-97a6-4088-9453-a1923f573b29} subkey (Windows 7+); NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MountPoints2; C:\\Windows\\inf\\setupapi.dev.log",
+  "purpose": "Reconstructs the history of USB devices (primarily mass storage) connected to a system: which device, when it was first installed, when it was last connected/removed, and which user account was logged on at the time.",
+  "key_fields": [
+    "USBSTOR device subkey name - encodes device class, vendor (Ven_), product (Prod_), and revision (Rev_), e.g. Disk&Ven_SanDisk&Prod_Extreme&Rev_0001",
+    "USBSTOR instance ID subkey - contains the device's reported serial number (or a system-generated identifier)",
+    "Properties\\{83da6326-97a6-4088-9453-a1923f573b29}\\0064 - first install/plug-in timestamp (Windows 7+)",
+    "Properties\\{83da6326-97a6-4088-9453-a1923f573b29}\\0066 - last connected/arrival timestamp (Windows 8+)",
+    "Properties\\{83da6326-97a6-4088-9453-a1923f573b29}\\0067 - last removal timestamp (Windows 8+)",
+    "MountPoints2 - per-user record (with LastWrite time) linking a volume GUID to the user account that mounted it, showing who was logged on when a device was connected",
+    "setupapi.dev.log - system-wide, chronological plain-text log of device installation events, including the first-connection timestamp, VID/PID, and serial number, for every plug-and-play device including non-storage USB devices"
+  ],
+  "normal_baseline": "A small, stable set of known storage devices (personal drives, approved corporate-issued media) with connection timestamps aligned to expected business use, and MountPoints2 attribution matching the device owner's account.",
+  "anomalies": [
+    "A device with no corresponding setupapi.dev.log first-install entry despite a USBSTOR record, or vice versa, suggesting registry or log tampering (they should normally agree on first-connection time)",
+    "Devices connecting outside business hours or immediately before/after a suspected data-exfiltration window",
+    "A large number of distinct unfamiliar devices connected in a short time, or the same device connecting across many different user accounts/hosts",
+    "MountPoints2 entry attributing a device to an account other than the one an analyst expects, based on other evidence",
+    "First-install (0064) and last-connected (0066) timestamps far apart with no intervening evidence of removal, or a last-removal (0067) timestamp that precedes the last-connected time, indicating inconsistent or edited property data",
+    "USBSTOR serial number values that look system-generated (their second character is '&') mixed among otherwise consistent hardware serials-treat any single serial value as provisional rather than a guaranteed unique hardware identifier"
+  ],
+  "parsing_tools": [
+    "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
+    "Nirsoft USBDeview",
+    "RegRipper (usbstor.pl, usb.pl plugins)"
+  ],
+  "attack_techniques": [
+    "T1091",
+    "T1052.001"
+  ],
+  "anti_forensic_notes": "The commonly cited rule that a serial number with '&' as its second character is always system-generated (i.e., the device itself has no hardware serial) has been shown to be unreliable in practice-Windows-reported values can be inconsistent across enclosures/adapters even for the same physical drive, so serial numbers should be treated as identifiers to correlate rather than as trustworthy hardware fingerprints. setupapi.dev.log only records the first installation of a given device/driver combination system-wide (not per subsequent reconnect), so later connect/disconnect timing must come from the registry property timestamps or MountPoints2, and deleting or rolling back that log removes the earliest-connection evidence.",
+  "related_artifacts": [
+    "shellbags"
+  ]
+}

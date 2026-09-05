@@ -1,0 +1,1013 @@
+{
+  "generated": "2026-09-05T01:19:36.602694Z",
+  "count": 25,
+  "artifacts": [
+    {
+      "id": "ntuser-dat-hive",
+      "name": "NTUSER.DAT (User Registry Hive)",
+      "category": "registry",
+      "subcategory": "user-configuration",
+      "os_min": "Windows 2000 (present in all NT-based Windows versions)",
+      "location": "Mounted as HKEY_CURRENT_USER while the user is logged on; also reachable as HKEY_USERS\\<SID> for a non-interactive profile. File: %UserProfile%\\NTUSER.DAT (e.g. C:\\Users\\<username>\\NTUSER.DAT)",
+      "purpose": "Root of a single user's registry — mounted as HKEY_CURRENT_USER for the duration of that user's session. Holds per-user application settings and UI preferences and, forensically, a per-user Run/RunOnce autostart location. User-activity artifacts that also live in this hive — UserAssist, RunMRU, TypedPaths, RecentDocs — are documented as separate artifacts; this entry covers the hive's general role and its own persistence keys.",
+      "key_fields": [
+        "Software\\Microsoft\\Windows\\CurrentVersion\\Run and \\RunOnce — per-user autostart entries, executed only when that specific user logs on",
+        "Software\\Classes — per-user COM/file-association overrides layered on top of HKLM\\SOFTWARE\\Classes (the underlying per-user Classes data itself is stored in the separate UsrClass.dat hive)",
+        "Volatile Environment — session-specific environment variables (e.g. USERNAME, USERDOMAIN, logon server) recreated at each logon",
+        "Hive last-write time and the paired NTUSER.DAT.LOG1/.LOG2 transaction logs"
+      ],
+      "normal_baseline": "Per-user Run entries correspond to user-installed, signed applications (chat clients, cloud-sync apps); the hive's last-write time tracks with the account's actual last logoff or sync cycle.",
+      "anomalies": [
+        "A per-user Run/RunOnce entry pointing to a script or binary the profile owner denies installing, especially one staged in %AppData%\\Roaming or %AppData%\\Local.",
+        "NTUSER.DAT's last-write time falling outside any interactive logon recorded for that account in the Security event log, suggesting the hive was modified offline or via a remote/administrative technique rather than by the user themselves.",
+        "An NTUSER.DAT file present under a user-profile folder with no corresponding account in the SAM (or SECURITY domain-cache) — an orphaned profile from a deleted account, or vice versa, a profile folder with no NTUSER.DAT."
+      ],
+      "parsing_tools": [
+        "Registry Explorer / RECmd (Eric Zimmerman)",
+        "RegRipper (NTUSER-targeted plugins)",
+        "Autoruns (Sysinternals), for per-user Run enumeration"
+      ],
+      "attack_techniques": [
+        "T1547.001"
+      ],
+      "anti_forensic_notes": "NTUSER.DAT is fully flushed to disk at logoff or periodic sync; a copy acquired live from a still-logged-on session can miss the most recent writes still held in the in-memory hive unless the .LOG1/.LOG2 transaction logs are also collected and replayed. Deleting a user profile removes NTUSER.DAT from its normal location, but Windows.old, Volume Shadow Copies, or backup/roaming-profile stores can retain earlier copies.",
+      "related_artifacts": [
+        "usrclass-dat-hive",
+        "software-hive"
+      ],
+      "group": "registry",
+      "file": "data/artifacts/registry/ntuser-dat-hive.json"
+    },
+    {
+      "id": "sam-hive",
+      "name": "SAM (Security Account Manager) Hive",
+      "category": "registry",
+      "subcategory": "user-accounts",
+      "os_min": "Windows 2000 (present in all NT-based Windows versions)",
+      "location": "HKLM\\SAM (file: %SystemRoot%\\System32\\config\\SAM)",
+      "purpose": "Stores local user account definitions for the machine — RIDs, group memberships, and encrypted password hashes — plus per-account login metadata. It is unreadable in place even by local Administrator while Windows is running; access requires SYSTEM privileges or an offline copy.",
+      "key_fields": [
+        "SAM\\Domains\\Account\\Users\\<RID in 8-digit hex> — one subkey per local account (e.g. 000001F4 = RID 500)",
+        "V value — username, full name, comment, and the encrypted LM/NT hash blob",
+        "F value — account flags and timestamps: last logon, password last set, account expires, failed-logon count",
+        "SAM\\Domains\\Account\\Users\\Names — maps account name to RID",
+        "SAM\\Domains\\Builtin\\Aliases — builtin group (e.g. Administrators, RID 544) membership"
+      ],
+      "normal_baseline": "RID 500 is the built-in Administrator (often renamed and/or disabled per hardening baselines); RID 501 is the built-in Guest (disabled by default); real user accounts start at RID 1000 and increment sequentially as created. F-value timestamps track plausibly with the account's known usage and the org's password-rotation policy.",
+      "anomalies": [
+        "RID hijacking: the F value of a low-privilege or disabled account (commonly Guest, RID 501) is patched so the account authenticates with the Administrator's RID (500) SID, granting admin rights while `net user`/account-listing tools still show it as Guest.",
+        "The built-in Administrator account (RID 500) is enabled when the environment's baseline/GPO expects it disabled.",
+        "A new local account's RID or last-write time doesn't fit the expected sequential/temporal pattern for how accounts are normally provisioned on that host.",
+        "An account newly added to a privileged builtin alias (e.g. Administrators) shortly before or during suspicious activity.",
+        "F-value 'last logon' or 'password last set' timestamps inconsistent with the account's known usage window."
+      ],
+      "parsing_tools": [
+        "Registry Explorer / RECmd (Eric Zimmerman)",
+        "RegRipper (samparse plugin)",
+        "Impacket secretsdump.py",
+        "Volatility (hashdump / SAM-related plugins, live memory)"
+      ],
+      "attack_techniques": [
+        "T1003.002"
+      ],
+      "anti_forensic_notes": "Password hashes in the SAM are encrypted with a boot key derived from the paired SYSTEM hive; a SAM hive collected without its matching SYSTEM hive cannot be decrypted. Attackers with SYSTEM-level access can dump SAM via `reg save`, Volume Shadow Copies (bypassing the live file lock), or in-memory extraction (e.g. Mimikatz lsadump::sam), leaving little or no on-disk trace beyond the access itself. RID hijacking abuses the F-value structure directly, so it will not show up in standard account-enumeration output and requires binary inspection of the F value to detect.",
+      "related_artifacts": [
+        "security-hive",
+        "system-hive"
+      ],
+      "group": "registry",
+      "file": "data/artifacts/registry/sam-hive.json"
+    },
+    {
+      "id": "security-hive",
+      "name": "SECURITY Hive",
+      "category": "registry",
+      "subcategory": "credential-access",
+      "os_min": "Windows 2000 (present in all NT-based Windows versions)",
+      "location": "HKLM\\SECURITY (file: %SystemRoot%\\System32\\config\\SECURITY) — not readable in place even by local Administrator; requires SYSTEM privileges",
+      "purpose": "Stores the Local Security Authority's policy database: the effective local audit policy, LSA secrets (service-account passwords, autologon password, machine account secret), and cached domain-logon credentials used when a domain controller cannot be reached.",
+      "key_fields": [
+        "Policy\\Secrets\\<name> — encrypted LSA secrets (service-account credentials, machine account secret, autologon password)",
+        "Policy\\PolSecretEncryptionKey — LSA key material, combined with the SYSTEM hive's boot key to decrypt Secrets",
+        "Policy\\PolAdtEv — binary-encoded effective audit policy that LSASS consumes",
+        "Cache\\NL$1 through NL$10 — DCC2/MSCache v2 cached domain-credential hashes (Windows Vista and later)"
+      ],
+      "normal_baseline": "Cache slots (NL$x) are populated only on domain-joined systems that log on while off-network; Policy\\Secrets contains only entries tied to known, installed services or scheduled-task run-as accounts; the audit policy reflected in PolAdtEv matches the organization's GPO baseline.",
+      "anomalies": [
+        "PolAdtEv reflects fewer audit categories enabled than the organization's GPO baseline defines — e.g. process-creation or logon auditing disabled locally shortly before other suspicious activity, blinding downstream logging.",
+        "New or unexpected entries under Policy\\Secrets that aren't tied to any known installed service (possible credential staging/harvesting).",
+        "Cache entries present on a system that isn't supposed to be domain-joined.",
+        "A Cache slot's last-write time with no corresponding logon event in the Security event log."
+      ],
+      "parsing_tools": [
+        "Registry Explorer / RECmd (Eric Zimmerman)",
+        "Impacket secretsdump.py",
+        "RegRipper"
+      ],
+      "attack_techniques": [
+        "T1003.004",
+        "T1003.005"
+      ],
+      "anti_forensic_notes": "The SECURITY hive has no SACL configured by default, so routine access to LSA Secrets (e.g. via Mimikatz lsadump::secrets) generates no Security event log entries unless an analyst has proactively set an audit SACL on the key beforehand (which then generates Event ID 4656/4663 on access). MSCache v2 (DCC2) hashes cannot be used in pass-the-hash attacks and only yield a plaintext password via offline cracking, so their mere presence indicates exposure risk rather than confirmed compromise.",
+      "related_artifacts": [
+        "sam-hive",
+        "system-hive"
+      ],
+      "group": "registry",
+      "file": "data/artifacts/registry/security-hive.json"
+    },
+    {
+      "id": "software-hive",
+      "name": "SOFTWARE Hive",
+      "category": "registry",
+      "subcategory": "persistence",
+      "os_min": "Windows 2000 (present in all NT-based Windows versions)",
+      "location": "HKLM\\SOFTWARE (file: %SystemRoot%\\System32\\config\\SOFTWARE)",
+      "purpose": "Stores machine-wide installed-application data, OS version/build identity, and system-wide autostart (Run/RunOnce) persistence locations that apply to every user of the machine.",
+      "key_fields": [
+        "Microsoft\\Windows\\CurrentVersion\\Run and \\RunOnce — machine-wide autostart command lines (REG_SZ/REG_EXPAND_SZ), run at every user logon",
+        "Microsoft\\Windows\\CurrentVersion\\Uninstall\\<AppGUID or Name> — DisplayName, DisplayVersion, Publisher, InstallDate, UninstallString, InstallLocation",
+        "Microsoft\\Windows NT\\CurrentVersion — ProductName, CurrentBuildNumber, InstallDate, RegisteredOwner",
+        "Wow6432Node mirror of the above Run/Uninstall keys, holding 32-bit software entries on 64-bit Windows"
+      ],
+      "normal_baseline": "Run/RunOnce entries correspond to known, digitally-signed vendor software (AV agents, GPU tray utilities, cloud-sync clients) launched from Program Files. Uninstall entries match software the organization actually deployed, with plausible InstallDate and Publisher values.",
+      "anomalies": [
+        "A Run or RunOnce value pointing to an executable or script in a user-writable path (%Temp%, %AppData%, Downloads) instead of Program Files.",
+        "A Run key value invoking powershell.exe, cmd.exe, mshta.exe, or rundll32.exe with an encoded or heavily obfuscated argument string — a common Registry Run Key persistence pattern.",
+        "An Uninstall key entry with no corresponding installed files on disk, or an InstallDate immediately followed by execution of its own UninstallString — suggesting a dropper that installs, runs, and removes its own uninstall metadata to reduce visibility.",
+        "An Uninstall entry's Publisher/DisplayName spoofing a well-known, trusted vendor."
+      ],
+      "parsing_tools": [
+        "Registry Explorer / RECmd (Eric Zimmerman)",
+        "RegRipper (run, uninstall plugins)",
+        "Autoruns (Sysinternals)"
+      ],
+      "attack_techniques": [
+        "T1547.001"
+      ],
+      "anti_forensic_notes": "RunOnce values are deleted by Windows automatically once the referenced command has executed, so a RunOnce-based dropper leaves nothing behind in this key after it fires — its absence is expected behavior, not evidence of tampering, and must be correlated with Prefetch or event-log data instead. An attacker may also manually delete a Run value once a longer-term persistence mechanism (e.g. a scheduled task or service) has taken over, leaving only the key's last-write time as a narrow window of evidence.",
+      "related_artifacts": [
+        "ntuser-dat-hive",
+        "system-hive"
+      ],
+      "group": "registry",
+      "file": "data/artifacts/registry/software-hive.json"
+    },
+    {
+      "id": "system-hive",
+      "name": "SYSTEM Hive",
+      "category": "registry",
+      "subcategory": "system-configuration",
+      "os_min": "Windows 2000 (present in all NT-based Windows versions)",
+      "location": "HKLM\\SYSTEM (file: %SystemRoot%\\System32\\config\\SYSTEM)",
+      "purpose": "Stores machine-wide configuration needed to boot and run Windows, kept as multiple redundant ControlSets. This entry focuses on services/drivers, network configuration, and hardware (USB) enumeration data; BAM and Shimcache also live under this hive but are documented as separate artifacts.",
+      "key_fields": [
+        "Select\\Current — index of which ControlSetNNN is the active configuration this boot",
+        "CurrentControlSet\\Services\\<name>\\Start, Type, ErrorControl, ImagePath, DisplayName — per-service/driver configuration",
+        "CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\<GUID> — DhcpIPAddress, IPAddress, DhcpServer, DhcpDomain (historical network config per interface)",
+        "CurrentControlSet\\Enum\\USBSTOR\\<Device Class>\\<Serial Number> — USB mass-storage device instance keys, with a first-connect timestamp implicit in key creation and a last-write time on the device subkey",
+        "CurrentControlSet\\Control\\ComputerName\\ComputerName — hostname"
+      ],
+      "normal_baseline": "Select\\Current typically points to the ControlSet the system last booted successfully with (which ControlSet number that is varies by machine and isn't itself meaningful). Installed services' Start/Type values match their documented purpose and vendor; ImagePath values point into Program Files or System32; USBSTOR entries correspond to devices the user/organization recognizes.",
+      "anomalies": [
+        "A service key with ImagePath pointing to a binary in a user-writable location (%AppData%, %Temp%, C:\\Windows\\Temp) rather than Program Files or System32.",
+        "Start value changed to 0x2 (Automatic) on a service that should be Manual (0x3) or Disabled (0x4), so it now persists across reboots.",
+        "ImagePath referencing rundll32.exe, cmd.exe, mshta.exe, or powershell.exe with an encoded or unusually long argument string — classic service-based LOLBin persistence.",
+        "ImagePath on an existing, previously legitimate service silently changed (service hijacking), especially where DisplayName/Description no longer match what the binary actually is.",
+        "A USBSTOR device's connect/last-write timestamp falling immediately before a mass file-copy, deletion, or exfiltration event of interest.",
+        "Select\\Current pointing to a different ControlSet than Select\\Default/LastKnownGood around the time of an incident, indicating the system booted into an alternate/recovery configuration."
+      ],
+      "parsing_tools": [
+        "Registry Explorer / RECmd (Eric Zimmerman)",
+        "RegRipper",
+        "Nirsoft USBDeview (live system)",
+        "Autoruns (Sysinternals) for service enumeration"
+      ],
+      "attack_techniques": [
+        "T1543.003",
+        "T1200"
+      ],
+      "anti_forensic_notes": "Deleting a malicious service key removes it from the active ControlSet's live view, but a non-active ControlSet, registry transaction logs, or unallocated hive slack space can still retain remnants until the hive is compacted. USBSTOR entries are not automatically cleared when a device is removed and persist indefinitely — their absence for a device an organization or witness says was used is itself suspicious and suggests deliberate key deletion.",
+      "related_artifacts": [
+        "software-hive",
+        "sam-hive"
+      ],
+      "group": "registry",
+      "file": "data/artifacts/registry/system-hive.json"
+    },
+    {
+      "id": "usrclass-dat-hive",
+      "name": "UsrClass.dat (User Classes Hive)",
+      "category": "registry",
+      "subcategory": "user-configuration",
+      "os_min": "Windows XP",
+      "location": "Mounted as HKEY_CURRENT_USER\\Software\\Classes (a per-user view of HKEY_CLASSES_ROOT) while the user is logged on. File: %LocalAppData%\\Microsoft\\Windows\\UsrClass.dat (Vista and later; Windows XP path was %UserProfile%\\Local Settings\\Application Data\\Microsoft\\Windows\\UsrClass.dat)",
+      "purpose": "A separate per-user hive, distinct from NTUSER.DAT, that holds the user-specific portion of the Classes registry: per-user COM class registrations and shell-extension data that override or supplement the machine-wide HKLM\\SOFTWARE\\Classes. It is also one of the two locations where Shellbags data is stored (the other being NTUSER.DAT on pre-Vista systems).",
+      "key_fields": [
+        "Local Settings\\Software\\Microsoft\\Windows\\Shell\\BagMRU — folder paths/names visited in Explorer, tracked as a most-recently-used tree",
+        "Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bags — per-folder view settings (window size, position, view mode) referenced by BagMRU entries",
+        "CLSID\\<GUID> subkeys — per-user COM class registrations (e.g. shell extension handlers, context-menu/property-sheet handlers)",
+        "Wow6432Node mirror for 32-bit COM registrations on 64-bit Windows"
+      ],
+      "normal_baseline": "COM/CLSID entries correspond to installed, legitimate applications' shell-extension components (e.g. archive managers, cloud-sync icon overlays); BagMRU/Bags entries reflect folders the user is known to have browsed, including removable and network paths no longer present on the system.",
+      "anomalies": [
+        "A CLSID entry registering a shell extension (context-menu handler, icon handler, property-sheet handler) whose InprocServer32 path points to a binary in a user-writable or unusual location rather than a normal application install directory — a known technique for gaining persistence that loads automatically whenever Explorer touches a file/folder.",
+        "BagMRU/Bags entries referencing paths on removable or network volumes that align with known data-staging or exfiltration locations, present even though the volume itself is no longer attached to the system — proving the folder was browsed at some point regardless of current volume presence.",
+        "Shellbags entries showing folder access to a sensitive directory that the account has no legitimate business reason to browse."
+      ],
+      "parsing_tools": [
+        "ShellBagsExplorer.exe and SBECmd.exe (Eric Zimmerman)",
+        "Registry Explorer / RECmd (Eric Zimmerman)",
+        "RegRipper"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "Shellbags entries in this hive are not tied to a file's own metadata and are not cleared when the referenced folder or volume is deleted or removed, so they can outlive the evidence they point to — an analyst can prove a folder was accessed even after the folder, and the drive it was on, are both gone. Because the hive loads only for its owning user, correlating it correctly requires matching the hive to the right SID/profile.",
+      "related_artifacts": [
+        "ntuser-dat-hive"
+      ],
+      "group": "registry",
+      "file": "data/artifacts/registry/usrclass-dat-hive.json"
+    },
+    {
+      "id": "amcache",
+      "name": "Amcache.hve",
+      "category": "registry",
+      "subcategory": "execution-evidence",
+      "os_min": "Windows 8 (backported to Windows 7 SP1 via KB2952664)",
+      "location": "C:\\Windows\\AppCompat\\Programs\\Amcache.hve (standalone registry hive, plus Amcache.hve.LOG1/.LOG2 transaction logs in the same folder)",
+      "purpose": "A registry hive maintained by the Microsoft Compatibility Appraiser / Inventory Collector that catalogs executables, installed applications, and loaded drivers seen on the system, recording each file's path, SHA-1 hash, and size. Because the entry is written independently of the file itself, it commonly survives after the underlying binary has been deleted, making it valuable evidence of program presence/first-run even post-deletion.",
+      "key_fields": [
+        "LowerCaseLongPath — full file path of the executable",
+        "FileId — a 41-character value: literal prefix \"0000\" + the SHA-1 hex digest (hashed over roughly the first 31 MiB of the file)",
+        "KeyLastWriteTimestamp — registry last-write time of the entry; the closest available proxy for when the entry was first inventoried",
+        "LinkDate — PE header compile/link timestamp (attacker-controllable, not a filesystem time)",
+        "Size — file size in bytes",
+        "Publisher / Version / BinFileVersion — PE resource / code-signing metadata",
+        "ProgramId — links a file entry (InventoryApplicationFile) to its parent install record (InventoryApplication)"
+      ],
+      "normal_baseline": "On Windows 10 1607+ / Windows 11, entries live under Root\\InventoryApplicationFile, Root\\InventoryApplication, and Root\\InventoryDriverBinary inside the hive (older Windows 7 SP1 / Windows 8.x builds instead use a legacy Root\\File\\{VolumeGUID}\\{FileRef} and Root\\Programs layout). A clean system accumulates entries for OS binaries, installed applications, and drivers over its lifetime, with plausible LinkDate values consistent with each vendor's known build/release dates and paths under Program Files, Windows, or System32.",
+      "anomalies": [
+        "Executable path under Temp, Downloads, AppData\\Local\\Temp, ProgramData, or another user-writable/unusual directory with no corresponding InventoryApplication install record",
+        "FileId (SHA-1) matches a known-malicious hash, especially when the path is atypical for that hash's known-good usage",
+        "Amcache entry exists (proving the file was once present/executed) with no matching file on disk — evidence of a deleted binary, especially valuable when the same timeframe shows corroborating Prefetch, Shimcache, or BAM entries",
+        "LinkDate that postdates KeyLastWriteTimestamp, or is otherwise inconsistent with the rest of the file's metadata — a sign the PE compile timestamp was forged",
+        "The same SHA-1 recorded across many hosts under different file names/paths, consistent with a single payload redeployed by an actor"
+      ],
+      "parsing_tools": [
+        "AmcacheParser (Eric Zimmerman)",
+        "Registry Explorer (Eric Zimmerman)",
+        "RegRipper (amcache.pl plugin)"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "Deleting the binary from disk does not remove its Amcache record: the inventory snapshot persists in the hive until the next Compatibility Appraiser scheduled-task run, and the prior entry is often still recoverable from the Amcache.hve.LOG1/.LOG2 transaction logs even after that. An investigator who collects only the .hve file (not its .LOG1/.LOG2 companions) on a system that wasn't cleanly shut down can miss the most recent writes. Wiping or replacing Amcache.hve outright, or disabling the Microsoft Compatibility Appraiser task, stops new entries from being recorded going forward but is itself an unusual, noteworthy action to find during triage.",
+      "related_artifacts": [
+        "shimcache",
+        "prefetch",
+        "bam-dam"
+      ],
+      "group": "execution",
+      "file": "data/artifacts/execution/amcache.json"
+    },
+    {
+      "id": "bam-dam",
+      "name": "BAM / DAM (Background Activity Moderator / Desktop Activity Moderator)",
+      "category": "registry",
+      "subcategory": "execution-evidence",
+      "os_min": "Windows 10 version 1709 (Fall Creators Update)",
+      "location": "Pre-Windows 10 1809: HKLM\\SYSTEM\\CurrentControlSet\\Services\\bam\\UserSettings\\{SID} and HKLM\\SYSTEM\\CurrentControlSet\\Services\\dam\\UserSettings\\{SID}. Windows 10 1809 and later: HKLM\\SYSTEM\\CurrentControlSet\\Services\\bam\\State\\UserSettings\\{SID} and \\dam\\State\\UserSettings\\{SID} (a 'State' subkey was inserted into the path).",
+      "purpose": "BAM is a Windows service that throttles background application activity to conserve battery/resources; as a side effect it records, per user SID, the full path of each executable that ran and the timestamp of its last execution. DAM is the equivalent mechanism for devices supporting Connected Standby (primarily mobile/tablet hardware). Both key their entries under the executing user's SID, giving analysts direct user attribution for a launched binary even though the data lives in the machine-wide SYSTEM hive.",
+      "key_fields": [
+        "Value name — full path of the executable that was run",
+        "Value data — an 8-byte little-endian FILETIME embedded in the REG_BINARY value, representing the last execution time of that executable for that user",
+        "SID subkey — identifies which user account ran the executable"
+      ],
+      "normal_baseline": "Under each active user's SID subkey, a list of paths to applications that user has run recently (within roughly the last 7 days), covering normal OS components, shell integrations, and everyday applications launched from local disk.",
+      "anomalies": [
+        "Executable path under Temp, Downloads, or another user-writable/unusual directory attributed to a SID for a user who wouldn't normally run such tools",
+        "A BAM/DAM entry for an executable whose file no longer exists on disk (deleted after execution) — corroborate against Amcache/Prefetch/Shimcache for the same binary",
+        "Execution attributed to a SID inconsistent with the expected interactive user (e.g. a service account or a rarely-used local account) at an unusual time of day",
+        "Entries missing entirely for a period where other execution artifacts (Prefetch, Shimcache) show activity — since BAM/DAM only covers roughly the trailing 7 days and purges on reboot, absence does not by itself prove non-execution and must be time-correlated"
+      ],
+      "parsing_tools": [
+        "Registry Explorer (Eric Zimmerman)",
+        "RegRipper (bam.pl plugin)"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "BAM/DAM entries are automatically purged roughly 7 days after the recorded activity, and an entry is removed once its associated executable no longer exists at its original location, and again on the next reboot — so this artifact has a naturally short retention window even with no attacker interference. It only records executables launched from local storage; programs run from removable media or network shares are not captured. Because the data lives in the live SYSTEM hive rather than a separate log, wiping it requires direct registry-key deletion (an unusual, detectable action) rather than simple file deletion.",
+      "related_artifacts": [
+        "amcache",
+        "shimcache",
+        "prefetch"
+      ],
+      "group": "execution",
+      "file": "data/artifacts/execution/bam-dam.json"
+    },
+    {
+      "id": "prefetch",
+      "name": "Prefetch (.pf files)",
+      "category": "file",
+      "subcategory": "execution-evidence",
+      "os_min": "Windows XP",
+      "location": "C:\\Windows\\Prefetch\\{EXECUTABLENAME}-{HASH}.pf. Prefetching (and therefore .pf creation) is controlled by HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management\\PrefetchParameters\\EnablePrefetcher, and is disabled by default on systems whose boot volume is an SSD.",
+      "purpose": "Windows' prefetcher records which files and directories an executable references during its first ~10 seconds of launch, storing that data in a .pf file so future launches can be sped up by pre-loading those resources. Because a .pf file is created/updated only when the named executable actually runs, Prefetch is one of the strongest single-artifact indicators of program execution and its history (run count, run times).",
+      "key_fields": [
+        "Executable name (limited to 29 characters in the filename)",
+        "Run count — total number of times the executable has been launched since the .pf file was created",
+        "Last-run timestamp, plus (format version 26 and later, i.e. Windows 8 and newer) up to 7 additional previous run timestamps for a maximum of 8 stored execution times; format version 23 (Vista/Windows 7) records only the single last-run timestamp with no run history array",
+        "Volume information — source volume path, serial number, and creation time",
+        "List of files and directories referenced during the executable's startup phase",
+        "Prefetch file format version number (17 = XP/2003, 23 = Vista/7/2008/2012, 26 = Windows 8/8.1, 30 = Windows 10) — identifies which decompression/parsing logic applies (Windows 10 .pf files are compressed and require Windows 8+ APIs to decompress)"
+      ],
+      "normal_baseline": "One .pf file per distinct executable path that has been run, up to a Microsoft-documented cap of 128 retained files in the Prefetch folder (oldest purged once the cap is reached); run counts and run-time clusters that line up with normal user/application behavior (e.g. daily logon scripts, frequently used applications).",
+      "anomalies": [
+        "A .pf file for an executable run from a Temp, Downloads, or other user-writable/unusual path, especially with a low run count consistent with a one-off tool execution",
+        "A high run count concentrated in a very short time window, consistent with automated/scripted repeated execution rather than normal interactive use",
+        "Referenced-files list inside the .pf naming unusual DLLs, staging directories, or files that no longer exist on disk — useful for recovering paths of since-deleted malware components",
+        "A .pf file whose executable no longer exists at the referenced path (deleted post-execution) while the .pf itself remains — direct evidence of a since-removed binary having run",
+        "Complete absence of expected Prefetch activity on a system that should have it enabled — always confirm EnablePrefetcher's registry value and whether the boot volume is an SSD (which disables prefetching by default) before treating an empty/sparse Prefetch folder as suspicious"
+      ],
+      "parsing_tools": [
+        "PECmd (Eric Zimmerman)",
+        "WinPrefetchView (Nirsoft)"
+      ],
+      "attack_techniques": [
+        "T1070.004"
+      ],
+      "anti_forensic_notes": "Prefetch files are ordinary files on disk (not registry-embedded), so they can be deleted individually or in bulk with simple filesystem operations — a documented anti-forensic technique corresponding to ATT&CK T1070.004 (Indicator Removal: File Deletion). Deletion of .pf files does not remove all trace, however: the NTFS Master File Table ($MFT) retains a record of the deleted file's name, size, and timestamps, and the $UsnJrnl records the deletion event itself. Because prefetching is off by default on SSD-booted systems and can be disabled entirely via EnablePrefetcher, a sparse or empty Prefetch folder is not inherently suspicious and must be evaluated against the system's actual configuration before being treated as evidence of tampering.",
+      "related_artifacts": [
+        "amcache",
+        "shimcache",
+        "bam-dam"
+      ],
+      "group": "execution",
+      "file": "data/artifacts/execution/prefetch.json"
+    },
+    {
+      "id": "shimcache",
+      "name": "Shimcache / AppCompatCache",
+      "category": "registry",
+      "subcategory": "execution-evidence",
+      "os_min": "Windows 2000 / XP",
+      "location": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\AppCompatCache (Windows 2003 and later); HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\AppCompatibility\\AppCompatCache on Windows XP/2000. Values are held in memory and only periodically flushed to the registry, typically on shutdown.",
+      "purpose": "Part of the Application Compatibility infrastructure: when Windows evaluates whether an executable needs a compatibility shim, it records the file's path, size, and last-modified time in a cache so it doesn't have to re-evaluate the file on every launch. Because the cache captures files the OS has looked at, it's used as evidence a given executable existed (and, on some versions, ran) on the system.",
+      "key_fields": [
+        "File full path",
+        "$STANDARD_INFORMATION last-modified timestamp of the file (NOT a run time)",
+        "File size (present on some Windows versions)",
+        "Process Execution Flag — present on Windows Vista, 7, Server 2008, and Server 2012 only; TRUE indicates the entry reflects actual execution, FALSE indicates the file was merely referenced (e.g. via directory browsing by the Application Experience Lookup Service) without running",
+        "Cache entry position/order (reflects last-update order, exploited for approximate sequencing)"
+      ],
+      "normal_baseline": "A large list of legitimate OS and application binaries with last-modified timestamps matching their known install/patch dates, generally clustered around Windows Update and application install events; entry order roughly tracks last-referenced order rather than true execution order.",
+      "anomalies": [
+        "Entry for an executable in a Temp, Downloads, or other user-writable path with a last-modified timestamp inconsistent with any known legitimate install",
+        "On Windows Vista/7/2008/2012, an entry with the Process Execution Flag set to TRUE for a binary in a suspicious location — a stronger indicator of actual execution than presence alone",
+        "A single-use or renamed binary appearing once with no corresponding Prefetch, Amcache, or event-log evidence of execution — consistent with a tool that was staged/inspected but not run, or with an execution artifact that was separately cleared",
+        "Timestamp manipulation: because the cached time is the file's $STANDARD_INFORMATION last-modified value (attacker-controllable via timestomping), a suspiciously 'clean' or backdated last-modified time on a malicious binary should be cross-checked against $FILE_NAME timestamps or other artifacts"
+      ],
+      "parsing_tools": [
+        "AppCompatCacheParser (Eric Zimmerman)",
+        "ShimCacheParser (Mandiant)"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "Critical version-dependent caveat: Shimcache reliability as proof of execution has changed across Windows releases. On Windows XP/2003 there is no execution flag at all, so presence alone was historically treated as a rough proxy for execution. On Windows Vista, 7, Server 2008, and Server 2012 a Process Execution Flag was added that distinguishes actual execution (TRUE) from mere presence, e.g. directory browsing (FALSE) — though Mandiant notes the flag's true internal semantics were never officially documented by Microsoft. On Windows 8 and later the execution-flag behavior changed again and is widely reported as unreliable/removed, meaning an entry can exist for a file that was never executed. Because of this, Shimcache should never be used alone to prove execution on modern Windows — always corroborate with Prefetch, Amcache, or BAM/DAM. The cache itself lives in memory and is only flushed to the registry hive periodically (typically at shutdown), so a hard power-off can lose recent updates, and clearing/rebuilding it requires kernel-level access rather than a simple deletion.",
+      "related_artifacts": [
+        "amcache",
+        "prefetch",
+        "bam-dam"
+      ],
+      "group": "execution",
+      "file": "data/artifacts/execution/shimcache.json"
+    },
+    {
+      "id": "recentdocs",
+      "name": "RecentDocs",
+      "category": "registry",
+      "subcategory": "user-activity/file-folder-access",
+      "os_min": "Windows XP",
+      "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RecentDocs",
+      "purpose": "Records documents and folders recently opened through File Explorer / common Open-Save dialogs, organized both as one flat MRU list and as per-file-extension subkeys, plus a dedicated Folder subkey for recently opened folders.",
+      "key_fields": [
+        "RecentDocs (root) - numbered binary values holding the filename plus associated .lnk shortcut data, ordered by the root MRUListEx",
+        "RecentDocs\\.<ext> subkeys - one per file extension (e.g. .docx, .pdf, .xlsx) with their own numbered values and MRUListEx, recording only files of that extension",
+        "RecentDocs\\Folder subkey - recently opened folders, with its own MRUListEx",
+        "MRUListEx - binary DWORD-array value giving access order (most recent first) at each level",
+        "Key LastWrite time - approximates when the most recently listed item was opened"
+      ],
+      "normal_baseline": "Extension subkeys matching the applications the user regularly works with (Office documents, PDFs, images), with entries for files stored in expected user-profile locations.",
+      "anomalies": [
+        "Extension subkeys appearing for file types the user does not normally work with (e.g. .zip, .rar, .7z, .ps1, .vbs, .hta) around the time of an incident",
+        "Entries referencing files in Temp, Downloads, or AppData paths rather than typical document locations",
+        "Filenames referencing sensitive data categories (finance, HR, credentials) opened by an account with no business reason to access them",
+        "RecentDocs entries with no corresponding file present in the file system and no plausible legitimate deletion, especially paired with other exfiltration-staging evidence",
+        "The root RecentDocs MRUListEx/order inconsistent with the per-extension subkeys' order, suggesting one was edited without the other"
+      ],
+      "parsing_tools": [
+        "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
+        "RegRipper (recentdocs.pl plugin)"
+      ],
+      "attack_techniques": [
+        "T1083"
+      ],
+      "anti_forensic_notes": "Entries persist after the referenced file is deleted, so RecentDocs commonly outlives the evidence it points to and is a good source for reconstructing what files existed even after cleanup. The key's LastWrite time only reflects the most recent addition across the whole key structure, so establishing a precise timeline for older entries requires the MRUListEx ordering rather than timestamps alone.",
+      "related_artifacts": [
+        "shellbags",
+        "userassist"
+      ],
+      "group": "user-activity",
+      "file": "data/artifacts/user-activity/recentdocs.json"
+    },
+    {
+      "id": "runmru",
+      "name": "RunMRU",
+      "category": "registry",
+      "subcategory": "user-activity/program-execution",
+      "os_min": "Windows XP",
+      "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU",
+      "purpose": "Records the most-recently-used command strings typed into the Run dialog (Win+R), letting an analyst reconstruct commands, paths, or scripts a user (or an attacker operating in that user's context) manually invoked via Run.",
+      "key_fields": [
+        "Value names - single lowercase letters (a, b, c, ...) each holding one typed command string, generally suffixed with '\\1'",
+        "MRUList - REG_SZ string whose character order gives the recency order of the lettered values (leftmost = most recently used)",
+        "Key LastWrite time - approximates when the most recent command was executed via Run"
+      ],
+      "normal_baseline": "A short list of familiar administrative commands and paths (cmd, mstsc, \\\\server\\share, control, appwiz.cpl, notepad, common file/folder paths the user navigates to via Run).",
+      "anomalies": [
+        "PowerShell/cmd invocations with encoded, obfuscated, or unusually long argument strings",
+        "UNC paths to unfamiliar internal or external hosts, or to admin shares (\\\\host\\C$)",
+        "References to script interpreters (wscript, cscript, mshta, rundll32, regsvr32) with file paths in Temp, Downloads, or AppData",
+        "Commands referencing archive extraction tools or living-off-the-land binaries not normally used interactively by that user",
+        "RunMRU key or individual lettered values missing/reset while other evidence (Prefetch, EventLogs, UserAssist) shows Run-dialog-style activity in the same window, suggesting deliberate clearing",
+        "Only the letter values remain with no MRUList, or the MRUList does not reference all present letters, indicating partial/manual tampering rather than normal overwrite behavior"
+      ],
+      "parsing_tools": [
+        "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
+        "RegRipper (runmru.pl plugin)"
+      ],
+      "attack_techniques": [
+        "T1059"
+      ],
+      "anti_forensic_notes": "Only the last ~26 distinct commands are retained (one per lowercase letter a-z; the oldest is evicted as new commands are added), so heavy Run-dialog use can push older evidence out through normal operation, not just tampering. An entry is only committed to the registry once the Run dialog is closed, so live/volatile use may not yet be on disk. Attackers who know about this artifact often delete specific values or the whole key, but doing so still requires closing the Run dialog to commit the change, and its absence alongside other execution evidence is itself suspicious.",
+      "related_artifacts": [
+        "userassist",
+        "typed-paths"
+      ],
+      "group": "user-activity",
+      "file": "data/artifacts/user-activity/runmru.json"
+    },
+    {
+      "id": "shellbags",
+      "name": "Shellbags",
+      "category": "registry",
+      "subcategory": "user-activity/file-folder-access",
+      "os_min": "Windows XP",
+      "location": "Windows XP: NTUSER.DAT: Software\\Microsoft\\Windows\\ShellNoRoam\\BagMRU and \\Bags. Windows Vista and later: NTUSER.DAT: Software\\Microsoft\\Windows\\Shell\\BagMRU and \\Bags, plus UsrClass.dat: Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\BagMRU and \\Bags",
+      "purpose": "Stores Windows Explorer's per-folder view preferences (icon size, view mode, window position). As a side effect of tracking which folder each preference belongs to, it preserves a record of every folder a user has browsed in Explorer, including folders on removable media, network shares, and mounted volumes that no longer exist on the system.",
+      "key_fields": [
+        "BagMRU - a tree of numbered subkeys mirroring the folder hierarchy the user navigated (each numbered key = a path segment), with binary shell item ID list data encoding the folder name and, for many item types, timestamps",
+        "MRUListEx (in each BagMRU node) - binary value giving the access order of child folders at that level",
+        "NodeSlot - value inside a BagMRU node linking it to its corresponding view-settings entry under Bags",
+        "Bags\\{slot}\\Shell - view mode, icon size, sort column, and window position/size for the referenced folder"
+      ],
+      "normal_baseline": "A tree reflecting the user's ordinary folder navigation habits: profile folders, Documents/Downloads/Desktop, commonly used application data folders, and drive letters the user routinely opens.",
+      "anomalies": [
+        "Shellbag entries referencing removable drives, mounted encrypted volumes, or network shares that are no longer present on the system and have no corresponding entry in current MountPoints2/USBSTOR-if the volume genuinely never existed on this host, this points to remnants worth cross-referencing",
+        "Folder paths referencing staging directories, archive tool output, or exfiltration-style naming shortly before a data-loss event, even though the folder itself has since been deleted",
+        "Shellbag entries for folders on a device that was connected only briefly or outside expected business hours",
+        "A gap in shellbag timestamps/structure inconsistent with the account's normal usage pattern, suggesting selective deletion of BagMRU/Bags entries (uncommon since most cleanup tools do not target these keys)",
+        "Folder access evidence in shellbags with no corresponding Prefetch, RecentDocs, or Jump List activity, indicating the folder was browsed but its contents were not opened through the expected channels"
+      ],
+      "parsing_tools": [
+        "Eric Zimmerman's ShellBags Explorer / SBECmd (github.com/EricZimmerman)",
+        "Magnet AXIOM"
+      ],
+      "attack_techniques": [
+        "T1083"
+      ],
+      "anti_forensic_notes": "Shellbags are not commonly targeted by mainstream privacy-cleaner tools, so they frequently retain folder-access history well after the corresponding files, folders, or removable/network volumes are gone-making them one of the more resilient sources of historical folder-browsing evidence. They exist in two hive locations (NTUSER.DAT and UsrClass.dat on Vista+), so an incomplete acquisition that only captures one hive will miss part of the picture.",
+      "related_artifacts": [
+        "typed-paths",
+        "recentdocs",
+        "usb-device-history"
+      ],
+      "group": "user-activity",
+      "file": "data/artifacts/user-activity/shellbags.json"
+    },
+    {
+      "id": "typed-paths",
+      "name": "TypedPaths",
+      "category": "registry",
+      "subcategory": "user-activity/file-folder-access",
+      "os_min": "Windows Vista",
+      "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TypedPaths",
+      "purpose": "Records paths a user manually typed or pasted into the File Explorer address/path bar, including local paths and remote UNC paths to network shares. Proves deliberate navigation to a specific location rather than passive browsing.",
+      "key_fields": [
+        "Value names - url1, url2, url3, ... sequential",
+        "Value data - the literal path or UNC string the user typed (e.g. C:\\Users\\jdoe\\Desktop\\staging, \\\\fileserver\\hr$)",
+        "Key LastWrite time - when the most recent typed path was committed"
+      ],
+      "normal_baseline": "A handful of familiar local folders and known network shares the user regularly navigates to by typing rather than clicking through folder hierarchies.",
+      "anomalies": [
+        "UNC paths to unfamiliar internal hosts or admin shares (\\\\host\\C$, \\\\host\\ADMIN$) typed by a user with no administrative reason to browse them",
+        "Paths into other users' profile directories",
+        "Typed paths to removable/external drive letters or mount points not otherwise associated with that user",
+        "Typed paths referencing staging or exfiltration-style folder names shortly before large file transfers or archive creation evidenced elsewhere",
+        "Key entries present with a LastWrite time inconsistent with the newest url# value, suggesting manual edits to the underlying hive"
+      ],
+      "parsing_tools": [
+        "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
+        "RegRipper"
+      ],
+      "attack_techniques": [
+        "T1135"
+      ],
+      "anti_forensic_notes": "An entry is only written to the registry once the File Explorer window is closed, so a typed path used and abandoned mid-session in a still-open window will not appear in an acquired hive. TypedPaths is not cleared by mainstream privacy/cleanup tools (CCleaner, BleachBit, Windows Disk Cleanup), so its presence is comparatively reliable, but the key's LastWrite time reflects when Explorer was closed, not the moment the path was typed.",
+      "related_artifacts": [
+        "runmru",
+        "shellbags"
+      ],
+      "group": "user-activity",
+      "file": "data/artifacts/user-activity/typed-paths.json"
+    },
+    {
+      "id": "usb-device-history",
+      "name": "USB Device History",
+      "category": "registry",
+      "subcategory": "user-activity/removable-media",
+      "os_min": "Windows XP",
+      "location": "SYSTEM hive: CurrentControlSet\\Enum\\USBSTOR and CurrentControlSet\\Enum\\USB; per-device Properties\\{83da6326-97a6-4088-9453-a1923f573b29} subkey (Windows 7+); NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MountPoints2; C:\\Windows\\inf\\setupapi.dev.log",
+      "purpose": "Reconstructs the history of USB devices (primarily mass storage) connected to a system: which device, when it was first installed, when it was last connected/removed, and which user account was logged on at the time.",
+      "key_fields": [
+        "USBSTOR device subkey name - encodes device class, vendor (Ven_), product (Prod_), and revision (Rev_), e.g. Disk&Ven_SanDisk&Prod_Extreme&Rev_0001",
+        "USBSTOR instance ID subkey - contains the device's reported serial number (or a system-generated identifier)",
+        "Properties\\{83da6326-97a6-4088-9453-a1923f573b29}\\0064 - first install/plug-in timestamp (Windows 7+)",
+        "Properties\\{83da6326-97a6-4088-9453-a1923f573b29}\\0066 - last connected/arrival timestamp (Windows 8+)",
+        "Properties\\{83da6326-97a6-4088-9453-a1923f573b29}\\0067 - last removal timestamp (Windows 8+)",
+        "MountPoints2 - per-user record (with LastWrite time) linking a volume GUID to the user account that mounted it, showing who was logged on when a device was connected",
+        "setupapi.dev.log - system-wide, chronological plain-text log of device installation events, including the first-connection timestamp, VID/PID, and serial number, for every plug-and-play device including non-storage USB devices"
+      ],
+      "normal_baseline": "A small, stable set of known storage devices (personal drives, approved corporate-issued media) with connection timestamps aligned to expected business use, and MountPoints2 attribution matching the device owner's account.",
+      "anomalies": [
+        "A device with no corresponding setupapi.dev.log first-install entry despite a USBSTOR record, or vice versa, suggesting registry or log tampering (they should normally agree on first-connection time)",
+        "Devices connecting outside business hours or immediately before/after a suspected data-exfiltration window",
+        "A large number of distinct unfamiliar devices connected in a short time, or the same device connecting across many different user accounts/hosts",
+        "MountPoints2 entry attributing a device to an account other than the one an analyst expects, based on other evidence",
+        "First-install (0064) and last-connected (0066) timestamps far apart with no intervening evidence of removal, or a last-removal (0067) timestamp that precedes the last-connected time, indicating inconsistent or edited property data",
+        "USBSTOR serial number values that look system-generated (their second character is '&') mixed among otherwise consistent hardware serials-treat any single serial value as provisional rather than a guaranteed unique hardware identifier"
+      ],
+      "parsing_tools": [
+        "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
+        "Nirsoft USBDeview",
+        "RegRipper (usbstor.pl, usb.pl plugins)"
+      ],
+      "attack_techniques": [
+        "T1091",
+        "T1052.001"
+      ],
+      "anti_forensic_notes": "The commonly cited rule that a serial number with '&' as its second character is always system-generated (i.e., the device itself has no hardware serial) has been shown to be unreliable in practice-Windows-reported values can be inconsistent across enclosures/adapters even for the same physical drive, so serial numbers should be treated as identifiers to correlate rather than as trustworthy hardware fingerprints. setupapi.dev.log only records the first installation of a given device/driver combination system-wide (not per subsequent reconnect), so later connect/disconnect timing must come from the registry property timestamps or MountPoints2, and deleting or rolling back that log removes the earliest-connection evidence.",
+      "related_artifacts": [
+        "shellbags"
+      ],
+      "group": "user-activity",
+      "file": "data/artifacts/user-activity/usb-device-history.json"
+    },
+    {
+      "id": "userassist",
+      "name": "UserAssist",
+      "category": "registry",
+      "subcategory": "user-activity/program-execution",
+      "os_min": "Windows XP",
+      "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist\\{GUID}\\Count",
+      "purpose": "Tracks GUI-launched programs and shortcuts per user, including how many times an item was run, how long it held focus, and when it was last executed. Populated by the Windows Explorer shell (explorer.exe/userassist.dll) when a user double-clicks an icon, shortcut, or Start Menu/Taskbar entry.",
+      "key_fields": [
+        "GUID subkey {CEBFF5CD-ACE2-4F4F-9178-9926F41749EA} - executed .exe files",
+        "GUID subkey {F4E57C4B-2036-45F0-A9AB-443BCFE33D9F} - shortcut (.lnk) launches, e.g. Start Menu items",
+        "Value name - ROT13-encoded full path or shortcut name of the launched item",
+        "Binary value data (Windows 7+, 72 bytes): Run Count (offset 4), Focus Count (offset 8), Focus Time in milliseconds (offset 12), Last Execution Time as FILETIME (offset 60)"
+      ],
+      "normal_baseline": "Populated with common user-facing applications (browsers, Office, Explorer, Settings) and OS utilities the user launched via the shell. Run counts grow gradually over normal daily use; focus time is nonzero for applications the user actually interacted with.",
+      "anomalies": [
+        "Entry for an executable in an unusual location (Temp, Downloads, AppData, ProgramData) with a high run count in a short time window",
+        "Run count present but focus time and focus count are zero or near-zero, suggesting the program launched and exited immediately (consistent with a dropper or one-shot loader) rather than genuine interactive use",
+        "Last-execution timestamp updated even though the underlying binary no longer exists on disk, indicating deleted post-execution malware",
+        "Entries for LOLBins (rundll32.exe, mshta.exe, regsvr32.exe, cmd.exe) launched via the shell (double-click/shortcut) rather than command line, which is unusual for these utilities",
+        "Complete absence of expected UserAssist entries for a period when other artifacts (Prefetch, EventLogs) show GUI activity, suggesting the key or its Count subkey was cleared",
+        "Session ID field indicating logons/sessions the analyst cannot otherwise account for"
+      ],
+      "parsing_tools": [
+        "Eric Zimmerman's RECmd / Registry Explorer (github.com/EricZimmerman)",
+        "Didier Stevens's userassist.py",
+        "Velociraptor Windows.Registry.UserAssist artifact"
+      ],
+      "attack_techniques": [
+        "T1204"
+      ],
+      "anti_forensic_notes": "Value names are ROT13-encoded, not encrypted, so this is trivially reversible and not a real obstacle to analysis. However, using 'Open file location' or similar shell actions from a search/menu can update a UserAssist entry's run count and timestamp without the target actually being executed, which can produce a false positive for execution if not corroborated with focus time/count or other execution artifacts (Prefetch, Amcache). The entire UserAssist key can be deleted or disabled by an attacker with registry access, and its absence where GUI activity is otherwise evidenced is itself a red flag.",
+      "related_artifacts": [
+        "shellbags",
+        "recentdocs"
+      ],
+      "group": "user-activity",
+      "file": "data/artifacts/user-activity/userassist.json"
+    },
+    {
+      "id": "logfile",
+      "name": "$LogFile (NTFS Transaction Log)",
+      "category": "file",
+      "subcategory": "filesystem-metadata",
+      "os_min": "Windows NT 3.1 (any NTFS volume)",
+      "location": "\\$LogFile (root of the NTFS volume)",
+      "purpose": "Implements NTFS's write-ahead logging for metadata operations, recording redo/undo records for filesystem transactions (creates, renames, deletes, attribute and index changes) so the volume can be rolled forward or back to a consistent state after a crash. Forensically it is a short-lived but very high-fidelity record of the most recent filesystem activity.",
+      "key_fields": [
+        "Log Sequence Number (LSN) - identifies and orders each transaction record",
+        "Redo/Undo operation pairs - describe the specific metadata change being journaled (e.g., an attribute update or an index entry add/delete)",
+        "Transaction records referencing MFT record numbers and the specific attribute types affected (e.g., $STANDARD_INFORMATION, $FILE_NAME, $INDEX_ALLOCATION)",
+        "RCRD page headers containing the NTFS restart/log-area structures"
+      ],
+      "normal_baseline": "A relatively small, constantly-recycled ring buffer of the most recent metadata transactions; on an active system it typically covers only minutes to a few hours of activity before being overwritten, so its normal state is mostly recent, routine metadata churn.",
+      "anomalies": [
+        "Recovered $LogFile records showing a file create, rename, and delete sequence for the same object within a very short window - consistent with a dropper or wiper cleaning up after itself",
+        "A $LogFile transaction record referencing an MFT entry/attribute change with no corresponding entry left in the live MFT, indicating the live artifact was altered or the underlying record removed after the fact",
+        "Redo records showing repeated $FILE_NAME or $STANDARD_INFORMATION attribute rewrites clustering around a known intrusion timeframe, corroborating a timestomping finding surfaced in the MFT",
+        "Index-related transaction records showing the same directory entry added and removed in rapid succession, consistent with an attempt to hide a file by briefly moving it in and out of a directory"
+      ],
+      "parsing_tools": [
+        "LogFileParser (Joakim Schicht)",
+        "MFTECmd (Eric Zimmerman, $LogFile support via the -f option)",
+        "NTFS Log Tracker"
+      ],
+      "attack_techniques": [
+        "T1070.006",
+        "T1070.004"
+      ],
+      "anti_forensic_notes": "$LogFile is a small, actively recycled ring buffer, so its window of coverage is short and normal system activity naturally overwrites older transactions - the absence of an expected transaction is not by itself proof of tampering. Because it records transactions independently of the MFT and USN Journal, it can corroborate or contradict those artifacts after they have been altered, but only if the volume is imaged quickly, before routine churn recycles the relevant log pages.",
+      "related_artifacts": [
+        "mft",
+        "usn-journal"
+      ],
+      "group": "filesystem",
+      "file": "data/artifacts/filesystem/logfile.json"
+    },
+    {
+      "id": "mft",
+      "name": "Master File Table ($MFT)",
+      "category": "file",
+      "subcategory": "filesystem-metadata",
+      "os_min": "Windows NT 3.1 (any NTFS volume)",
+      "location": "\\$MFT (root of every NTFS volume; not directly accessible via normal file APIs while the volume is mounted)",
+      "purpose": "The MFT is the core NTFS structure holding one (or more) records per file and directory on the volume, including its attributes, timestamps, size, and data location. It is the primary source for filesystem timeline reconstruction and for detecting timestomping.",
+      "key_fields": [
+        "$STANDARD_INFORMATION ($10) attribute - MACB timestamps (Modified, Accessed, Created, MFT-entry-modified); settable by any user-mode process via Win32 APIs like SetFileTime",
+        "$FILE_NAME ($30) attribute - a second, independent set of MACB timestamps plus the parent directory reference; written only by the kernel and not reachable through standard Win32 timestamp-modification APIs",
+        "MFT record header - record number, sequence number, and an in-use flag distinguishing allocated from deleted records",
+        "$DATA attribute - resident (small files stored inline in the MFT record) or non-resident (data runs pointing to clusters) file content",
+        "Allocated size vs. real (actual) size fields"
+      ],
+      "normal_baseline": "$SI and $FN timestamps for the same file are close together and consistent with when the file entered its current directory (they are written together at creation), and timestamp deltas track plausible install, build, or download times for that path.",
+      "anomalies": [
+        "$STANDARD_INFORMATION timestamps earlier than the corresponding $FILE_NAME timestamps on the same file - the classic timestomping signature, since most timestomping tools and the SetFileTime API only reach $SI",
+        "$FILE_NAME timestamps that also look forged (e.g., matching an unusually round or historical date), indicating 'double timestomping' where both attributes were rewritten to defeat a simple $SI/$FN comparison",
+        "MFT record flagged not-in-use (deleted) with attribute data still resident and recoverable, especially when it correlates with a USN Journal delete-reason record at a matching time",
+        "Create time for a security-relevant executable inconsistent with the OS build/install baseline expected for that path (e.g., a System32 binary 'created' years after the OS was installed)",
+        "Nanosecond component of $SI timestamps reading exactly zero across many otherwise unrelated files - a weak, heuristic indicator of automated timestamp-setting tooling, prone to false positives and not conclusive on its own"
+      ],
+      "parsing_tools": [
+        "MFTECmd (Eric Zimmerman)",
+        "analyzeMFT (David Kovar)",
+        "NTFS Log Tracker"
+      ],
+      "attack_techniques": [
+        "T1070.006"
+      ],
+      "anti_forensic_notes": "Standard timestomping tools and the Win32 SetFileTime API only reach $STANDARD_INFORMATION, so comparing $SI against $FN exposes most cases - but 'double timestomping' that also rewrites $FILE_NAME defeats this comparison, and if a timestomped file is later moved or renamed, Windows copies the (already-forged) $SI times into a freshly written $FN attribute, erasing the discrepancy entirely. Deleted-file MFT records are frequently overwritten as the volume reuses space, so the window to recover a deleted entry's full attribute set shrinks over time, making correlation with the USN Journal and $LogFile necessary once the live MFT record itself has been reused.",
+      "related_artifacts": [
+        "usn-journal",
+        "logfile",
+        "recycle-bin",
+        "amcache",
+        "prefetch"
+      ],
+      "group": "filesystem",
+      "file": "data/artifacts/filesystem/mft.json"
+    },
+    {
+      "id": "recycle-bin",
+      "name": "Recycle Bin ($Recycle.Bin)",
+      "category": "file",
+      "subcategory": "user-activity",
+      "os_min": "Windows Vista ($Recycle.Bin / $I / $R format; the earlier centralized INFO2 format is used on Windows 2000/XP/Server 2003 at C:\\RECYCLER\\<SID>\\INFO2)",
+      "location": "C:\\$Recycle.Bin\\<user SID>\\ containing paired $I<random>.<ext> (metadata) and $R<random>.<ext> (content) files for each deleted item",
+      "purpose": "Records files a user deleted through Explorer or another Recycle-Bin-aware path, preserving both the deleted content and metadata about the item's original path, size, and deletion time - allowing recovery of the file and reconstruction of what was deleted, when, and by which account.",
+      "key_fields": [
+        "$I file - header with version, original file size, deletion timestamp (FILETIME), and the original full path of the deleted item",
+        "$R file - the deleted item's actual bytes (a renamed copy of the original file, or a full copy of a deleted folder's contents)",
+        "Shared random identifier - the 6-character suffix common to an $I/$R pair, linking metadata to content",
+        "Per-user SID subdirectory under $Recycle.Bin - attributes the deletion to a specific local or domain account"
+      ],
+      "normal_baseline": "A small, rotating set of recently user-deleted files whose original paths, sizes, and deletion times match plausible user activity, such as deleting items from Downloads, Desktop, or Documents.",
+      "anomalies": [
+        "An $I file present with no matching $R file (or vice versa) - the content was permanently removed after being sent to the Recycle Bin (e.g., 'Empty Recycle Bin' or direct deletion of the $R file), while the metadata trace survives",
+        "The original path recorded in an $I file points to a security-relevant location (an EDR/AV install directory, a Startup folder, System32) - consistent with an attacker deleting evidence or disabling defenses",
+        "A burst of deletions across many $I/$R pairs in a short window, consistent with an attacker or wiper clearing a staging directory",
+        "The deletion timestamp in an $I file falls outside the SID subdirectory owner's known logon sessions, suggesting the deletion was performed under someone else's profile/context",
+        "The entire $Recycle.Bin\\<SID> folder emptied of $I/$R pairs immediately following other evidence of malicious activity, inconsistent with routine user cleanup"
+      ],
+      "parsing_tools": [
+        "RBCmd (Eric Zimmerman)",
+        "Autopsy"
+      ],
+      "attack_techniques": [
+        "T1070.004"
+      ],
+      "anti_forensic_notes": "Deleting a file directly (Shift+Delete, `del` from a command shell, or most malware self-deletion routines) bypasses the Recycle Bin entirely and leaves no $I/$R pair - the absence of an expected Recycle Bin entry for a known deletion is itself a signal that a non-Explorer deletion path was used. An attacker can also delete just the $R content file while leaving the $I metadata behind, or clear the whole $Recycle.Bin folder, so a lone surviving $I record should still be treated as valuable evidence of the deletion event even without recoverable content.",
+      "related_artifacts": [
+        "mft",
+        "usn-journal",
+        "shellbags"
+      ],
+      "group": "filesystem",
+      "file": "data/artifacts/filesystem/recycle-bin.json"
+    },
+    {
+      "id": "usn-journal",
+      "name": "USN Journal ($UsnJrnl)",
+      "category": "file",
+      "subcategory": "filesystem-metadata",
+      "os_min": "Windows 2000 (present but not enabled by default until Windows Vista, which enables it by default on NTFS volumes)",
+      "location": "\\$Extend\\$UsnJrnl (root of the NTFS volume, inside the $Extend system directory); change records live in the alternate data stream $UsnJrnl:$J, with sizing/config metadata in $UsnJrnl:$Max",
+      "purpose": "A per-volume, append-only log of file and directory create, delete, rename, and modification-type changes, recorded independently of the MFT. It provides a durable, sequential record of filesystem activity that often survives after the underlying file or its MFT entry is gone.",
+      "key_fields": [
+        "USN (Update Sequence Number) - the byte offset of the record within the $J stream, monotonically increasing",
+        "Reason - bitmask of change-reason flags, e.g. USN_REASON_FILE_CREATE (0x100), USN_REASON_FILE_DELETE (0x200), USN_REASON_DATA_OVERWRITE (0x1), USN_REASON_RENAME_OLD_NAME (0x1000), USN_REASON_RENAME_NEW_NAME (0x2000), USN_REASON_BASIC_INFO_CHANGE (timestamp/attribute change)",
+        "FileReferenceNumber / ParentFileReferenceNumber - link the record to its MFT entry and parent directory, used to reconstruct full paths",
+        "Timestamp - the time the change was recorded",
+        "FileName - the name of the file/directory at the time of that specific record; a rename appears as an old-name record immediately followed by a new-name record"
+      ],
+      "normal_baseline": "A high-volume, continuously scrolling record of routine file activity (temp file churn, application writes, OS updates) consistent with expected user and system behavior. Because it is a fixed-size, effectively circular log, older entries are overwritten as new ones are written.",
+      "anomalies": [
+        "A USN_REASON_FILE_DELETE record for a file with no corresponding live or freed-but-intact MFT entry and no matching Recycle Bin $I/$R pair - consistent with a non-Explorer deletion path (e.g., Shift+Delete or a direct deletion API call)",
+        "A cluster of USN_REASON_BASIC_INFO_CHANGE records with no accompanying data-write reason, correlating in time with an $SI/$FN timestamp mismatch found in the MFT - two independent sources converging on a timestomping event",
+        "RENAME_OLD_NAME/RENAME_NEW_NAME pairs moving an executable from a staging or Temp path into a persistence location (Startup folder, System32) shortly before other execution evidence",
+        "A gap in USN sequence numbers larger than the volume's typical churn rate would explain, suggesting the journal was deleted and recreated (fsutil usn deletejournal) to break continuity",
+        "A file create immediately followed by a delete for the same name within a very short window, consistent with a dropper writing and then removing a payload"
+      ],
+      "parsing_tools": [
+        "MFTECmd (Eric Zimmerman)",
+        "NTFS Log Tracker"
+      ],
+      "attack_techniques": [
+        "T1070.006",
+        "T1070.004"
+      ],
+      "anti_forensic_notes": "An attacker with administrative access can delete and recreate the journal via `fsutil usn deletejournal <volume>`, wiping all prior change history for that volume in one step; because this resets the journal's starting USN, an unexplained discontinuity in the sequence numbers is itself the anti-forensic indicator to look for. The journal's fixed size also means it naturally overwrites its own oldest entries during normal system use, so the absence of activity from further back than the volume's typical churn rate cannot be assumed to be suspicious on its own.",
+      "related_artifacts": [
+        "mft",
+        "logfile",
+        "recycle-bin"
+      ],
+      "group": "filesystem",
+      "file": "data/artifacts/filesystem/usn-journal.json"
+    },
+    {
+      "id": "volume-shadow-copies",
+      "name": "Volume Shadow Copies (VSS)",
+      "category": "file",
+      "subcategory": "anti-forensics-detection",
+      "os_min": "Windows XP / Server 2003 (Volume Shadow Copy Service and vssadmin); the Explorer 'Previous Versions' / System Protection restore-point workflow used since Windows Vista",
+      "location": "Mounted via device paths such as \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy<N>; the change-block storage for a volume's shadow copies is kept in the hidden System Volume Information\\ directory on that same volume",
+      "purpose": "A Windows service that creates point-in-time snapshots of a volume, used by System Restore, backup software, and Explorer's 'Previous Versions' feature. Forensically, a mounted shadow copy lets an investigator browse a volume's file system and registry hives exactly as they existed at an earlier point in time, recovering files and hive states since deleted or modified on the live volume.",
+      "key_fields": [
+        "Shadow copy set ID and creation timestamp, from `vssadmin list shadows`",
+        "Originating volume and the resulting shadow copy device path",
+        "Full file-system tree captured inside each snapshot, including files since deleted, modified, or overwritten on the live volume",
+        "Prior versions of registry hives (SYSTEM, SOFTWARE, SAM, NTUSER.DAT) captured inside each snapshot"
+      ],
+      "normal_baseline": "A small number of shadow copies per volume on systems with System Restore/System Protection enabled, created periodically or before driver/OS updates. On many hardened enterprise builds and some consumer configurations, System Restore is disabled entirely and no shadow copies exist at all, which is itself unremarkable.",
+      "anomalies": [
+        "All shadow copies for a volume deleted immediately prior to or during a suspected ransomware or destructive-attack timeframe",
+        "Command-line or process telemetry showing `vssadmin delete shadows /all /quiet`, `wmic shadowcopy delete`, or a PowerShell `Get-CimInstance Win32_ShadowCopy | Remove-CimInstance` invocation",
+        "Shadow copy storage association resized to an unusually small maximum via `vssadmin resize shadowstorage`, causing older snapshots to be silently pruned",
+        "diskshadow.exe (a legitimate, Microsoft-signed backup utility) invoked interactively or via script outside of any known backup job - a common technique used to delete shadow copies while evading vssadmin-specific detection rules",
+        "A shadow-copy-capable volume showing zero shadow copies on a host where organizational baseline/policy expects System Protection to be enabled"
+      ],
+      "parsing_tools": [
+        "vssadmin (built-in)",
+        "ShadowExplorer",
+        "Arsenal Image Mounter",
+        "libvshadow / vshadowmount (libyal)"
+      ],
+      "attack_techniques": [
+        "T1490"
+      ],
+      "anti_forensic_notes": "Deleting the VSS catalog via vssadmin, WMI, or diskshadow removes the enumerable shadow copy set, but the underlying change-block data in System Volume Information is not necessarily zeroed and may still be recoverable through raw carving until overwritten by subsequent disk activity. Because VSS deletion is a near-universal precursor to ransomware detonation, its presence is high-signal - but a system where System Restore was already disabled will show no shadow copies for entirely benign reasons, so absence alone should not be conflated with an attacker's deletion without corroborating command-line or event evidence.",
+      "related_artifacts": [
+        "mft",
+        "usn-journal",
+        "recycle-bin",
+        "system-hive"
+      ],
+      "group": "filesystem",
+      "file": "data/artifacts/filesystem/volume-shadow-copies.json"
+    },
+    {
+      "id": "powershell-operational",
+      "name": "PowerShell Operational Log",
+      "category": "file",
+      "subcategory": "script-execution",
+      "os_min": "Windows PowerShell 5.0 / Windows 10 (Module Logging available since PowerShell 3.0; Script Block Logging introduced with PowerShell 5.0)",
+      "location": "%SystemRoot%\\System32\\winevt\\Logs\\Microsoft-Windows-PowerShell%4Operational.evtx (channel: Microsoft-Windows-PowerShell/Operational)",
+      "purpose": "Records detailed PowerShell engine activity when Script Block Logging and/or Module Logging are enabled via Group Policy, capturing the actual code executed - including code assembled or decoded at runtime - rather than just the invoking command line.",
+      "key_fields": [
+        "Event ID 4103 - Module Logging: records pipeline execution details (parameters, variables) for the PowerShell modules configured for logging",
+        "Event ID 4104 - Script Block Logging: records the full text of an executed script block, including inline one-liners, downloaded scripts, and code reconstructed after de-obfuscation (e.g., after Base64 decoding or string concatenation)",
+        "Event ID 4105/4106 - optional start/completion events for each script block invocation (high volume; disabled by default even when script block logging is on)",
+        "ScriptBlockText - the field within 4104 containing the actual script content",
+        "ScriptBlockId - a GUID correlating a script block's start/stop/content events together"
+      ],
+      "normal_baseline": "A background level of 4103/4104 events generated by normal administrative scripting, scheduled tasks, and management tooling (e.g., DSC, module auto-loading), with script content matching known, benign automation.",
+      "anomalies": [
+        "4104 script block content containing obfuscation patterns: heavy Base64 encoding, string concatenation/reversal, or char-code array reconstruction used to hide the true command",
+        "4104 content showing download-and-execute patterns (e.g., Net.WebClient, Invoke-WebRequest piped into Invoke-Expression) or in-memory/reflective loading of .NET assemblies",
+        "4104 content invoking known offensive tooling or frameworks (e.g., credential-dumping or lateral-movement cmdlets) not part of normal admin workflows",
+        "A 4103/4104 event with no corresponding 4688 process-creation event for powershell.exe around the same time, suggesting execution via a hosted PowerShell engine (e.g., through another process's embedded runspace) rather than the standalone console",
+        "Script block logging or module logging disabled (missing 4103/4104 events entirely) on a host where the organizational GPO baseline requires it enabled"
+      ],
+      "parsing_tools": [
+        "Windows Event Viewer",
+        "wevtutil",
+        "EvtxECmd (Eric Zimmerman)",
+        "Hayabusa"
+      ],
+      "attack_techniques": [
+        "T1059.001",
+        "T1027",
+        "T1140"
+      ],
+      "anti_forensic_notes": "Script Block Logging is specifically designed to defeat obfuscation: it records the fully deobfuscated script content immediately before execution regardless of how many layers of encoding, concatenation, or variable substitution were applied, so a Base64-encoded or string-split command still appears in plaintext in the 4104 event. However, both Script Block Logging and Module Logging are off by default and must be enabled via 'Turn on PowerShell Script Block Logging' / 'Turn on Module Logging' Group Policy - an attacker with sufficient privileges can also disable these settings or the EventLog service before executing, and their absence on a host expected to have them enabled is itself a signal worth investigating.",
+      "related_artifacts": [
+        "security-eventlog",
+        "sysmon"
+      ],
+      "group": "eventlogs",
+      "file": "data/artifacts/eventlogs/powershell-operational.json"
+    },
+    {
+      "id": "security-eventlog",
+      "name": "Security Event Log",
+      "category": "file",
+      "subcategory": "authentication",
+      "os_min": "Windows 2000 (the event IDs and field names below reflect Windows Vista / Server 2008 and later)",
+      "location": "%SystemRoot%\\System32\\winevt\\Logs\\Security.evtx",
+      "purpose": "The central Windows audit trail for authentication, authorization, and object-access activity, generated by the Local Security Authority. It is typically the first log an analyst pulls for logon/logoff activity, privilege use, process creation (when enabled), and account/group management.",
+      "key_fields": [
+        "Event ID - identifies the audited action",
+        "Subject / Creator Subject - SID, account name, and domain of the principal that performed the action",
+        "Target / New Logon - SID and account name the action was performed against, or the identity of a newly created logon session",
+        "Logon Type (events 4624/4625) - numeric code for how the logon occurred: 2=Interactive, 3=Network, 4=Batch, 5=Service, 7=Unlock, 8=NetworkCleartext, 9=NewCredentials, 10=RemoteInteractive, 11=CachedInteractive",
+        "Logon ID - hexadecimal correlation value linking a logon session across 4624, 4634, 4672, 4688, and other events",
+        "4624/4625 - an account successfully/unsuccessfully logged on",
+        "4634 - an account was logged off",
+        "4648 - a logon was attempted using explicit credentials (commonly seen with runas / lateral movement)",
+        "4672 - special privileges assigned to a new logon (admin-equivalent token)",
+        "4688 - a new process has been created (Process Command Line is only populated if 'Include command line in process creation events' is enabled via GPO)",
+        "4720/4722/4725/4726 - a user account was created / enabled / disabled / deleted",
+        "4724 - an attempt was made to reset an account's password",
+        "4732 - a member was added to a security-enabled local group",
+        "4738 - a user account was changed",
+        "4740 - a user account was locked out",
+        "4768/4769 - a Kerberos TGT / service ticket was requested",
+        "4776 - the domain controller attempted to validate credentials for an account (NTLM)",
+        "1102 - the audit log was cleared"
+      ],
+      "normal_baseline": "A steady mix of paired 4624/4634 events for known accounts and their expected logon types, 4688 process creation consistent with approved software, and account-management events (4720, 4732, etc.) occurring only during known provisioning activity by authorized IT/HR staff.",
+      "anomalies": [
+        "A rapid cluster of 4625 failures against one or many accounts (password spraying or brute force), especially followed by a 4624 success for the same account",
+        "4672 (special privileges assigned) immediately following a 4624 for an account not normally expected to hold administrative rights",
+        "4648 (explicit credentials) from a workstation to a server outside a normal admin workflow - a classic lateral movement / credential reuse indicator",
+        "4720 (account created) followed shortly by 4732 (added to a privileged local group) for the same account outside a known change-management window - a backdoor-account pattern",
+        "1102 (audit log cleared) with no corresponding scheduled maintenance activity - a high-confidence anti-forensic indicator",
+        "4688 New Process Name or Process Command Line showing encoded PowerShell, an unusual LOLBin invocation, or a process spawned from an unexpected parent (e.g., winword.exe spawning cmd.exe)",
+        "4768/4769 Kerberos ticket requests for service accounts using weak encryption types or occurring at unusual hours, consistent with Kerberoasting"
+      ],
+      "parsing_tools": [
+        "Windows Event Viewer",
+        "wevtutil",
+        "EvtxECmd (Eric Zimmerman)",
+        "Hayabusa"
+      ],
+      "attack_techniques": [
+        "T1078",
+        "T1136.001",
+        "T1098",
+        "T1070.001",
+        "T1003.002"
+      ],
+      "anti_forensic_notes": "Clearing the Security log (via Event Viewer, `wevtutil cl Security`, or PowerShell) itself generates Event ID 1102 recording the account that performed the clear - an attacker cannot suppress this event without disabling the EventLog service or tampering with the .evtx file directly, both of which leave their own trace. Command-line auditing on 4688 is off by default and must be explicitly enabled via the 'Include command line in process creation events' GPO; its absence on an otherwise well-audited host silently blinds process-creation forensics to attacker command lines and is worth flagging on its own.",
+      "related_artifacts": [
+        "sam-hive",
+        "security-hive",
+        "system-eventlog",
+        "sysmon",
+        "powershell-operational"
+      ],
+      "group": "eventlogs",
+      "file": "data/artifacts/eventlogs/security-eventlog.json"
+    },
+    {
+      "id": "sysmon",
+      "name": "Sysmon (System Monitor)",
+      "category": "file",
+      "subcategory": "process-execution",
+      "os_min": "Windows 7 / Server 2008 R2 and later (Sysmon is a Sysinternals tool, not a default Windows component, and must be separately installed and configured)",
+      "location": "Applications and Services Logs\\Microsoft\\Windows\\Sysmon\\Operational, i.e. %SystemRoot%\\System32\\winevt\\Logs\\Microsoft-Windows-Sysmon%4Operational.evtx",
+      "purpose": "A Microsoft Sysinternals kernel-mode driver and service that logs detailed system activity - process creation with full command lines, network connections, file creation, registry changes, and more - to the Windows event log, extremely rarely present by default but very commonly deployed for DFIR and detection engineering.",
+      "key_fields": [
+        "Event ID 1 - Process Create: full command line, hashes (SHA1 default, or MD5/SHA256/IMPHASH), ProcessGuid, parent process info",
+        "Event ID 3 - Network Connection: source process, source/destination IP and port, hostnames (disabled by default)",
+        "Event ID 5 - Process Terminate",
+        "Event ID 7 - Image Loaded: DLL/module load into a process, with hash and signature info (disabled by default, high volume)",
+        "Event ID 8 - CreateRemoteThread: source and target process, thread start address/module/function - a common process injection indicator",
+        "Event ID 10 - ProcessAccess: one process opening a handle to another (e.g., access to lsass.exe for credential theft)",
+        "Event ID 11 - FileCreate: a file was created or overwritten, useful for monitoring autostart and staging locations",
+        "Event ID 12/13/14 - RegistryEvent: key/value create-delete, value set, and key/value rename respectively",
+        "Event ID 22 - DNSEvent: a process performed a DNS query (Windows 8.1+ only)",
+        "ProcessGuid / LogonGuid - unique correlation identifiers that survive PID reuse, used to stitch related events together"
+      ],
+      "normal_baseline": "Event volume and content dependent entirely on the deployed Sysmon configuration file; on a well-tuned config, Event ID 1 (process creation) reflects known software launching from expected paths with plausible parent-child relationships, and configured network/file/registry events match approved application behavior.",
+      "anomalies": [
+        "Event ID 1 process creation with a suspicious parent-child relationship (e.g., an Office application spawning cmd.exe or powershell.exe) or a command line containing encoded/obfuscated content",
+        "Event ID 8 (CreateRemoteThread) targeting a sensitive process such as lsass.exe or a browser process, indicating likely code injection",
+        "Event ID 10 (ProcessAccess) showing a non-standard process opening a handle to lsass.exe with access rights consistent with memory-reading tools (a classic credential-dumping indicator)",
+        "Event ID 1 showing process creation events abruptly stop while other logs (Security, System) continue - possible Sysmon tampering or filter-rule abuse rather than expected quiet",
+        "Event ID 11 (FileCreate) writing an executable into an unusual autostart location (Startup folder, Run key target directory) shortly before a corresponding Event ID 1 executing it",
+        "Registry events (12/13/14) creating or modifying known persistence keys (e.g., Run/RunOnce) from an unexpected parent process"
+      ],
+      "parsing_tools": [
+        "Windows Event Viewer",
+        "wevtutil",
+        "EvtxECmd (Eric Zimmerman)",
+        "Hayabusa"
+      ],
+      "attack_techniques": [
+        "T1055",
+        "T1003.001",
+        "T1562.001"
+      ],
+      "anti_forensic_notes": "Sysmon explicitly does not attempt to hide itself or its driver from attackers, and its own documentation notes it provides no self-protection beyond running as a protected process; an attacker with sufficient privileges can uninstall it (sysmon -u), stop its service, or tamper with the 'Start'/'Enable' values under its EventLog-Microsoft-Windows-Sysmon-Operational Autologger registry key to silently suppress future logging without necessarily generating an obvious Sysmon-specific alert. Because Sysmon coverage and event volume depend entirely on the deployed configuration file, a gap in expected event types (e.g., no Event ID 3 network connections at all) may simply mean that event type was never enabled, not that it was tampered with - the configuration in place must be checked before drawing conclusions from absence.",
+      "related_artifacts": [
+        "security-eventlog",
+        "powershell-operational",
+        "prefetch",
+        "shimcache"
+      ],
+      "group": "eventlogs",
+      "file": "data/artifacts/eventlogs/sysmon.json"
+    },
+    {
+      "id": "system-eventlog",
+      "name": "System Event Log",
+      "category": "file",
+      "subcategory": "service-persistence",
+      "os_min": "Windows 2000 (the Service Control Manager event IDs below reflect Windows Vista / Server 2008 and later)",
+      "location": "%SystemRoot%\\System32\\winevt\\Logs\\System.evtx",
+      "purpose": "Records operating-system and driver/service-level activity, primarily generated by the Service Control Manager. For a DFIR analyst it is most valuable as the record of service installation, start/stop state changes, and startup-type changes - all common persistence and defense-evasion indicators.",
+      "key_fields": [
+        "Event ID - identifies the SCM/system action",
+        "Service Name (param1) - the internal name of the affected service",
+        "Service state / new state (param2) - e.g. 'running' or 'stopped' for 7036; the new start type for 7040",
+        "Service File Name / binary path - the executable path recorded when a service is installed (7045)",
+        "Account context - the account a new service is configured to run as (7045)",
+        "7045 - a new service was installed on the system, including its name, binary path, service type, start type, and running account",
+        "7036 - a service entered the running or stopped state",
+        "7040 - a service's start type was changed",
+        "7034 - a service terminated unexpectedly (crashed, rather than stopping cleanly)",
+        "104 - the event log was cleared"
+      ],
+      "normal_baseline": "7045 entries correspond to known, typically vendor-signed software or OS component installs; 7036 running/stopped transitions track expected boot, shutdown, and update cycles for known services; 7040 start-type changes are rare and tied to known administrative or update activity.",
+      "anomalies": [
+        "7045 for a service whose binary path sits in Temp, AppData, ProgramData, or another user-writable location, or whose name mimics a legitimate OS service (e.g., 'WindowsUpdate', 'SvcHost') without matching any real Microsoft service",
+        "7040 changing a security product's service start type away from Automatic (or to Disabled), especially shortly before a 7036 'stopped' event for that same service - a common pattern for disabling security tooling",
+        "7034 (unexpected termination) for a security product's service rather than a clean 7036 stop, suggesting the process was forcibly killed rather than stopped through its normal control path",
+        "7045 events with the same unusual service name, binary path, or hash appearing across multiple hosts in a short window, consistent with lateral movement via remote service creation (e.g., PsExec-style execution)",
+        "104 (log cleared) with no corresponding scheduled maintenance activity"
+      ],
+      "parsing_tools": [
+        "Windows Event Viewer",
+        "wevtutil",
+        "EvtxECmd (Eric Zimmerman)",
+        "Hayabusa"
+      ],
+      "attack_techniques": [
+        "T1543.003",
+        "T1569.002",
+        "T1070.001"
+      ],
+      "anti_forensic_notes": "Attackers frequently favor stopping or reconfiguring a security service through the normal SCM control path (sc.exe stop, Stop-Service, or the SCM API) because it produces only a routine-looking 7036 'stopped' event rather than the more conspicuous 7034 crash event - so a 7036 stop for a security product is not automatically benign and should be checked against who/what triggered it. Clearing the System log to remove 7045/7036/7040 evidence itself generates Event ID 104, which an attacker must separately suppress or accept as a trace.",
+      "related_artifacts": [
+        "security-eventlog",
+        "system-hive",
+        "sysmon"
+      ],
+      "group": "eventlogs",
+      "file": "data/artifacts/eventlogs/system-eventlog.json"
+    }
+  ]
+}

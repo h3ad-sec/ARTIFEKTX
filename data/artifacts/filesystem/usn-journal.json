@@ -1,0 +1,38 @@
+{
+  "id": "usn-journal",
+  "name": "USN Journal ($UsnJrnl)",
+  "category": "file",
+  "subcategory": "filesystem-metadata",
+  "os_min": "Windows 2000 (present but not enabled by default until Windows Vista, which enables it by default on NTFS volumes)",
+  "location": "\\$Extend\\$UsnJrnl (root of the NTFS volume, inside the $Extend system directory); change records live in the alternate data stream $UsnJrnl:$J, with sizing/config metadata in $UsnJrnl:$Max",
+  "purpose": "A per-volume, append-only log of file and directory create, delete, rename, and modification-type changes, recorded independently of the MFT. It provides a durable, sequential record of filesystem activity that often survives after the underlying file or its MFT entry is gone.",
+  "key_fields": [
+    "USN (Update Sequence Number) - the byte offset of the record within the $J stream, monotonically increasing",
+    "Reason - bitmask of change-reason flags, e.g. USN_REASON_FILE_CREATE (0x100), USN_REASON_FILE_DELETE (0x200), USN_REASON_DATA_OVERWRITE (0x1), USN_REASON_RENAME_OLD_NAME (0x1000), USN_REASON_RENAME_NEW_NAME (0x2000), USN_REASON_BASIC_INFO_CHANGE (timestamp/attribute change)",
+    "FileReferenceNumber / ParentFileReferenceNumber - link the record to its MFT entry and parent directory, used to reconstruct full paths",
+    "Timestamp - the time the change was recorded",
+    "FileName - the name of the file/directory at the time of that specific record; a rename appears as an old-name record immediately followed by a new-name record"
+  ],
+  "normal_baseline": "A high-volume, continuously scrolling record of routine file activity (temp file churn, application writes, OS updates) consistent with expected user and system behavior. Because it is a fixed-size, effectively circular log, older entries are overwritten as new ones are written.",
+  "anomalies": [
+    "A USN_REASON_FILE_DELETE record for a file with no corresponding live or freed-but-intact MFT entry and no matching Recycle Bin $I/$R pair - consistent with a non-Explorer deletion path (e.g., Shift+Delete or a direct deletion API call)",
+    "A cluster of USN_REASON_BASIC_INFO_CHANGE records with no accompanying data-write reason, correlating in time with an $SI/$FN timestamp mismatch found in the MFT - two independent sources converging on a timestomping event",
+    "RENAME_OLD_NAME/RENAME_NEW_NAME pairs moving an executable from a staging or Temp path into a persistence location (Startup folder, System32) shortly before other execution evidence",
+    "A gap in USN sequence numbers larger than the volume's typical churn rate would explain, suggesting the journal was deleted and recreated (fsutil usn deletejournal) to break continuity",
+    "A file create immediately followed by a delete for the same name within a very short window, consistent with a dropper writing and then removing a payload"
+  ],
+  "parsing_tools": [
+    "MFTECmd (Eric Zimmerman)",
+    "NTFS Log Tracker"
+  ],
+  "attack_techniques": [
+    "T1070.006",
+    "T1070.004"
+  ],
+  "anti_forensic_notes": "An attacker with administrative access can delete and recreate the journal via `fsutil usn deletejournal <volume>`, wiping all prior change history for that volume in one step; because this resets the journal's starting USN, an unexplained discontinuity in the sequence numbers is itself the anti-forensic indicator to look for. The journal's fixed size also means it naturally overwrites its own oldest entries during normal system use, so the absence of activity from further back than the volume's typical churn rate cannot be assumed to be suspicious on its own.",
+  "related_artifacts": [
+    "mft",
+    "logfile",
+    "recycle-bin"
+  ]
+}
