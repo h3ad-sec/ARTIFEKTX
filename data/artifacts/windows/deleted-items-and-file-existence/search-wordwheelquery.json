@@ -1,8 +1,7 @@
 {
   "id": "search-wordwheelquery",
   "name": "Search – WordWheelQuery",
-  "category": "registry",
-  "subcategory": "file-folder-access",
+  "type": "registry",
   "os_min": "Windows 7",
   "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\WordWheelQuery",
   "purpose": "Maintains an ordered history of the search terms a user has typed into the File Explorer search box.",

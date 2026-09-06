@@ -1,8 +1,7 @@
 {
   "id": "box-drive",
   "name": "Box Drive",
-  "category": "file",
-  "subcategory": "cloud-storage",
+  "type": "file",
   "os_min": "Windows 8",
   "location": "Default reparse point to virtual filesystem: %USERPROFILE%\\Box. Default local file cache: %USERPROFILE%\\AppData\\Local\\Box\\Box\\cache. File metadata and configuration data: %USERPROFILE%\\AppData\\Local\\Box\\Box\\logs\\ (Box_Streem logs); %USERPROFILE%\\AppData\\Local\\Box\\Box\\data\\ (sync.db and streemsfs.db = file metadata, metrics.db = user account info).",
   "purpose": "Box Drive presents its synced content as a virtual filesystem implemented through an NTFS reparse point rather than a real local copy, and it logs unusually detailed metadata for both locally cached and cloud-only files.",

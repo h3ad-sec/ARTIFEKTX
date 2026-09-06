@@ -1,8 +1,7 @@
 {
   "id": "dropbox",
   "name": "Dropbox",
-  "category": "file",
-  "subcategory": "cloud-storage",
+  "type": "file",
   "os_min": "Windows 8",
   "location": "Default local file storage: %USERPROFILE%\\Dropbox; %USERPROFILE%\\Dropbox\\.dropbox.cache (up to 3 days of cached data). File storage folder location: SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\SyncRootManager\\Dropbox!<SID>!Personal\\UserSyncRoots. File metadata and configuration data: %USERPROFILE%\\AppData\\Local\\Dropbox\\ (nucleus.sqlite3, sync_history.db, aggregation.dbx = usage and file metadata; older versions: filecache.dbx, config.dbx, both DPAPI-encrypted; info.json = app configuration data).",
   "purpose": "Dropbox synchronizes a local folder with the user's cloud account; older client versions encrypt most metadata with Windows DPAPI making it host- and user-bound, while recent versions expose substantially more metadata in plain SQLite databases.",

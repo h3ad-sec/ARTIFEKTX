@@ -1,8 +1,7 @@
 {
   "id": "recent-files",
   "name": "Recent Files",
-  "category": "registry",
-  "subcategory": "file-folder-access",
+  "type": "registry",
   "os_min": "Windows XP",
   "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RecentDocs",
   "purpose": "Records documents and folders recently opened through File Explorer / common Open-Save dialogs, organized both as one flat MRU list and as per-file-extension subkeys, plus a dedicated Folder subkey for recently opened folders.",

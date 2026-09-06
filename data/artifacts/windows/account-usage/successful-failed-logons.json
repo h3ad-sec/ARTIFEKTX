@@ -1,8 +1,7 @@
 {
   "id": "successful-failed-logons",
   "name": "Successful/Failed Logons",
-  "category": "file",
-  "subcategory": "authentication",
+  "type": "file",
   "os_min": "Windows 7 / Server 2008 R2",
   "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx",
   "purpose": "Profiles account creation, attempted logons, and account usage through the core Security-log authentication event IDs.",

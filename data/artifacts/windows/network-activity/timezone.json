@@ -1,8 +1,7 @@
 {
   "id": "timezone",
   "name": "Timezone",
-  "category": "registry",
-  "subcategory": "time-configuration",
+  "type": "registry",
   "os_min": "Windows XP",
   "location": "SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation ; System.evtx (Event ID 6013)",
   "purpose": "Identifies the system's currently configured time zone, needed to correctly interpret event log and other artifact timestamps recorded in local time; System.evtx can supplement this with historical time zone change information.",

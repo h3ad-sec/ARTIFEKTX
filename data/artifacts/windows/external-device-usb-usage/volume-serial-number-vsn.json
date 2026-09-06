@@ -1,8 +1,7 @@
 {
   "id": "volume-serial-number-vsn",
   "name": "Volume Serial Number (VSN)",
-  "category": "registry",
-  "subcategory": "removable-media",
+  "type": "registry",
   "os_min": "Windows 7 (EMDMgmt); Windows 10 (Partition/Diagnostic.evtx VBR-embedded VSN)",
   "location": "SOFTWARE\\Microsoft\\WindowsNT\\CurrentVersion\\EMDMgmt - find the key matching the device's Volume Name and USB Unique Serial Number, then take the last integer in the matching line and convert it from decimal to hex to get the VSN; this key is often missing entirely on modern systems using SSD-based removable devices. Windows 10+: Microsoft-Windows-Partition/Diagnostic.evtx Event ID 1006 may include VBR data containing the VSN - 4 bytes located at offset 0x43 (FAT), 0x64 (exFAT), or 0x48 (NTFS) within each Volume Boot Record; this log is cleared during major OS feature updates.",
   "purpose": "Discovers the Volume Serial Number assigned to the file-system partition on a USB device - this is NOT the USB Unique Serial Number hardcoded into the device's firmware, nor any external label serial number - for correlating the device to files or shell items it produced elsewhere on the system.",

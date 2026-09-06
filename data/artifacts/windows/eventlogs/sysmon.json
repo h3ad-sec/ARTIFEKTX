@@ -1,8 +1,7 @@
 {
   "id": "sysmon",
   "name": "Sysmon (System Monitor)",
-  "category": "file",
-  "subcategory": "process-execution",
+  "type": "file",
   "os_min": "Windows 7 / Server 2008 R2 and later (Sysmon is a Sysinternals tool, not a default Windows component, and must be separately installed and configured)",
   "location": "Applications and Services Logs\\Microsoft\\Windows\\Sysmon\\Operational, i.e. %SystemRoot%\\System32\\winevt\\Logs\\Microsoft-Windows-Sysmon%4Operational.evtx",
   "purpose": "A Microsoft Sysinternals kernel-mode driver and service that logs detailed system activity - process creation with full command lines, network connections, file creation, registry changes, and more - to the Windows event log, extremely rarely present by default but very commonly deployed for DFIR and detection engineering.",

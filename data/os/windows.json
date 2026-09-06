@@ -1,14 +1,13 @@
 {
   "os": "Windows",
-  "generated": "2026-09-06T15:53:31.250959+00:00",
+  "generated": "2026-09-06T16:05:17.358464+00:00",
   "count": 107,
   "categories": {
     "Account Usage": [
       {
         "id": "authentication-events",
         "name": "Authentication Events",
-        "category": "file",
-        "subcategory": "authentication",
+        "type": "file",
         "os_min": "Windows 7",
         "location": "Security.evtx",
         "purpose": "Identifies where authentication of credentials actually occurred, distinguishing local/workgroup account authentication (recorded on the workstation itself) from domain/Active Directory authentication (recorded on the domain controller), via NTLM and Kerberos protocol events.",
@@ -47,8 +46,7 @@
       {
         "id": "cloud-account-details",
         "name": "Cloud Account Details",
-        "category": "registry",
-        "subcategory": "user-accounts",
+        "type": "registry",
         "os_min": "Windows 8 (Microsoft account login support)",
         "location": "SAM\\Domains\\Account\\Users\\<RID>\\InternetUserName",
         "purpose": "Identifies whether a local Windows account is actually a Microsoft cloud account by recording the email address tied to it, directly inside the SAM hive.",
@@ -79,8 +77,7 @@
       {
         "id": "last-login-and-password-change",
         "name": "Last Login and Password Change",
-        "category": "registry",
-        "subcategory": "user-accounts",
+        "type": "registry",
         "os_min": "All Windows NT-based versions",
         "location": "SAM\\Domains\\Account\\Users",
         "purpose": "The SAM registry hive maintains a list of local accounts and associated configuration information, including last login time, last password change, and login counts.",
@@ -116,8 +113,7 @@
       {
         "id": "logon-event-types",
         "name": "Logon Event Types",
-        "category": "file",
-        "subcategory": "authentication",
+        "type": "file",
         "os_min": "Windows 7 / Server 2008 R2",
         "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx: the Logon Type field within Event ID 4624",
         "purpose": "Determines by exactly what means a logon was attempted, in addition to date, time, username, hostname, and success/failure status. The single field that separates a console logon from a network logon, RDP session, or scheduled-task logon.",
@@ -161,8 +157,7 @@
       {
         "id": "remote-desktop-protocol-rdp-usage",
         "name": "Remote Desktop Protocol (RDP) Usage",
-        "category": "file",
-        "subcategory": "authentication",
+        "type": "file",
         "os_min": "Windows 7 / Server 2008 R2",
         "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx",
         "purpose": "Tracks RDP logons and session reconnections to a target machine, and identifies which accounts were used to do so, purely from the Security log's account-usage perspective.",
@@ -197,8 +192,7 @@
       {
         "id": "service-events",
         "name": "Service Events",
-        "category": "file",
-        "subcategory": "authentication",
+        "type": "file",
         "os_min": "Event ID 7045 requires Windows Server 2008 R2+; 4697 auditing requires Windows 10+",
         "location": "System.evtx (Win7+): Event IDs 7034/7035/7036/7040/7045; Security.evtx (Win10+, requires auditing enabled). Event ID 4697",
         "purpose": "Analyzes logs for suspicious Windows service creation, persistence, and services started or stopped around the time of a suspected compromise; service events also record account information.",
@@ -236,8 +230,7 @@
       {
         "id": "successful-failed-logons",
         "name": "Successful/Failed Logons",
-        "category": "file",
-        "subcategory": "authentication",
+        "type": "file",
         "os_min": "Windows 7 / Server 2008 R2",
         "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx",
         "purpose": "Profiles account creation, attempted logons, and account usage through the core Security-log authentication event IDs.",
@@ -277,8 +270,7 @@
       {
         "id": "user-accounts",
         "name": "User Accounts",
-        "category": "registry",
-        "subcategory": "user-accounts",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList",
         "purpose": "Identifies both local and domain accounts that have interactively logged on to the system, by enumerating one subkey per user SID with a pointer to that user's profile folder.",
@@ -319,8 +311,7 @@
       {
         "id": "amcache-hve",
         "name": "Amcache.hve",
-        "category": "registry",
-        "subcategory": "execution-evidence",
+        "type": "registry",
         "os_min": "Windows 8 (backported to Windows 7 SP1 via KB2952664)",
         "location": "C:\\Windows\\AppCompat\\Programs\\Amcache.hve (standalone registry hive, plus Amcache.hve.LOG1/.LOG2 transaction logs in the same folder)",
         "purpose": "A registry hive maintained by the Microsoft Compatibility Appraiser / Inventory Collector that catalogs executables, installed applications, and loaded drivers seen on the system, recording each file's path, SHA-1 hash, and size. Because the entry is written independently of the file itself, it commonly survives after the underlying binary has been deleted, making it valuable evidence of program presence/first-run even post-deletion.",
@@ -358,8 +349,7 @@
       {
         "id": "bam-dam",
         "name": "BAM/DAM",
-        "category": "registry",
-        "subcategory": "execution-evidence",
+        "type": "registry",
         "os_min": "Windows 10 version 1709 (Fall Creators Update)",
         "location": "Pre-Windows 10 1809: HKLM\\SYSTEM\\CurrentControlSet\\Services\\bam\\UserSettings\\{SID} and HKLM\\SYSTEM\\CurrentControlSet\\Services\\dam\\UserSettings\\{SID}. Windows 10 1809 and later: HKLM\\SYSTEM\\CurrentControlSet\\Services\\bam\\State\\UserSettings\\{SID} and \\dam\\State\\UserSettings\\{SID} (a 'State' subkey was inserted into the path).",
         "purpose": "BAM is a Windows service that throttles background application activity to conserve battery/resources; as a side effect it records, per user SID, the full path of each executable that ran and the timestamp of its last execution. DAM is the equivalent mechanism for devices supporting Connected Standby (primarily mobile/tablet hardware). Both key their entries under the executing user's SID, giving analysts direct user attribution for a launched binary even though the data lives in the machine-wide SYSTEM hive.",
@@ -391,8 +381,7 @@
       {
         "id": "capabilityaccessmanager",
         "name": "CapabilityAccessManager",
-        "category": "registry",
-        "subcategory": "device-capability-access",
+        "type": "registry",
         "os_min": "Windows 10 1903+",
         "location": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore (machine-wide) ; NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore (per-user)",
         "purpose": "Records which applications accessed sensitive device capabilities, such as the microphone and camera, and when.",
@@ -428,8 +417,7 @@
       {
         "id": "commands-executed-in-run-dialog",
         "name": "Commands Executed in the Run Dialog",
-        "category": "registry",
-        "subcategory": "program-execution",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU",
         "purpose": "Records the most-recently-used command strings typed into the Run dialog (Win+R), letting an analyst reconstruct commands, paths, or scripts a user (or an attacker operating in that user's context) manually invoked via Run.",
@@ -464,8 +452,7 @@
       {
         "id": "jump-lists",
         "name": "Jump Lists",
-        "category": "file",
-        "subcategory": "file-folder-access",
+        "type": "file",
         "os_min": "Windows 7",
         "location": "AutomaticDestinations: %AppData%\\Microsoft\\Windows\\Recent\\AutomaticDestinations\\<AppID>.automaticDestinations-ms; CustomDestinations: \\CustomDestinations\\<AppID>.customDestinations-ms",
         "purpose": "Tracks recently/frequently accessed files per application via embedded shell-link data, providing file-access evidence even for files later deleted.",
@@ -497,8 +484,7 @@
       {
         "id": "last-visited-mru",
         "name": "Last Visited MRU",
-        "category": "registry",
-        "subcategory": "file-folder-access",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "XP: NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\LastVisitedMRU ; Windows 7+: NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\LastVisitedPidlMRU",
         "purpose": "Tracks which applications the user has run through a standard Open/Save dialog and the last folder location each application interacted with.",
@@ -530,8 +516,7 @@
       {
         "id": "prefetch",
         "name": "Prefetch",
-        "category": "file",
-        "subcategory": "execution-evidence",
+        "type": "file",
         "os_min": "Windows XP",
         "location": "C:\\Windows\\Prefetch\\{EXECUTABLENAME}-{HASH}.pf. Prefetching (and therefore .pf creation) is controlled by HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management\\PrefetchParameters\\EnablePrefetcher, and is disabled by default on systems whose boot volume is an SSD.",
         "purpose": "Windows' prefetcher records which files and directories an executable references during its first ~10 seconds of launch, storing that data in a .pf file so future launches can be sped up by pre-loading those resources. Because a .pf file is created/updated only when the named executable actually runs, Prefetch is one of the strongest single-artifact indicators of program execution and its history (run count, run times).",
@@ -571,8 +556,7 @@
       {
         "id": "shimcache",
         "name": "Shimcache",
-        "category": "registry",
-        "subcategory": "execution-evidence",
+        "type": "registry",
         "os_min": "Windows 2000 / XP",
         "location": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\AppCompatCache (Windows 2003 and later); HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\AppCompatibility\\AppCompatCache on Windows XP/2000. Values are held in memory and only periodically flushed to the registry, typically on shutdown.",
         "purpose": "Part of the Application Compatibility infrastructure: when Windows evaluates whether an executable needs a compatibility shim, it records the file's path, size, and last-modified time in a cache so it doesn't have to re-evaluate the file on every launch. Because the cache captures files the OS has looked at, it's used as evidence a given executable existed (and, on some versions, ran) on the system.",
@@ -606,8 +590,7 @@
       {
         "id": "srum",
         "name": "System Resource Usage Monitor (SRUM)",
-        "category": "file",
-        "subcategory": "execution-evidence",
+        "type": "file",
         "os_min": "Windows 8",
         "location": "C:\\Windows\\System32\\sru\\SRUDB.dat (ESE/EDB database)",
         "purpose": "Tracks application execution, CPU/network resource usage, and per-app network data volume over time, written hourly and at shutdown.",
@@ -639,8 +622,7 @@
       {
         "id": "task-bar-feature-usage",
         "name": "Task Bar Feature Usage",
-        "category": "registry",
-        "subcategory": "execution-evidence",
+        "type": "registry",
         "os_min": "Windows 10 1903+",
         "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FeatureUsage",
         "purpose": "Logs how a signed-in user interacts with taskbar-pinned and running applications, distinguishing deliberately pinned apps from apps that merely received window focus.",
@@ -675,8 +657,7 @@
       {
         "id": "userassist",
         "name": "UserAssist",
-        "category": "registry",
-        "subcategory": "program-execution",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist\\{GUID}\\Count",
         "purpose": "Tracks GUI-launched programs and shortcuts per user, including how many times an item was run, how long it held focus, and when it was last executed. Populated by the Windows Explorer shell (explorer.exe/userassist.dll) when a user double-clicks an icon, shortcut, or Start Menu/Taskbar entry.",
@@ -713,8 +694,7 @@
       {
         "id": "windows-10-timeline",
         "name": "Windows 10 Timeline",
-        "category": "file",
-        "subcategory": "execution-evidence",
+        "type": "file",
         "os_min": "Windows 10 1803 (Timeline feature)",
         "location": "C:\\Users\\<profile>\\AppData\\Local\\ConnectedDevicesPlatform\\<account-ID>\\ActivitiesCache.db (SQLite database)",
         "purpose": "Stores a rolling history of applications and files the user interacted with, which Windows used to present as a chronological 'Timeline', including content viewed inside those applications.",
@@ -752,8 +732,7 @@
       {
         "id": "auto-complete-data",
         "name": "Auto-Complete Data",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Firefox: places.sqlite, formhistory.sqlite ; Chrome/Edge: History (keyword_search_terms table), Web Data (autofill table), Shortcuts, Network Action Predictor, Login Data",
         "purpose": "Aggregates data a user has typed into the browser across several distinct databases. Search-engine queries, web form entries, Omnibox/address-bar input, letter-by-letter typed predictions, and typed credentials.",
@@ -789,8 +768,7 @@
       {
         "id": "bookmarks",
         "name": "Bookmarks",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Firefox: places.sqlite, bookmarkbackups\\bookmarks-<date>.jsonlz4 ; Chrome/Edge: Bookmarks (JSON), Bookmarks.bak (Chrome) / Bookmarks.msbak (Edge)",
         "purpose": "Records default browser items as well as sites a user chose to save for future reference.",
@@ -823,8 +801,7 @@
       {
         "id": "browser-downloads",
         "name": "Browser Downloads",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Chrome/Edge: History.downloads table in the profile folder; Firefox: downloads recorded via moz_annos in places.sqlite (or separate downloads.sqlite on older versions)",
         "purpose": "Modern browsers include a built-in download manager capable of keeping a history of every file downloaded by the user, providing information about websites visited and corresponding items retrieved.",
@@ -857,8 +834,7 @@
       {
         "id": "browser-preferences",
         "name": "Browser Preferences",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Firefox: prefs.js (profile root) ; Chrome/Edge: Preferences (JSON, profile root)",
         "purpose": "Configuration data associated with the browser application, including privacy settings and synchronization preferences.",
@@ -891,8 +867,7 @@
       {
         "id": "cache",
         "name": "Cache",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Firefox: Cache (older) / cache2 (Firefox 32+) folder under the profile ; Chrome/Edge: Cache\\ folder under the profile (data_# index files and f_###### content files)",
         "purpose": "Local storage of web page components (images, scripts, stylesheets, media) retained to speed up subsequent visits to the same site.",
@@ -925,8 +900,7 @@
       {
         "id": "chrome-edge-browser-artifacts",
         "name": "Chrome / Edge (Chromium) Browser Artifacts",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "C:\\Users\\<user>\\AppData\\Local\\Google\\Chrome\\User Data\\Default (Chrome) or \\Microsoft\\Edge\\User Data\\Default (Edge); History, Login Data, Web Data, Cookies (under Network\\), Bookmarks, Preferences",
         "purpose": "SQLite databases and JSON files recording browsing history, downloads, saved logins, autofill, and cookies.",
@@ -958,8 +932,7 @@
       {
         "id": "cookies",
         "name": "Cookies",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Firefox: cookies.sqlite ; Chrome/Edge (newer): Network\\Cookies ; Chrome/Edge (older, pre-network-isolation): Cookies",
         "purpose": "Site-set tokens that provide insight into what websites have been visited and, for authentication cookies, what activities might have taken place there.",
@@ -998,8 +971,7 @@
       {
         "id": "extensions",
         "name": "Extensions",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Chrome/Edge: User Data\\Default\\Extensions\\<extension-id>\\<version>\\manifest.json; Preferences JSON also lists installed extension IDs",
         "purpose": "Identifies browser extensions installed for a profile, including sideloaded/unpacked extensions not from an official store.",
@@ -1027,8 +999,7 @@
       {
         "id": "firefox-browser-artifacts",
         "name": "Firefox Browser Artifacts",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "C:\\Users\\<user>\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\<profile>\\ ; places.sqlite (history/bookmarks), cookies.sqlite, formhistory.sqlite, logins.json + key4.db (saved passwords)",
         "purpose": "Stores browsing history, bookmarks, cookies, form autofill history, and encrypted saved logins in per-profile SQLite/JSON files.",
@@ -1057,8 +1028,7 @@
       {
         "id": "history-and-download-history",
         "name": "History and Download History",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Firefox: %USERPROFILE%\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\<randomtext>.default\\places.sqlite (Win7+; XP: %USERPROFILE%\\Application Data\\...) ; Chrome/Edge: %USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\<Profile>\\History and \\Microsoft\\Edge\\User Data\\<Profile>\\History (Win7+; XP under Local Settings\\Application Data)",
         "purpose": "Records websites visited by date and time, forming the primary source for reconstructing a user's browsing activity.",
@@ -1092,8 +1062,7 @@
       {
         "id": "html5-filesystem",
         "name": "HTML5 FileSystem",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Chrome: %USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\<Profile>\\File System ; Edge: %USERPROFILE%\\AppData\\Local\\Microsoft\\Edge\\User Data\\<Profile>\\File System (Chromium browsers only; not implemented by Firefox)",
         "purpose": "Implements the HTML5 local storage FileSystem API, letting web applications store larger binary data locally than the 10MB text-only limit of HTML5 Web Storage allows.",
@@ -1123,8 +1092,7 @@
       {
         "id": "html5-web-storage",
         "name": "HTML5 Web Storage",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Firefox: %USERPROFILE%\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\<randomtext>.default\\webappstore.sqlite ; Chrome: %USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\<Profile>\\Local Storage ; Edge: %USERPROFILE%\\AppData\\Local\\Microsoft\\Edge\\User Data\\<Profile>\\Local Storage",
         "purpose": "Per-domain, text-based persistent storage (up to 10MB per domain) that websites use for state and tracking data. Functionally a \"super cookie\" that outlives typical cookie settings.",
@@ -1156,8 +1124,7 @@
       {
         "id": "media-history",
         "name": "Media History",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Chrome: %USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\<Profile>\\Media History ; Edge: %USERPROFILE%\\AppData\\Local\\Microsoft\\Edge\\User Data\\<Profile>\\Media History (Chromium browsers only; no Firefox equivalent)",
         "purpose": "SQLite database tracking audio and video playback on visited websites, recorded separately from the general browsing History file.",
@@ -1190,8 +1157,7 @@
       {
         "id": "session-restore",
         "name": "Session Restore",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Firefox (older): sessionstore.js ; Firefox (newer): sessionstore.jsonlz4, sessionstore-backups\\ ; Chrome/Edge (older): Current Session, Current Tabs, Last Session, Last Tabs files in the profile root ; Chrome/Edge (newer): Sessions\\ folder with Session_<timestamp> / Tabs_<timestamp> files",
         "purpose": "Automatic crash-recovery feature that lets the browser restore open tabs and windows after a crash or restart.",
@@ -1227,8 +1193,7 @@
       {
         "id": "stored-credentials",
         "name": "Stored Credentials",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Firefox: logins.json (+ key4.db) ; Chrome/Edge: Login Data",
         "purpose": "Browser-based password-manager storage holding site credentials a user chose to save, typically protected with Windows DPAPI encryption.",
@@ -1263,8 +1228,7 @@
       {
         "id": "box-drive",
         "name": "Box Drive",
-        "category": "file",
-        "subcategory": "cloud-storage",
+        "type": "file",
         "os_min": "Windows 8",
         "location": "Default reparse point to virtual filesystem: %USERPROFILE%\\Box. Default local file cache: %USERPROFILE%\\AppData\\Local\\Box\\Box\\cache. File metadata and configuration data: %USERPROFILE%\\AppData\\Local\\Box\\Box\\logs\\ (Box_Streem logs); %USERPROFILE%\\AppData\\Local\\Box\\Box\\data\\ (sync.db and streemsfs.db = file metadata, metrics.db = user account info).",
         "purpose": "Box Drive presents its synced content as a virtual filesystem implemented through an NTFS reparse point rather than a real local copy, and it logs unusually detailed metadata for both locally cached and cloud-only files.",
@@ -1301,8 +1265,7 @@
       {
         "id": "dropbox",
         "name": "Dropbox",
-        "category": "file",
-        "subcategory": "cloud-storage",
+        "type": "file",
         "os_min": "Windows 8",
         "location": "Default local file storage: %USERPROFILE%\\Dropbox; %USERPROFILE%\\Dropbox\\.dropbox.cache (up to 3 days of cached data). File storage folder location: SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\SyncRootManager\\Dropbox!<SID>!Personal\\UserSyncRoots. File metadata and configuration data: %USERPROFILE%\\AppData\\Local\\Dropbox\\ (nucleus.sqlite3, sync_history.db, aggregation.dbx = usage and file metadata; older versions: filecache.dbx, config.dbx, both DPAPI-encrypted; info.json = app configuration data).",
         "purpose": "Dropbox synchronizes a local folder with the user's cloud account; older client versions encrypt most metadata with Windows DPAPI making it host- and user-bound, while recent versions expose substantially more metadata in plain SQLite databases.",
@@ -1342,8 +1305,7 @@
       {
         "id": "google-drive-desktop",
         "name": "Google Drive for Desktop",
-        "category": "file",
-        "subcategory": "cloud-storage",
+        "type": "file",
         "os_min": "Windows 8",
         "location": "Local drive letter and account ID: NTUSER\\Software\\Google\\DriveFS\\Share\\. Default local file cache: %USERPROFILE%\\AppData\\Local\\Google\\DriveFS\\<account identifier>\\content_cache. File metadata: %USERPROFILE%\\AppData\\Local\\Google\\DriveFS\\<account identifier>\\metadata_sqlite_db.",
         "purpose": "Google Drive for Desktop is the merged successor to Google Backup and Sync and Drive File Stream; it presents a virtual FAT32 volume named \"My Drive\" that is only mounted and accessible while the associated Google account is logged in.",
@@ -1378,8 +1340,7 @@
       {
         "id": "onedrive",
         "name": "OneDrive",
-        "category": "file",
-        "subcategory": "cloud-storage",
+        "type": "file",
         "os_min": "Windows 8",
         "location": "Default local file storage: %USERPROFILE%\\OneDrive (Personal) or %USERPROFILE%\\OneDrive - <CompanyName> (Business). File storage folder location: NTUSER\\Software\\Microsoft\\OneDrive\\Accounts\\<Personal|Business1>. File metadata: %USERPROFILE%\\AppData\\Local\\Microsoft\\OneDrive\\logs\\<Personal|Business1>\\ (SyncDiagnostics.log, SyncEngine \"odl\" logs). Settings/account data: %USERPROFILE%\\AppData\\Local\\Microsoft\\OneDrive\\settings\\<Personal|Business1>\\ (<UserCid>.dat).",
         "purpose": "OneDrive ships by default on Windows 8 and later but stays inactive until a user authenticates to a Microsoft cloud account, after which it silently maintains a two-way sync between a local folder and the associated Personal or Business OneDrive tenant.",
@@ -1418,8 +1379,7 @@
       {
         "id": "msg-eml-files",
         "name": "MSG/EML File Metadata",
-        "category": "file",
-        "subcategory": "communication-artifact",
+        "type": "file",
         "os_min": "Windows XP",
         "location": "No fixed location - individual .msg (Outlook drag-and-save, or 'Save As' from a message) and .eml (saved by most other mail clients, and by Outlook when exporting/forwarding as RFC 822) files can appear anywhere on disk: user Documents/Desktop, Downloads folder, email attachments, removable media, or extracted attachments from an OST/PST.",
         "purpose": "Individual saved-email files that carry a full self-contained copy of one message, independent of any mailbox store. .msg is Microsoft's OLE/Compound File Binary Format (CFBF) container preserving Outlook-specific MAPI properties; .eml is a plain-text file following the RFC 822/MIME structure used by virtually every other mail client, making it the more portable but MAPI-metadata-poor of the two.",
@@ -1458,8 +1418,7 @@
       {
         "id": "outlook-ost-pst",
         "name": "Outlook OST/PST Files",
-        "category": "file",
-        "subcategory": "communication-artifact",
+        "type": "file",
         "os_min": "Windows XP",
         "location": "Classic Outlook cached-mode OST: %LOCALAPPDATA%\\Microsoft\\Outlook\\ (default since Outlook 2013/2016). PST: %USERPROFILE%\\Documents\\Outlook Files\\ (Outlook 2013+ default) or %LOCALAPPDATA%\\Microsoft\\Outlook\\ (legacy/upgraded profiles, hidden folder). Exact per-store paths are recorded in HKEY_CURRENT_USER\\Software\\Microsoft\\Office\\<version>\\Outlook\\Profiles\\<profile>\\9375CFF0413111d3B88A00104B2A6676\\<service>\\001f6700 (or similarly-named binary values) and in the legacy HKCU\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows Messaging Subsystem\\Profiles\\<profile> key. Note: the current \"New Outlook\" / Outlook for Windows (Monarch) client does not use the classic Cached Exchange Mode/OST model for Exchange/M365 mailboxes - Microsoft does not document an equivalent user-accessible cache file path for it, so do not assume a New-Outlook mailbox has a parseable local OST.",
         "purpose": "OST (Offline Storage Table) is a local, encrypted cache of an Exchange/IMAP mailbox used for offline access and cached mode sync; PST (Personal Storage Table) is a self-contained archive/local-delivery store an analyst can open independently of any server. Both are structured containers (folders, messages, contacts, calendar) and are frequently the single richest local source of a user's email history, including items the user believes were deleted from the server.",
@@ -1498,8 +1457,7 @@
       {
         "id": "teams-slack-cache",
         "name": "Teams/Slack Local Cache (LevelDB)",
-        "category": "file",
-        "subcategory": "communication-artifact",
+        "type": "file",
         "os_min": "Windows 10",
         "location": "Teams 2.x (current, Electron-based): %LOCALAPPDATA%\\Packages\\MSTeams_8wekyb3d8bbwe\\LocalCache\\Microsoft\\MSTeams\\ containing an IndexedDB directory whose LevelDB files hold cached messages/posts/contacts. Legacy classic Teams 1.x: %APPDATA%\\Microsoft\\Teams\\IndexedDB\\. Slack desktop: %APPDATA%\\Slack\\Local Storage\\leveldb\\ for LevelDB key-value data, with a separate Cache_data folder holding cached attachments/media (Chromium disk-cache format). Exact subfolder names can shift between client versions - confirm the live path on the target build before relying on it.",
         "purpose": "Modern Teams and Slack desktop clients are Electron/Chromium apps that persist recent conversation state client-side using LevelDB (Chromium's key-value storage engine, backing IndexedDB and Local Storage) rather than a conventional flat file, so a forensic copy of these directories can yield message text, contact/channel metadata, and cached attachments even without server-side access.",
@@ -1537,8 +1495,7 @@
       {
         "id": "recycle-bin",
         "name": "Recycle Bin",
-        "category": "file",
-        "subcategory": "user-activity",
+        "type": "file",
         "os_min": "Windows Vista ($Recycle.Bin / $I / $R format; the earlier centralized INFO2 format is used on Windows 2000/XP/Server 2003 at C:\\RECYCLER\\<SID>\\INFO2)",
         "location": "C:\\$Recycle.Bin\\<user SID>\\ containing paired $I<random>.<ext> (metadata) and $R<random>.<ext> (content) files for each deleted item",
         "purpose": "Records files a user deleted through Explorer or another Recycle-Bin-aware path, preserving both the deleted content and metadata about the item's original path, size, and deletion time - allowing recovery of the file and reconstruction of what was deleted, when, and by which account.",
@@ -1574,8 +1531,7 @@
       {
         "id": "search-wordwheelquery",
         "name": "Search – WordWheelQuery",
-        "category": "registry",
-        "subcategory": "file-folder-access",
+        "type": "registry",
         "os_min": "Windows 7",
         "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\WordWheelQuery",
         "purpose": "Maintains an ordered history of the search terms a user has typed into the File Explorer search box.",
@@ -1608,8 +1564,7 @@
       {
         "id": "thumbcache",
         "name": "Thumbcache",
-        "category": "file",
-        "subcategory": "file-folder-access",
+        "type": "file",
         "os_min": "Windows Vista",
         "location": "%USERPROFILE%\\AppData\\Local\\Microsoft\\Windows\\Explorer (per-user; one database per thumbnail size, e.g. thumbcache_256.db)",
         "purpose": "Centralizes thumbnail images for pictures, documents, and folders into a per-user set of databases, one per thumbnail size (small/medium/large/extra large), replacing the per-folder Thumbs.db model used on Windows XP. Like Thumbs.db, it can retain evidence of a folder's prior contents after the source files are deleted.",
@@ -1643,8 +1598,7 @@
       {
         "id": "thumbs-db",
         "name": "Thumbs.db",
-        "category": "file",
-        "subcategory": "file-folder-access",
+        "type": "file",
         "os_min": "Windows XP",
         "location": "Hidden Thumbs.db file created inside each folder viewed in Explorer's thumbnail view (one per folder, colocated with the images it catalogs); creation behavior is OS-version dependent and most consistent on Windows XP",
         "purpose": "Explorer's thumbnail-view feature writes a hidden Thumbs.db cache file into any folder whose contents were viewed as thumbnails. Because cached thumbnails and filenames remain in the file after the source pictures are deleted or moved, it functions as a historical record of a folder's prior contents.",
@@ -1679,8 +1633,7 @@
       {
         "id": "user-typed-paths",
         "name": "User Typed Paths",
-        "category": "registry",
-        "subcategory": "file-folder-access",
+        "type": "registry",
         "os_min": "Windows Vista",
         "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TypedPaths",
         "purpose": "Records paths a user manually typed or pasted into the File Explorer address/path bar, including local paths and remote UNC paths to network shares. Proves deliberate navigation to a specific location rather than passive browsing.",
@@ -1714,8 +1667,7 @@
       {
         "id": "windows-search-database",
         "name": "Windows Search Database",
-        "category": "file",
-        "subcategory": "search-indexing",
+        "type": "file",
         "os_min": "Windows XP",
         "location": "Windows XP: C:\\Documents and Settings\\All Users\\Application Data\\Microsoft\\Search\\Data\\Applications\\Windows\\Windows.edb; Windows 7+: C:\\ProgramData\\Microsoft\\Search\\Data\\Applications\\Windows\\Windows.edb, plus the GatherLogs\\SystemIndex subfolder under the same Applications\\Windows path",
         "purpose": "Windows Search maintains an Extensible Storage Engine (ESE) database indexing metadata-and in many cases partial content-from over 900 file types, plus email, so users can search by keyword. Because it indexes a file's metadata and content independent of the file's current location, it can preserve evidence of files later moved, renamed, or deleted.",
@@ -1753,8 +1705,7 @@
       {
         "id": "application-eventlog",
         "name": "Application.evtx",
-        "category": "file",
-        "subcategory": "application-activity",
+        "type": "file",
         "os_min": "Windows XP / Server 2003",
         "location": "%SystemRoot%\\System32\\Winevt\\Logs\\Application.evtx",
         "purpose": "Records application-generated events including crashes, installer errors, and some AV/EDR product logging.",
@@ -1782,8 +1733,7 @@
       {
         "id": "defender-eventlog",
         "name": "Windows Defender Operational Log",
-        "category": "file",
-        "subcategory": "detection-evidence",
+        "type": "file",
         "os_min": "Windows 8 / Windows Defender",
         "location": "%SystemRoot%\\System32\\Winevt\\Logs\\Microsoft-Windows-Windows Defender%4Operational.evtx",
         "purpose": "Records Defender detections, remediation actions, and Attack Surface Reduction (ASR) rule activity.",
@@ -1812,8 +1762,7 @@
       {
         "id": "powershell-operational",
         "name": "PowerShell Operational Log",
-        "category": "file",
-        "subcategory": "script-execution",
+        "type": "file",
         "os_min": "Windows PowerShell 5.0 / Windows 10 (Module Logging available since PowerShell 3.0; Script Block Logging introduced with PowerShell 5.0)",
         "location": "%SystemRoot%\\System32\\winevt\\Logs\\Microsoft-Windows-PowerShell%4Operational.evtx (channel: Microsoft-Windows-PowerShell/Operational)",
         "purpose": "Records detailed PowerShell engine activity when Script Block Logging and/or Module Logging are enabled via Group Policy, capturing the actual code executed - including code assembled or decoded at runtime - rather than just the invoking command line.",
@@ -1853,8 +1802,7 @@
       {
         "id": "rdp-eventlogs",
         "name": "RDP / TerminalServices Event Logs",
-        "category": "file",
-        "subcategory": "logon-activity",
+        "type": "file",
         "os_min": "Windows Vista / Server 2008 (channel structure); RDP itself much older",
         "location": "Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx (pre-auth connection); Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx (session lifecycle); plus Security.evtx",
         "purpose": "Records the network-connection, authentication, and session-lifecycle stages of RDP activity across three separate log channels.",
@@ -1891,8 +1839,7 @@
       {
         "id": "security-eventlog",
         "name": "Security Event Log",
-        "category": "file",
-        "subcategory": "authentication",
+        "type": "file",
         "os_min": "Windows 2000 (the event IDs and field names below reflect Windows Vista / Server 2008 and later)",
         "location": "%SystemRoot%\\System32\\winevt\\Logs\\Security.evtx",
         "purpose": "The central Windows audit trail for authentication, authorization, and object-access activity, generated by the Local Security Authority. It is typically the first log an analyst pulls for logon/logoff activity, privilege use, process creation (when enabled), and account/group management.",
@@ -1956,8 +1903,7 @@
       {
         "id": "sysmon",
         "name": "Sysmon (System Monitor)",
-        "category": "file",
-        "subcategory": "process-execution",
+        "type": "file",
         "os_min": "Windows 7 / Server 2008 R2 and later (Sysmon is a Sysinternals tool, not a default Windows component, and must be separately installed and configured)",
         "location": "Applications and Services Logs\\Microsoft\\Windows\\Sysmon\\Operational, i.e. %SystemRoot%\\System32\\winevt\\Logs\\Microsoft-Windows-Sysmon%4Operational.evtx",
         "purpose": "A Microsoft Sysinternals kernel-mode driver and service that logs detailed system activity - process creation with full command lines, network connections, file creation, registry changes, and more - to the Windows event log, extremely rarely present by default but very commonly deployed for DFIR and detection engineering.",
@@ -2005,8 +1951,7 @@
       {
         "id": "system-eventlog",
         "name": "System Event Log",
-        "category": "file",
-        "subcategory": "service-persistence",
+        "type": "file",
         "os_min": "Windows 2000 (the Service Control Manager event IDs below reflect Windows Vista / Server 2008 and later)",
         "location": "%SystemRoot%\\System32\\winevt\\Logs\\System.evtx",
         "purpose": "Records operating-system and driver/service-level activity, primarily generated by the Service Control Manager. For a DFIR analyst it is most valuable as the record of service installation, start/stop state changes, and startup-type changes - all common persistence and defense-evasion indicators.",
@@ -2055,8 +2000,7 @@
       {
         "id": "connection-timestamps",
         "name": "Connection Timestamps",
-        "category": "file",
-        "subcategory": "removable-media",
+        "type": "file",
         "os_min": "First Install/Last Connected/Last Removal properties require Windows 7+ (0064) / Windows 8+ (0066, 0067)",
         "location": "Plug and Play log: XP: C:\\Windows\\setupapi.log ; Win7+: C:\\Windows\\inf\\setupapi.dev.log. Registry. Win7+: SYSTEM\\CurrentControlSet\\Enum\\USBSTOR\\Disk&Ven_&Prod_\\<USBSerial#>\\Properties\\{83da6326-97a6-4088-9453-a19231573b29}\\####(0064=First Install, 0066=Last Connected, 0067=Last Removal); mirrored under \\Enum\\SCSI\\... . Also Win10+: Microsoft-Windows-Partition/Diagnostic.evtx Event ID 1006 per device connect/disconnect.",
         "purpose": "Determines the temporal usage of specific USB devices connected to a Windows machine by combining the plug-and-play log file (first-ever install) with the registry's Properties GUID subkeys (first install, last connected, last removed) and the Partition/Diagnostic event log (every connect/disconnect).",
@@ -2095,8 +2039,7 @@
       {
         "id": "drive-letter-and-volume-name",
         "name": "Drive Letter and Volume Name",
-        "category": "registry",
-        "subcategory": "removable-media",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "Windows XP: SYSTEM\\CurrentControlSet\\Enum\\USBSTOR (find the device's ParentIdPrefix), then correlate that value against SYSTEM\\MountedDevices to find the last mount point. Windows 7+: SOFTWARE\\Microsoft\\Windows Portable Devices\\Devices; SYSTEM\\MountedDevices (examine \\DosDevices\\<letter> values for a matching device serial number); SOFTWARE\\Microsoft\\Windows Search\\VolumeInfoCache.",
         "purpose": "Discovers the last drive letter and volume name assigned to a specific USB device the last time it was connected to the system.",
@@ -2135,8 +2078,7 @@
       {
         "id": "setupapi-devlog",
         "name": "SetupAPI Device Install Log (setupapi.dev.log)",
-        "category": "file",
-        "subcategory": "removable-media",
+        "type": "file",
         "os_min": "Windows XP",
         "location": "%SystemRoot%\\inf\\setupapi.dev.log (Windows Vista and later). On Windows XP/2000/Server 2003 the equivalent file is %SystemRoot%\\setupapi.log (note: no 'inf' subfolder, different filename). ANSI plain-text file; when it grows large it is not simply truncated - a related setupapi.upgrade.log is created during OS upgrades to record driver migration for previously-installed devices.",
         "purpose": "System-wide, chronological plain-text log written by the Plug and Play (PnP) manager and SetupAPI recording every device/driver installation operation on the host, including the exact local-time timestamp a device's driver was first installed. For removable media this is the highest-confidence source for establishing precisely when a USB device was FIRST connected to a system, complementing (and independently corroborating) the registry-based USBSTOR 'last connected/removed' property timestamps.",
@@ -2175,8 +2117,7 @@
       {
         "id": "usb-device-identification",
         "name": "USB Device Identification",
-        "category": "registry",
-        "subcategory": "removable-media",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "SYSTEM hive: CurrentControlSet\\Enum\\USBSTOR and CurrentControlSet\\Enum\\USB; per-device Properties\\{83da6326-97a6-4088-9453-a1923f573b29} subkey (Windows 7+); NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MountPoints2; C:\\Windows\\inf\\setupapi.dev.log",
         "purpose": "Reconstructs the history of USB devices (primarily mass storage) connected to a system: which device, when it was first installed, when it was last connected/removed, and which user account was logged on at the time.",
@@ -2217,8 +2158,7 @@
       {
         "id": "usb-event-logs",
         "name": "Event Logs (Removable Device)",
-        "category": "file",
-        "subcategory": "removable-media",
+        "type": "file",
         "os_min": "Windows 7 (Security.evtx / System.evtx events); Windows 10 (Partition/Diagnostic.evtx Event ID 1006)",
         "location": "System.evtx - Event IDs 20001, 20003 (Plug and Play driver install attempted). Security.evtx - Event IDs 4663 (attempt to access a removable storage object), 4656 (failure to access a removable storage object), 6416 (a new external device was recognized by the system) - these depend on system audit-policy settings. Windows 10+: Microsoft-Windows-Partition/Diagnostic.evtx - Event ID 1006, recorded for each device connect/disconnect.",
         "purpose": "Removable device connect/disconnect and access activity audited across multiple Windows event logs, giving an independent, timestamped, log-based record of USB activity that complements the registry-based USB artifacts.",
@@ -2261,8 +2201,7 @@
       {
         "id": "usb-user-information",
         "name": "User Information",
-        "category": "registry",
-        "subcategory": "removable-media",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "SYSTEM\\MountedDevices (document the device's Volume GUID) correlated against each user's NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MountPoints2 (per-user subkeys, one per mounted volume GUID).",
         "purpose": "Identifies which user account(s) were logged on when a specific USB device was connected, by matching the device's Volume GUID between the system-wide MountedDevices key and individual users' per-profile MountPoints2 key.",
@@ -2299,8 +2238,7 @@
       {
         "id": "volume-serial-number-vsn",
         "name": "Volume Serial Number (VSN)",
-        "category": "registry",
-        "subcategory": "removable-media",
+        "type": "registry",
         "os_min": "Windows 7 (EMDMgmt); Windows 10 (Partition/Diagnostic.evtx VBR-embedded VSN)",
         "location": "SOFTWARE\\Microsoft\\WindowsNT\\CurrentVersion\\EMDMgmt - find the key matching the device's Volume Name and USB Unique Serial Number, then take the last integer in the matching line and convert it from decimal to hex to get the VSN; this key is often missing entirely on modern systems using SSD-based removable devices. Windows 10+: Microsoft-Windows-Partition/Diagnostic.evtx Event ID 1006 may include VBR data containing the VSN - 4 bytes located at offset 0x43 (FAT), 0x64 (exFAT), or 0x48 (NTFS) within each Volume Boot Record; this log is cleared during major OS feature updates.",
         "purpose": "Discovers the Volume Serial Number assigned to the file-system partition on a USB device - this is NOT the USB Unique Serial Number hardcoded into the device's firmware, nor any external label serial number - for correlating the device to files or shell items it produced elsewhere on the system.",
@@ -2342,8 +2280,7 @@
       {
         "id": "internet-explorer-file-urls",
         "name": "Internet Explorer file:///",
-        "category": "file",
-        "subcategory": "file-folder-access",
+        "type": "file",
         "os_min": "Windows XP",
         "location": "IE6-7: %USERPROFILE%\\Local Settings\\History\\History.IE5; IE8-9: %USERPROFILE%\\AppData\\Local\\Microsoft\\Windows\\History\\History.IE5; IE10-11 and Windows 10+: %USERPROFILE%\\AppData\\Local\\Microsoft\\Windows\\WebCache\\WebCacheV*.dat",
         "purpose": "Internet Explorer's history databases record local and remote (network share) file-path access per user, logged as file:/// URL entries. Because the underlying database formats persist across OS versions, some of this evidence can still be recovered even on Windows 11+ systems that no longer ship Internet Explorer.",
@@ -2381,8 +2318,7 @@
       {
         "id": "ms-word-reading-locations",
         "name": "MS Word Reading Locations",
-        "category": "registry",
-        "subcategory": "document-access",
+        "type": "registry",
         "os_min": "Windows 7 (Word 2013+)",
         "location": "NTUSER.DAT: Software\\Microsoft\\Office\\<Version>\\Word\\Reading Locations",
         "purpose": "Records the last cursor/scroll position a user reached within a specific Word document, along with when that reading session ended, so Word can resume the document at the same spot next time it's opened.",
@@ -2413,8 +2349,7 @@
       {
         "id": "office-oalerts",
         "name": "Office OAlerts",
-        "category": "file",
-        "subcategory": "application-activity",
+        "type": "file",
         "os_min": "Windows Vista",
         "location": "OAlerts.evtx (%SystemRoot%\\System32\\Winevt\\Logs\\OAlerts.evtx)",
         "purpose": "Captures the alert dialogs MS Office applications show users during risky or unsaved-work actions, such as attempting to close a document without saving.",
@@ -2445,8 +2380,7 @@
       {
         "id": "office-recent-files",
         "name": "Office Recent Files",
-        "category": "registry",
-        "subcategory": "document-access",
+        "type": "registry",
         "os_min": "Windows XP (Office XP/2002+)",
         "location": "NTUSER.DAT: Software\\Microsoft\\Office\\<Version>\\<AppName>\\File MRU (Version: 10.0=OfficeXP, 11.0=Office2003, 12.0=Office2007, 14.0=Office2010, 15.0=Office2013, 16.0=Office2016/2019/M365) ; Microsoft 365 also under \\User MRU\\LiveId_####\\File MRU (Microsoft account sign-in) and \\User MRU\\AD_####\\File MRU (Azure AD sign-in)",
         "purpose": "Each Office application maintains its own recently-opened-files list, separate from the OS-level RecentDocs registry key and the Windows Recent Items shell folder.",
@@ -2479,8 +2413,7 @@
       {
         "id": "office-trust-records",
         "name": "Office Trust Records",
-        "category": "registry",
-        "subcategory": "document-access",
+        "type": "registry",
         "os_min": "Windows XP SP3 (Office 2010+)",
         "location": "NTUSER.DAT: Software\\Microsoft\\Office\\<Version>\\<AppName>\\Security\\Trusted Documents\\TrustRecords",
         "purpose": "Remembers a user's decision to trust a document that triggered a security warning, such as a Protected View or macro warning, so Office does not re-prompt the next time the same file is opened.",
@@ -2514,8 +2447,7 @@
       {
         "id": "open-save-mru",
         "name": "Open/Save MRU",
-        "category": "registry",
-        "subcategory": "file-folder-access",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "XP: NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\OpenSaveMRU ; Windows 7/8/10: NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\OpenSavePidlMRU",
         "purpose": "Tracks individual files opened or saved through any application's standard Windows shell Open/Save dialog, spanning Office, browsers, chat clients, and most other common desktop software.",
@@ -2550,8 +2482,7 @@
       {
         "id": "recent-files",
         "name": "Recent Files",
-        "category": "registry",
-        "subcategory": "file-folder-access",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RecentDocs",
         "purpose": "Records documents and folders recently opened through File Explorer / common Open-Save dialogs, organized both as one flat MRU list and as per-file-extension subkeys, plus a dedicated Folder subkey for recently opened folders.",
@@ -2589,8 +2520,7 @@
       {
         "id": "shell-bags",
         "name": "Shell Bags",
-        "category": "registry",
-        "subcategory": "file-folder-access",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "Windows XP: NTUSER.DAT: Software\\Microsoft\\Windows\\ShellNoRoam\\BagMRU and \\Bags. Windows Vista and later: NTUSER.DAT: Software\\Microsoft\\Windows\\Shell\\BagMRU and \\Bags, plus UsrClass.dat: Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\BagMRU and \\Bags",
         "purpose": "Stores Windows Explorer's per-folder view preferences (icon size, view mode, window position). As a side effect of tracking which folder each preference belongs to, it preserves a record of every folder a user has browsed in Explorer, including folders on removable media, network shares, and mounted volumes that no longer exist on the system.",
@@ -2626,8 +2556,7 @@
       {
         "id": "shortcut-lnk-files",
         "name": "Shortcut (LNK) Files",
-        "category": "file",
-        "subcategory": "file-folder-access",
+        "type": "file",
         "os_min": "Windows 95",
         "location": "%AppData%\\Microsoft\\Windows\\Recent\\ and Desktop/Start Menu locations",
         "purpose": "Auto-created shortcuts to recently opened files/folders, encoding target path, volume serial, and MAC timestamps of the target at time of access.",
@@ -2661,8 +2590,7 @@
       {
         "id": "logfile",
         "name": "$LogFile (NTFS Transaction Log)",
-        "category": "file",
-        "subcategory": "filesystem-metadata",
+        "type": "file",
         "os_min": "Windows NT 3.1 (any NTFS volume)",
         "location": "\\$LogFile (root of the NTFS volume)",
         "purpose": "Implements NTFS's write-ahead logging for metadata operations, recording redo/undo records for filesystem transactions (creates, renames, deletes, attribute and index changes) so the volume can be rolled forward or back to a consistent state after a crash. Forensically it is a short-lived but very high-fidelity record of the most recent filesystem activity.",
@@ -2698,8 +2626,7 @@
       {
         "id": "mft",
         "name": "Master File Table ($MFT)",
-        "category": "file",
-        "subcategory": "filesystem-metadata",
+        "type": "file",
         "os_min": "Windows NT 3.1 (any NTFS volume)",
         "location": "\\$MFT (root of every NTFS volume; not directly accessible via normal file APIs while the volume is mounted)",
         "purpose": "The MFT is the core NTFS structure holding one (or more) records per file and directory on the volume, including its attributes, timestamps, size, and data location. It is the primary source for filesystem timeline reconstruction and for detecting timestomping.",
@@ -2740,8 +2667,7 @@
       {
         "id": "motw-zone-identifier",
         "name": "Zone.Identifier ADS (Mark of the Web)",
-        "category": "file",
-        "subcategory": "provenance",
+        "type": "file",
         "os_min": "Introduced with Internet Explorer; ADS format standardized further by Windows 10",
         "location": "Alternate Data Stream on the downloaded file: <filename>:Zone.Identifier:$DATA",
         "purpose": "Marks files originating from the internet (or other untrusted zones) so Windows/Office apply extra security prompts (Protected View, SmartScreen).",
@@ -2772,8 +2698,7 @@
       {
         "id": "ntfs-timestamp-rules",
         "name": "NTFS $STANDARD_INFORMATION Timestamp Behavior Rules",
-        "category": "file",
-        "subcategory": "filesystem-metadata",
+        "type": "file",
         "os_min": "Behavior documented for Windows 10 v1903 and Windows 11 v22H2 (SANS FOR500 poster testing). Varies by OS version and action combination on other builds",
         "location": "Not a location itself: this is a reference matrix describing how the $MFT's $STANDARD_INFORMATION attribute (Modified/Access/Creation/Metadata-change, i.e. MACE) changes under common file operations. See the `mft` artifact for where this data physically lives.",
         "purpose": "Documents exactly which of the four $STANDARD_INFORMATION timestamps (Modified, Access, Creation, Metadata/MFT-entry-change) update, stay unchanged, or get inherited from the source file for each common file operation (creation, access, modification, rename, local move, volume move via CLI, volume move via cut/paste, copy, deletion). The single most load-bearing reference for timeline reconstruction and timestomping detection.",
@@ -2812,8 +2737,7 @@
       {
         "id": "usn-journal",
         "name": "USN Journal ($UsnJrnl)",
-        "category": "file",
-        "subcategory": "filesystem-metadata",
+        "type": "file",
         "os_min": "Windows 2000 (present but not enabled by default until Windows Vista, which enables it by default on NTFS volumes)",
         "location": "\\$Extend\\$UsnJrnl (root of the NTFS volume, inside the $Extend system directory); change records live in the alternate data stream $UsnJrnl:$J, with sizing/config metadata in $UsnJrnl:$Max",
         "purpose": "A per-volume, append-only log of file and directory create, delete, rename, and modification-type changes, recorded independently of the MFT. It provides a durable, sequential record of filesystem activity that often survives after the underlying file or its MFT entry is gone.",
@@ -2851,8 +2775,7 @@
       {
         "id": "volume-shadow-copies",
         "name": "Volume Shadow Copies (VSS)",
-        "category": "file",
-        "subcategory": "anti-forensics-detection",
+        "type": "file",
         "os_min": "Windows XP / Server 2003 (Volume Shadow Copy Service and vssadmin); the Explorer 'Previous Versions' / System Protection restore-point workflow used since Windows Vista",
         "location": "Mounted via device paths such as \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy<N>; the change-block storage for a volume's shadow copies is kept in the hidden System Volume Information\\ directory on that same volume",
         "purpose": "A Windows service that creates point-in-time snapshots of a volume, used by System Restore, backup software, and Explorer's 'Previous Versions' feature. Forensically, a mounted shadow copy lets an investigator browse a volume's file system and registry hives exactly as they existed at an earlier point in time, recovering files and hive states since deleted or modified on the live volume.",
@@ -2893,8 +2816,7 @@
       {
         "id": "memory-code-injection",
         "name": "Injected Code / Process Hollowing Detection (Malfind)",
-        "category": "file",
-        "subcategory": "memory-forensics",
+        "type": "file",
         "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
         "location": "Not a disk location - identified within a RAM acquisition using Volatility 3's malfind plugin (windows.malfind; renamed to windows.malware.malfind as the malware-related plugins were consolidated under the windows.malware namespace, with the old windows.malfind name deprecated).",
         "purpose": "Walks each process's Virtual Address Descriptor (VAD) tree looking for memory regions whose protection and backing are consistent with injected code - executable-and-writable private memory not backed by any file on disk - and dumps a hex/disassembly preview of the region so an analyst can confirm shellcode, a reflectively-loaded PE, or a hollowed-out legitimate process.",
@@ -2933,8 +2855,7 @@
       {
         "id": "memory-commandline-history",
         "name": "Command-Line History via Process-Creation Auditing (4688 / Sysmon EID 1)",
-        "category": "file",
-        "subcategory": "memory-forensics",
+        "type": "file",
         "os_min": "N/A - Event ID 4688 command-line logging requires Windows Vista/Server 2008 or later plus the specific audit policy below enabled; Sysmon requires separate installation on any supported Windows version.",
         "location": "Security.evtx (Event ID 4688, Process Command Line field) and/or Microsoft-Windows-Sysmon%4Operational.evtx (Event ID 1, CommandLine field).",
         "purpose": "This entry documents the mechanism that must be in place for command-line arguments to be captured at process-creation time at all - it is not the general Security or Sysmon event log entry, but specifically what has to be configured (or not) for the Process Command Line / CommandLine field to be populated, and how analysts use that field to reconstruct exactly what an attacker typed or a script executed.",
@@ -2978,8 +2899,7 @@
       {
         "id": "memory-network-connections",
         "name": "Network Connections at Capture Time (Memory Forensics)",
-        "category": "file",
-        "subcategory": "memory-forensics",
+        "type": "file",
         "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
         "location": "Not a disk location - reconstructed from a RAM acquisition using Volatility 3's windows.netscan and windows.netstat plugins.",
         "purpose": "Recovers TCP/UDP endpoints and TCP listeners that existed in memory at the moment of capture, including connections a live netstat could no longer show because the process had already exited or the socket had closed - giving an analyst a network snapshot tied to the exact moment of acquisition rather than to whenever the host was later examined live.",
@@ -3020,8 +2940,7 @@
       {
         "id": "memory-process-list",
         "name": "Process List, Handles & Loaded DLLs (Memory Forensics)",
-        "category": "file",
-        "subcategory": "memory-forensics",
+        "type": "file",
         "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
         "location": "Not a disk location - reconstructed from a RAM acquisition (raw memory image, hibernation file, or crash dump) using Volatility 3's windows.pslist, windows.pstree, windows.psscan, windows.dlllist, and windows.handles plugins.",
         "purpose": "Reconstructs which processes were running at the moment of memory capture, their parent-child relationships, loaded modules, and open handles, by parsing EPROCESS/ETHREAD kernel structures and the process PEB directly out of the memory image. Because several of these plugins locate processes by different mechanisms, comparing their output is the primary way to catch a process a rootkit tried to hide.",
@@ -3069,8 +2988,7 @@
       {
         "id": "arp-cache",
         "name": "ARP Cache",
-        "category": "file",
-        "subcategory": "network-activity",
+        "type": "file",
         "os_min": "Windows XP (caching mechanism changed significantly starting Windows Vista)",
         "location": "In-memory neighbor/ARP table maintained by the TCP/IP stack; not written to a file or registry hive. Viewed live via `arp -a` or PowerShell `Get-NetNeighbor` / `netsh interface ipv4 show neighbors`.",
         "purpose": "Maps IPv4 addresses on the local subnet to their resolved MAC (link-layer) addresses so the host doesn't re-broadcast an ARP request for every packet; shows which local hosts a machine has actually exchanged Layer 2 traffic with recently.",
@@ -3105,8 +3023,7 @@
       {
         "id": "browser-url-parameters",
         "name": "Browser URL Parameters",
-        "category": "file",
-        "subcategory": "browser-artifact",
+        "type": "file",
         "os_min": "N/A (application-level)",
         "location": "Embedded within ordinary browser history URL records (see chrome-edge-browser-artifacts / firefox-browser-artifacts) - not a dedicated artifact store of its own.",
         "purpose": "Captures geolocation and network-identification clues leaked within otherwise-ordinary browser history URL parameters - for example, captive-portal sign-in redirects or a Google Maps URL containing geocode/daddr parameters revealing a searched address - that can identify connected networks and approximate physical locations.",
@@ -3138,8 +3055,7 @@
       {
         "id": "dns-client-cache",
         "name": "DNS Client (Resolver) Cache",
-        "category": "file",
-        "subcategory": "network-activity",
+        "type": "file",
         "os_min": "Windows 2000 (DNS Client / Dnscache service); Get-DnsClientCache cmdlet requires Windows 8 / Server 2012+",
         "location": "In-memory cache maintained by the DNS Client (Dnscache) service; not persisted to disk. Related configuration lives at HKLM\\SYSTEM\\CurrentControlSet\\Services\\Dnscache\\Parameters (e.g. MaxCacheTtl). Viewed live via `ipconfig /displaydns` or PowerShell `Get-DnsClientCache`.",
         "purpose": "Speeds up repeat name resolution by caching successfully resolved DNS answers and negative (failed) lookups, and preloads static mappings from the local Hosts file; records which domain names a host recently attempted or succeeded in resolving.",
@@ -3177,8 +3093,7 @@
       {
         "id": "hosts-file",
         "name": "Hosts File",
-        "category": "file",
-        "subcategory": "network-configuration",
+        "type": "file",
         "os_min": "Windows 2000 (path has remained stable through current Windows releases)",
         "location": "%SystemRoot%\\System32\\drivers\\etc\\hosts (typically C:\\Windows\\System32\\drivers\\etc\\hosts)",
         "purpose": "Plain-text, manually-maintained IP-to-hostname mapping table that the DNS Client consults before querying any DNS server; lets an administrator, or an attacker, override name resolution for specific domains without touching DNS infrastructure.",
@@ -3213,8 +3128,7 @@
       {
         "id": "network-history",
         "name": "Network History",
-        "category": "registry",
-        "subcategory": "network-configuration",
+        "type": "registry",
         "os_min": "Windows Vista (NetworkList keys); Interfaces/NetworkCards present since Windows XP",
         "location": "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces ; SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\NetworkCards ; SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\NetworkList\\Signatures\\Unmanaged ; \\NetworkList\\Signatures\\Managed ; \\NetworkList\\Nla\\Cache ; \\NetworkList\\Profiles",
         "purpose": "Identifies networks the computer has connected to, including domain/intranet name, SSID, first and last connection times, and the network gateway's MAC address; covers wired, wireless, and VPN connections.",
@@ -3251,8 +3165,7 @@
       {
         "id": "network-interfaces",
         "name": "Network Interfaces",
-        "category": "registry",
-        "subcategory": "network-configuration",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces ; SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\NetworkCards",
         "purpose": "Lists the network interfaces (physical and virtual adapters) available on the system and their last known configuration, including IP addressing, DHCP, and domain information.",
@@ -3286,8 +3199,7 @@
       {
         "id": "timezone",
         "name": "Timezone",
-        "category": "registry",
-        "subcategory": "time-configuration",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation ; System.evtx (Event ID 6013)",
         "purpose": "Identifies the system's currently configured time zone, needed to correctly interpret event log and other artifact timestamps recorded in local time; System.evtx can supplement this with historical time zone change information.",
@@ -3324,8 +3236,7 @@
       {
         "id": "wifi-profiles",
         "name": "WiFi (WLAN) Profiles",
-        "category": "file",
-        "subcategory": "network-configuration",
+        "type": "file",
         "os_min": "Windows Vista (Native Wifi / WLAN AutoConfig service and WLAN_profile XML schema)",
         "location": "XML files under %ALLUSERSPROFILE%\\Microsoft\\Wlansvc\\Profiles\\Interfaces\\{interface-GUID}\\{profile-GUID}.xml, one file per saved network per wireless adapter; also queryable live via `netsh wlan show profiles` and `netsh wlan show profile name=\"SSID\" key=clear`.",
         "purpose": "Stores every wireless network (SSID) a machine has been configured to connect to, including its authentication/encryption settings and, unless cleared, its pre-shared key. Providing SSID connection history and potential credential recovery.",
@@ -3361,8 +3272,7 @@
       {
         "id": "windows-firewall-log",
         "name": "Windows Firewall Log",
-        "category": "file",
-        "subcategory": "network-activity",
+        "type": "file",
         "os_min": "Windows XP (legacy pfirewall.log); Windows Vista+ for the Windows Firewall with Advanced Security event log channel",
         "location": "Legacy text log, must be manually enabled and is off by default: %windir%\\System32\\LogFiles\\Firewall\\pfirewall.log. Rule-change/administrative history: Applications and Services Logs\\Microsoft-Windows-Windows Firewall With Advanced Security\\Firewall (.evtx).",
         "purpose": "Records network traffic Windows Firewall evaluated (dropped and/or allowed connections, once logging is enabled) and, separately in the WFAS event channel, administrative changes to firewall rules and profile state. Used to reconstruct blocked/allowed connection attempts and to detect firewall tampering.",
@@ -3400,8 +3310,7 @@
       {
         "id": "wlan-event-log",
         "name": "WLAN Event Log",
-        "category": "file",
-        "subcategory": "network-configuration",
+        "type": "file",
         "os_min": "Windows 7",
         "location": "Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx (also cross-reference System.evtx Event ID 6100)",
         "purpose": "Provides a historical, event-based record of wireless network association attempts and outcomes, complementing the current-state wifi-profiles XML files and the correlatable network-history registry keys.",
@@ -3440,8 +3349,7 @@
       {
         "id": "ifeo-appinit",
         "name": "Image File Execution Options / AppInit_DLLs",
-        "category": "registry",
-        "subcategory": "persistence",
+        "type": "registry",
         "os_min": "Windows Vista (IFEO Debugger abuse formalized); AppInit_DLLs from Windows NT",
         "location": "HKLM\\SOFTWARE{\\Wow6432Node}\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\<executable>\\Debugger; AppInit_DLLs at HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows",
         "purpose": "IFEO Debugger value causes a specified debugger/program to launch in place of (or before) the target executable; AppInit_DLLs forces a DLL to load into every process that loads user32.dll.",
@@ -3472,8 +3380,7 @@
       {
         "id": "run-runonce-keys",
         "name": "Run / RunOnce Registry Keys",
-        "category": "registry",
-        "subcategory": "persistence",
+        "type": "registry",
         "os_min": "Windows NT 4.0",
         "location": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run(Once) and HKCU (NTUSER.DAT) equivalents",
         "purpose": "Machine-wide or per-user autostart mechanism executing listed commands at logon/boot.",
@@ -3505,8 +3412,7 @@
       {
         "id": "scheduled-tasks",
         "name": "Scheduled Tasks",
-        "category": "file",
-        "subcategory": "persistence",
+        "type": "file",
         "os_min": "Windows Vista (XML tasks); legacy .job on XP",
         "location": "C:\\Windows\\System32\\Tasks\\<TaskName> (XML); registry mirror at HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tree and \\Tasks",
         "purpose": "Defines actions executed on a schedule or trigger (logon, event, time); a common legitimate and malicious persistence mechanism.",
@@ -3538,8 +3444,7 @@
       {
         "id": "services-persistence",
         "name": "Windows Services (Persistence)",
-        "category": "registry",
-        "subcategory": "persistence",
+        "type": "registry",
         "os_min": "Windows NT 4.0",
         "location": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\<ServiceName> (ImagePath, Start, ServiceDll for svchost-hosted)",
         "purpose": "Services configured with Start=2 (auto) or 3 (demand) launch at boot or on demand, commonly abused for SYSTEM-level persistence.",
@@ -3573,8 +3478,7 @@
       {
         "id": "startup-folders",
         "name": "Startup Folders",
-        "category": "file",
-        "subcategory": "persistence",
+        "type": "file",
         "os_min": "Windows NT 4.0",
         "location": "%AppData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup (per-user) and %ProgramData%\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp (all-users)",
         "purpose": "Any shortcut or executable placed here launches automatically at user logon.",
@@ -3605,8 +3509,7 @@
       {
         "id": "wmi-event-subscription",
         "name": "WMI Permanent Event Subscription",
-        "category": "file",
-        "subcategory": "persistence",
+        "type": "file",
         "os_min": "Windows XP (WMI infrastructure); technique common from Windows 7+",
         "location": "CIM repository: C:\\Windows\\System32\\wbem\\Repository\\OBJECTS.DATA (root\\subscription namespace: __EventFilter, __EventConsumer, __FilterToConsumerBinding)",
         "purpose": "Lets code execute automatically when a defined WMI event occurs (e.g. process start, time, logon), providing fileless, reboot-surviving persistence.",
@@ -3641,8 +3544,7 @@
       {
         "id": "ntuser-dat-hive",
         "name": "NTUSER.DAT (User Registry Hive)",
-        "category": "registry",
-        "subcategory": "user-configuration",
+        "type": "registry",
         "os_min": "Windows 2000 (present in all NT-based Windows versions)",
         "location": "Mounted as HKEY_CURRENT_USER while the user is logged on; also reachable as HKEY_USERS\\<SID> for a non-interactive profile. File: %UserProfile%\\NTUSER.DAT (e.g. C:\\Users\\<username>\\NTUSER.DAT)",
         "purpose": "Root of a single user's registry: mounted as HKEY_CURRENT_USER for the duration of that user's session. Holds per-user application settings and UI preferences and, forensically, a per-user Run/RunOnce autostart location. User-activity artifacts that also live in this hive. UserAssist, RunMRU, TypedPaths, RecentDocs. Are documented as separate artifacts; this entry covers the hive's general role and its own persistence keys.",
@@ -3676,8 +3578,7 @@
       {
         "id": "sam-hive",
         "name": "SAM (Security Account Manager) Hive",
-        "category": "registry",
-        "subcategory": "user-accounts",
+        "type": "registry",
         "os_min": "Windows 2000 (present in all NT-based Windows versions)",
         "location": "HKLM\\SAM (file: %SystemRoot%\\System32\\config\\SAM)",
         "purpose": "Stores local user account definitions for the machine. RIDs, group memberships, and encrypted password hashes. Plus per-account login metadata. It is unreadable in place even by local Administrator while Windows is running; access requires SYSTEM privileges or an offline copy.",
@@ -3717,8 +3618,7 @@
       {
         "id": "security-hive",
         "name": "SECURITY Hive",
-        "category": "registry",
-        "subcategory": "credential-access",
+        "type": "registry",
         "os_min": "Windows 2000 (present in all NT-based Windows versions)",
         "location": "HKLM\\SECURITY (file: %SystemRoot%\\System32\\config\\SECURITY): not readable in place even by local Administrator; requires SYSTEM privileges",
         "purpose": "Stores the Local Security Authority's policy database: the effective local audit policy, LSA secrets (service-account passwords, autologon password, machine account secret), and cached domain-logon credentials used when a domain controller cannot be reached.",
@@ -3754,8 +3654,7 @@
       {
         "id": "software-hive",
         "name": "SOFTWARE Hive",
-        "category": "registry",
-        "subcategory": "persistence",
+        "type": "registry",
         "os_min": "Windows 2000 (present in all NT-based Windows versions)",
         "location": "HKLM\\SOFTWARE (file: %SystemRoot%\\System32\\config\\SOFTWARE)",
         "purpose": "Stores machine-wide installed-application data, OS version/build identity, and system-wide autostart (Run/RunOnce) persistence locations that apply to every user of the machine.",
@@ -3790,8 +3689,7 @@
       {
         "id": "system-hive",
         "name": "SYSTEM Hive",
-        "category": "registry",
-        "subcategory": "system-configuration",
+        "type": "registry",
         "os_min": "Windows 2000 (present in all NT-based Windows versions)",
         "location": "HKLM\\SYSTEM (file: %SystemRoot%\\System32\\config\\SYSTEM)",
         "purpose": "Stores machine-wide configuration needed to boot and run Windows, kept as multiple redundant ControlSets. This entry focuses on services/drivers, network configuration, and hardware (USB) enumeration data; BAM and Shimcache also live under this hive but are documented as separate artifacts.",
@@ -3831,8 +3729,7 @@
       {
         "id": "usrclass-dat-hive",
         "name": "UsrClass.dat (User Classes Hive)",
-        "category": "registry",
-        "subcategory": "user-configuration",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "Mounted as HKEY_CURRENT_USER\\Software\\Classes (a per-user view of HKEY_CLASSES_ROOT) while the user is logged on. File: %LocalAppData%\\Microsoft\\Windows\\UsrClass.dat (Vista and later; Windows XP path was %UserProfile%\\Local Settings\\Application Data\\Microsoft\\Windows\\UsrClass.dat)",
         "purpose": "A separate per-user hive, distinct from NTUSER.DAT, that holds the user-specific portion of the Classes registry: per-user COM class registrations and shell-extension data that override or supplement the machine-wide HKLM\\SOFTWARE\\Classes. It is also one of the two locations where Shellbags data is stored (the other being NTUSER.DAT on pre-Vista systems).",
@@ -3865,8 +3762,7 @@
       {
         "id": "computer-name",
         "name": "Computer Name",
-        "category": "registry",
-        "subcategory": "system-identification",
+        "type": "registry",
         "os_min": "Windows XP",
         "location": "SYSTEM\\CurrentControlSet\\Control\\ComputerName\\ComputerName",
         "purpose": "Stores the hostname of the system in the ComputerName value, used to identify the machine on a network and correlate its identity across logs and other artifacts.",
@@ -3900,8 +3796,7 @@
       {
         "id": "operating-system-version",
         "name": "Operating System Version",
-        "category": "registry",
-        "subcategory": "system-identification",
+        "type": "registry",
         "os_min": "Windows XP (Source OS historical-update subkeys present on Windows 10+)",
         "location": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion ; SYSTEM\\Setup\\Source OS",
         "purpose": "Determines the operating system type, edition, version, and build number, plus installation date(s) for both the currently installed build and any prior builds the system was updated from.",
@@ -3939,8 +3834,7 @@
       {
         "id": "system-boot-and-autostart-programs",
         "name": "System Boot & Autostart Programs",
-        "category": "registry",
-        "subcategory": "persistence",
+        "type": "registry",
         "os_min": "All Windows NT-based versions",
         "location": "NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Run ; \\RunOnce ; SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce ; \\Policies\\Explorer\\Run ; \\Run ; SYSTEM\\CurrentControlSet\\Services",
         "purpose": "Lists of programs that will run automatically on system boot or at user login, spanning both the user-level and machine-level Run/RunOnce keys and the Services key's Start value.",
@@ -3977,8 +3871,7 @@
       {
         "id": "system-last-shutdown-time",
         "name": "System Last Shutdown Time",
-        "category": "registry",
-        "subcategory": "system-identification",
+        "type": "registry",
         "os_min": "Windows XP (ShutdownCount value is Windows XP only)",
         "location": "SYSTEM\\CurrentControlSet\\Control\\Windows (ShutdownTime value) ; SYSTEM\\CurrentControlSet\\Control\\Watchdog\\Display (ShutdownCount value, Windows XP only)",
         "purpose": "Records the last time the system was shut down; on Windows XP, also records a running count of the total number of shutdowns.",

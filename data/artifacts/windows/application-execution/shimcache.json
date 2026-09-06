@@ -1,8 +1,7 @@
 {
   "id": "shimcache",
   "name": "Shimcache",
-  "category": "registry",
-  "subcategory": "execution-evidence",
+  "type": "registry",
   "os_min": "Windows 2000 / XP",
   "location": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\AppCompatCache (Windows 2003 and later); HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\AppCompatibility\\AppCompatCache on Windows XP/2000. Values are held in memory and only periodically flushed to the registry, typically on shutdown.",
   "purpose": "Part of the Application Compatibility infrastructure: when Windows evaluates whether an executable needs a compatibility shim, it records the file's path, size, and last-modified time in a cache so it doesn't have to re-evaluate the file on every launch. Because the cache captures files the OS has looked at, it's used as evidence a given executable existed (and, on some versions, ran) on the system.",

@@ -1,8 +1,7 @@
 {
   "id": "usrclass-dat-hive",
   "name": "UsrClass.dat (User Classes Hive)",
-  "category": "registry",
-  "subcategory": "user-configuration",
+  "type": "registry",
   "os_min": "Windows XP",
   "location": "Mounted as HKEY_CURRENT_USER\\Software\\Classes (a per-user view of HKEY_CLASSES_ROOT) while the user is logged on. File: %LocalAppData%\\Microsoft\\Windows\\UsrClass.dat (Vista and later; Windows XP path was %UserProfile%\\Local Settings\\Application Data\\Microsoft\\Windows\\UsrClass.dat)",
   "purpose": "A separate per-user hive, distinct from NTUSER.DAT, that holds the user-specific portion of the Classes registry: per-user COM class registrations and shell-extension data that override or supplement the machine-wide HKLM\\SOFTWARE\\Classes. It is also one of the two locations where Shellbags data is stored (the other being NTUSER.DAT on pre-Vista systems).",

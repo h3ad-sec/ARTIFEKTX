@@ -1,8 +1,7 @@
 {
   "id": "scheduled-tasks",
   "name": "Scheduled Tasks",
-  "category": "file",
-  "subcategory": "persistence",
+  "type": "file",
   "os_min": "Windows Vista (XML tasks); legacy .job on XP",
   "location": "C:\\Windows\\System32\\Tasks\\<TaskName> (XML); registry mirror at HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tree and \\Tasks",
   "purpose": "Defines actions executed on a schedule or trigger (logon, event, time); a common legitimate and malicious persistence mechanism.",

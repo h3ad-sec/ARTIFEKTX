@@ -1,8 +1,7 @@
 {
   "id": "userassist",
   "name": "UserAssist",
-  "category": "registry",
-  "subcategory": "program-execution",
+  "type": "registry",
   "os_min": "Windows XP",
   "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist\\{GUID}\\Count",
   "purpose": "Tracks GUI-launched programs and shortcuts per user, including how many times an item was run, how long it held focus, and when it was last executed. Populated by the Windows Explorer shell (explorer.exe/userassist.dll) when a user double-clicks an icon, shortcut, or Start Menu/Taskbar entry.",

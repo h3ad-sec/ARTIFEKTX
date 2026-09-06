@@ -1,8 +1,7 @@
 {
   "id": "application-eventlog",
   "name": "Application.evtx",
-  "category": "file",
-  "subcategory": "application-activity",
+  "type": "file",
   "os_min": "Windows XP / Server 2003",
   "location": "%SystemRoot%\\System32\\Winevt\\Logs\\Application.evtx",
   "purpose": "Records application-generated events including crashes, installer errors, and some AV/EDR product logging.",

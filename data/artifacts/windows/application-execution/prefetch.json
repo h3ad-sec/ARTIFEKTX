@@ -1,8 +1,7 @@
 {
   "id": "prefetch",
   "name": "Prefetch",
-  "category": "file",
-  "subcategory": "execution-evidence",
+  "type": "file",
   "os_min": "Windows XP",
   "location": "C:\\Windows\\Prefetch\\{EXECUTABLENAME}-{HASH}.pf. Prefetching (and therefore .pf creation) is controlled by HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management\\PrefetchParameters\\EnablePrefetcher, and is disabled by default on systems whose boot volume is an SSD.",
   "purpose": "Windows' prefetcher records which files and directories an executable references during its first ~10 seconds of launch, storing that data in a .pf file so future launches can be sped up by pre-loading those resources. Because a .pf file is created/updated only when the named executable actually runs, Prefetch is one of the strongest single-artifact indicators of program execution and its history (run count, run times).",

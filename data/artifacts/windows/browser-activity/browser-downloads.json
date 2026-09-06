@@ -1,8 +1,7 @@
 {
   "id": "browser-downloads",
   "name": "Browser Downloads",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Chrome/Edge: History.downloads table in the profile folder; Firefox: downloads recorded via moz_annos in places.sqlite (or separate downloads.sqlite on older versions)",
   "purpose": "Modern browsers include a built-in download manager capable of keeping a history of every file downloaded by the user, providing information about websites visited and corresponding items retrieved.",

@@ -1,8 +1,7 @@
 {
   "id": "media-history",
   "name": "Media History",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Chrome: %USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\<Profile>\\Media History ; Edge: %USERPROFILE%\\AppData\\Local\\Microsoft\\Edge\\User Data\\<Profile>\\Media History (Chromium browsers only; no Firefox equivalent)",
   "purpose": "SQLite database tracking audio and video playback on visited websites, recorded separately from the general browsing History file.",

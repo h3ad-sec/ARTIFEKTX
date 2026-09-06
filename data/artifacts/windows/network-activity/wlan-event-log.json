@@ -1,8 +1,7 @@
 {
   "id": "wlan-event-log",
   "name": "WLAN Event Log",
-  "category": "file",
-  "subcategory": "network-configuration",
+  "type": "file",
   "os_min": "Windows 7",
   "location": "Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx (also cross-reference System.evtx Event ID 6100)",
   "purpose": "Provides a historical, event-based record of wireless network association attempts and outcomes, complementing the current-state wifi-profiles XML files and the correlatable network-history registry keys.",

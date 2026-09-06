@@ -1,8 +1,7 @@
 {
   "id": "system-boot-and-autostart-programs",
   "name": "System Boot & Autostart Programs",
-  "category": "registry",
-  "subcategory": "persistence",
+  "type": "registry",
   "os_min": "All Windows NT-based versions",
   "location": "NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Run ; \\RunOnce ; SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce ; \\Policies\\Explorer\\Run ; \\Run ; SYSTEM\\CurrentControlSet\\Services",
   "purpose": "Lists of programs that will run automatically on system boot or at user login, spanning both the user-level and machine-level Run/RunOnce keys and the Services key's Start value.",

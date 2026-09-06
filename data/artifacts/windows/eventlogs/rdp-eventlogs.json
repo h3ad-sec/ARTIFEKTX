@@ -1,8 +1,7 @@
 {
   "id": "rdp-eventlogs",
   "name": "RDP / TerminalServices Event Logs",
-  "category": "file",
-  "subcategory": "logon-activity",
+  "type": "file",
   "os_min": "Windows Vista / Server 2008 (channel structure); RDP itself much older",
   "location": "Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx (pre-auth connection); Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx (session lifecycle); plus Security.evtx",
   "purpose": "Records the network-connection, authentication, and session-lifecycle stages of RDP activity across three separate log channels.",

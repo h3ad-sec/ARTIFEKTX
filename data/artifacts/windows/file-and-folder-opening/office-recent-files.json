@@ -1,8 +1,7 @@
 {
   "id": "office-recent-files",
   "name": "Office Recent Files",
-  "category": "registry",
-  "subcategory": "document-access",
+  "type": "registry",
   "os_min": "Windows XP (Office XP/2002+)",
   "location": "NTUSER.DAT: Software\\Microsoft\\Office\\<Version>\\<AppName>\\File MRU (Version: 10.0=OfficeXP, 11.0=Office2003, 12.0=Office2007, 14.0=Office2010, 15.0=Office2013, 16.0=Office2016/2019/M365) ; Microsoft 365 also under \\User MRU\\LiveId_####\\File MRU (Microsoft account sign-in) and \\User MRU\\AD_####\\File MRU (Azure AD sign-in)",
   "purpose": "Each Office application maintains its own recently-opened-files list, separate from the OS-level RecentDocs registry key and the Windows Recent Items shell folder.",

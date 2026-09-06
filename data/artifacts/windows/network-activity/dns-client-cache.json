@@ -1,8 +1,7 @@
 {
   "id": "dns-client-cache",
   "name": "DNS Client (Resolver) Cache",
-  "category": "file",
-  "subcategory": "network-activity",
+  "type": "file",
   "os_min": "Windows 2000 (DNS Client / Dnscache service); Get-DnsClientCache cmdlet requires Windows 8 / Server 2012+",
   "location": "In-memory cache maintained by the DNS Client (Dnscache) service; not persisted to disk. Related configuration lives at HKLM\\SYSTEM\\CurrentControlSet\\Services\\Dnscache\\Parameters (e.g. MaxCacheTtl). Viewed live via `ipconfig /displaydns` or PowerShell `Get-DnsClientCache`.",
   "purpose": "Speeds up repeat name resolution by caching successfully resolved DNS answers and negative (failed) lookups, and preloads static mappings from the local Hosts file; records which domain names a host recently attempted or succeeded in resolving.",

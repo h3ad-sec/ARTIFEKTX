@@ -1,8 +1,7 @@
 {
   "id": "run-runonce-keys",
   "name": "Run / RunOnce Registry Keys",
-  "category": "registry",
-  "subcategory": "persistence",
+  "type": "registry",
   "os_min": "Windows NT 4.0",
   "location": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run(Once) and HKCU (NTUSER.DAT) equivalents",
   "purpose": "Machine-wide or per-user autostart mechanism executing listed commands at logon/boot.",

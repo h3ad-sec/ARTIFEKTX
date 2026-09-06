@@ -1,8 +1,7 @@
 {
   "id": "cache",
   "name": "Cache",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Firefox: Cache (older) / cache2 (Firefox 32+) folder under the profile ; Chrome/Edge: Cache\\ folder under the profile (data_# index files and f_###### content files)",
   "purpose": "Local storage of web page components (images, scripts, stylesheets, media) retained to speed up subsequent visits to the same site.",

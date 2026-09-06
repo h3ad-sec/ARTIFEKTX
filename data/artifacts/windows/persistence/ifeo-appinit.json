@@ -1,8 +1,7 @@
 {
   "id": "ifeo-appinit",
   "name": "Image File Execution Options / AppInit_DLLs",
-  "category": "registry",
-  "subcategory": "persistence",
+  "type": "registry",
   "os_min": "Windows Vista (IFEO Debugger abuse formalized); AppInit_DLLs from Windows NT",
   "location": "HKLM\\SOFTWARE{\\Wow6432Node}\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\<executable>\\Debugger; AppInit_DLLs at HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows",
   "purpose": "IFEO Debugger value causes a specified debugger/program to launch in place of (or before) the target executable; AppInit_DLLs forces a DLL to load into every process that loads user32.dll.",

@@ -1,8 +1,7 @@
 {
   "id": "software-hive",
   "name": "SOFTWARE Hive",
-  "category": "registry",
-  "subcategory": "persistence",
+  "type": "registry",
   "os_min": "Windows 2000 (present in all NT-based Windows versions)",
   "location": "HKLM\\SOFTWARE (file: %SystemRoot%\\System32\\config\\SOFTWARE)",
   "purpose": "Stores machine-wide installed-application data, OS version/build identity, and system-wide autostart (Run/RunOnce) persistence locations that apply to every user of the machine.",

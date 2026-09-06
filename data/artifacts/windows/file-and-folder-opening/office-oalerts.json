@@ -1,8 +1,7 @@
 {
   "id": "office-oalerts",
   "name": "Office OAlerts",
-  "category": "file",
-  "subcategory": "application-activity",
+  "type": "file",
   "os_min": "Windows Vista",
   "location": "OAlerts.evtx (%SystemRoot%\\System32\\Winevt\\Logs\\OAlerts.evtx)",
   "purpose": "Captures the alert dialogs MS Office applications show users during risky or unsaved-work actions, such as attempting to close a document without saving.",

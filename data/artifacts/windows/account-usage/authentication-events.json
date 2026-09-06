@@ -1,8 +1,7 @@
 {
   "id": "authentication-events",
   "name": "Authentication Events",
-  "category": "file",
-  "subcategory": "authentication",
+  "type": "file",
   "os_min": "Windows 7",
   "location": "Security.evtx",
   "purpose": "Identifies where authentication of credentials actually occurred, distinguishing local/workgroup account authentication (recorded on the workstation itself) from domain/Active Directory authentication (recorded on the domain controller), via NTLM and Kerberos protocol events.",

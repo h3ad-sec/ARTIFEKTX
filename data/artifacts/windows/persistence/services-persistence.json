@@ -1,8 +1,7 @@
 {
   "id": "services-persistence",
   "name": "Windows Services (Persistence)",
-  "category": "registry",
-  "subcategory": "persistence",
+  "type": "registry",
   "os_min": "Windows NT 4.0",
   "location": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\<ServiceName> (ImagePath, Start, ServiceDll for svchost-hosted)",
   "purpose": "Services configured with Start=2 (auto) or 3 (demand) launch at boot or on demand, commonly abused for SYSTEM-level persistence.",

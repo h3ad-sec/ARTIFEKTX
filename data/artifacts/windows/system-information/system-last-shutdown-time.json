@@ -1,8 +1,7 @@
 {
   "id": "system-last-shutdown-time",
   "name": "System Last Shutdown Time",
-  "category": "registry",
-  "subcategory": "system-identification",
+  "type": "registry",
   "os_min": "Windows XP (ShutdownCount value is Windows XP only)",
   "location": "SYSTEM\\CurrentControlSet\\Control\\Windows (ShutdownTime value) ; SYSTEM\\CurrentControlSet\\Control\\Watchdog\\Display (ShutdownCount value, Windows XP only)",
   "purpose": "Records the last time the system was shut down; on Windows XP, also records a running count of the total number of shutdowns.",

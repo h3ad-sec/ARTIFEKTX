@@ -1,8 +1,7 @@
 {
   "id": "usb-device-identification",
   "name": "USB Device Identification",
-  "category": "registry",
-  "subcategory": "removable-media",
+  "type": "registry",
   "os_min": "Windows XP",
   "location": "SYSTEM hive: CurrentControlSet\\Enum\\USBSTOR and CurrentControlSet\\Enum\\USB; per-device Properties\\{83da6326-97a6-4088-9453-a1923f573b29} subkey (Windows 7+); NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MountPoints2; C:\\Windows\\inf\\setupapi.dev.log",
   "purpose": "Reconstructs the history of USB devices (primarily mass storage) connected to a system: which device, when it was first installed, when it was last connected/removed, and which user account was logged on at the time.",

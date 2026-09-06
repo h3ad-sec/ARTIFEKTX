@@ -1,8 +1,7 @@
 {
   "id": "thumbs-db",
   "name": "Thumbs.db",
-  "category": "file",
-  "subcategory": "file-folder-access",
+  "type": "file",
   "os_min": "Windows XP",
   "location": "Hidden Thumbs.db file created inside each folder viewed in Explorer's thumbnail view (one per folder, colocated with the images it catalogs); creation behavior is OS-version dependent and most consistent on Windows XP",
   "purpose": "Explorer's thumbnail-view feature writes a hidden Thumbs.db cache file into any folder whose contents were viewed as thumbnails. Because cached thumbnails and filenames remain in the file after the source pictures are deleted or moved, it functions as a historical record of a folder's prior contents.",

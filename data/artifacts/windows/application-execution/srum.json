@@ -1,8 +1,7 @@
 {
   "id": "srum",
   "name": "System Resource Usage Monitor (SRUM)",
-  "category": "file",
-  "subcategory": "execution-evidence",
+  "type": "file",
   "os_min": "Windows 8",
   "location": "C:\\Windows\\System32\\sru\\SRUDB.dat (ESE/EDB database)",
   "purpose": "Tracks application execution, CPU/network resource usage, and per-app network data volume over time, written hourly and at shutdown.",

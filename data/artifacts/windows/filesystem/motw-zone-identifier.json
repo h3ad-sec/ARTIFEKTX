@@ -1,8 +1,7 @@
 {
   "id": "motw-zone-identifier",
   "name": "Zone.Identifier ADS (Mark of the Web)",
-  "category": "file",
-  "subcategory": "provenance",
+  "type": "file",
   "os_min": "Introduced with Internet Explorer; ADS format standardized further by Windows 10",
   "location": "Alternate Data Stream on the downloaded file: <filename>:Zone.Identifier:$DATA",
   "purpose": "Marks files originating from the internet (or other untrusted zones) so Windows/Office apply extra security prompts (Protected View, SmartScreen).",

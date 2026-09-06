@@ -1,8 +1,7 @@
 {
   "id": "system-hive",
   "name": "SYSTEM Hive",
-  "category": "registry",
-  "subcategory": "system-configuration",
+  "type": "registry",
   "os_min": "Windows 2000 (present in all NT-based Windows versions)",
   "location": "HKLM\\SYSTEM (file: %SystemRoot%\\System32\\config\\SYSTEM)",
   "purpose": "Stores machine-wide configuration needed to boot and run Windows, kept as multiple redundant ControlSets. This entry focuses on services/drivers, network configuration, and hardware (USB) enumeration data; BAM and Shimcache also live under this hive but are documented as separate artifacts.",

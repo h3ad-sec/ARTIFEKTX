@@ -1,8 +1,7 @@
 {
   "id": "browser-preferences",
   "name": "Browser Preferences",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Firefox: prefs.js (profile root) ; Chrome/Edge: Preferences (JSON, profile root)",
   "purpose": "Configuration data associated with the browser application, including privacy settings and synchronization preferences.",

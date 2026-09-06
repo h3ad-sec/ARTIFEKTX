@@ -1,8 +1,7 @@
 {
   "id": "windows-10-timeline",
   "name": "Windows 10 Timeline",
-  "category": "file",
-  "subcategory": "execution-evidence",
+  "type": "file",
   "os_min": "Windows 10 1803 (Timeline feature)",
   "location": "C:\\Users\\<profile>\\AppData\\Local\\ConnectedDevicesPlatform\\<account-ID>\\ActivitiesCache.db (SQLite database)",
   "purpose": "Stores a rolling history of applications and files the user interacted with, which Windows used to present as a chronological 'Timeline', including content viewed inside those applications.",

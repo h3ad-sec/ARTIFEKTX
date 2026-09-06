@@ -1,8 +1,7 @@
 {
   "id": "recycle-bin",
   "name": "Recycle Bin",
-  "category": "file",
-  "subcategory": "user-activity",
+  "type": "file",
   "os_min": "Windows Vista ($Recycle.Bin / $I / $R format; the earlier centralized INFO2 format is used on Windows 2000/XP/Server 2003 at C:\\RECYCLER\\<SID>\\INFO2)",
   "location": "C:\\$Recycle.Bin\\<user SID>\\ containing paired $I<random>.<ext> (metadata) and $R<random>.<ext> (content) files for each deleted item",
   "purpose": "Records files a user deleted through Explorer or another Recycle-Bin-aware path, preserving both the deleted content and metadata about the item's original path, size, and deletion time - allowing recovery of the file and reconstruction of what was deleted, when, and by which account.",

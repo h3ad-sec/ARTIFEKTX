@@ -223,8 +223,7 @@ body.light .os-tab.active{background:rgba(14,165,233,.1);}
   border:1px solid var(--border);color:var(--muted);white-space:nowrap;text-transform:uppercase;}
 .type-badge.type-registry{color:var(--accent2);border-color:color-mix(in srgb, var(--accent2) 35%, transparent);}
 .type-badge.type-file{color:#22c55e;border-color:color-mix(in srgb, #22c55e 35%, transparent);}
-.card-sub{font-family:var(--mono);font-size:9px;color:var(--card-accent,var(--muted));letter-spacing:.05em;margin-bottom:8px;text-transform:uppercase;}
-.card-desc{font-size:13px;color:var(--text-dim);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.card-desc{font-size:13px;color:var(--text-dim);line-height:1.55;margin-top:8px;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
 .anomaly-count{font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--status-partial);
   border:1px solid color-mix(in srgb, var(--status-partial) 35%, transparent);border-radius:2px;padding:2px 6px;white-space:nowrap;flex-shrink:0;}
 .card-footer{margin-top:10px;display:flex;justify-content:space-between;align-items:center;}
@@ -567,7 +566,7 @@ function getFiltered(){
   return allArtifacts.filter(function(a){
     if(activeGroup!=='all'&&a.group!==activeGroup)return false;
     if(!searchTerm)return true;
-    var hay=[a.name,a.purpose,a.subcategory,a.location,a.interpretation,(a.key_fields||[]).join(' '),(a.anomalies||[]).join(' ')].join(' ').toLowerCase();
+    var hay=[a.name,a.purpose,a.location,a.interpretation,(a.key_fields||[]).join(' '),(a.anomalies||[]).join(' ')].join(' ').toLowerCase();
     return hay.indexOf(searchTerm)!==-1;
   });
 }
@@ -598,9 +597,8 @@ function buildCard(a){
   return '<div class="artifact-card'+(isOpen?' card-open':'')+'" id="card-'+a.id+'" style="--card-accent:'+color+'" onclick="'+(isOpen?'':'toggleCard(\''+a.id+'\')')+'" role="button" tabindex="0" aria-expanded="'+(isOpen?'true':'false')+'">'
     +'<div class="card-top">'
       +'<div class="card-name">'+escapeHtml(a.name)+'</div>'
-      +'<div class="card-badges"><span class="type-badge type-'+a.category+'">'+a.category+'</span></div>'
+      +'<div class="card-badges"><span class="type-badge type-'+a.type+'">'+a.type+'</span></div>'
     +'</div>'
-    +'<div class="card-sub">'+escapeHtml(a.subcategory)+'</div>'
     +'<div class="card-desc">'+escapeHtml(a.purpose)+'</div>'
     +'<div class="card-footer">'
       +(anomalyCount?'<span class="anomaly-count">'+anomalyCount+' ANOMAL'+(anomalyCount===1?'Y':'IES')+'</span>':'<span></span>')
@@ -879,7 +877,7 @@ function copyMarkdown(id){
   var lines=[];
   lines.push('## '+a.name);
   lines.push('');
-  lines.push('**Type:** '+a.category+'  |  **Subcategory:** '+a.subcategory+'  |  **OS Min:** '+(a.os_min||''));
+  lines.push('**Type:** '+a.type+'  |  **OS Min:** '+(a.os_min||''));
   lines.push('');
   lines.push('**Location:** `'+a.location+'`');
   lines.push('');

@@ -1,8 +1,7 @@
 {
   "id": "office-trust-records",
   "name": "Office Trust Records",
-  "category": "registry",
-  "subcategory": "document-access",
+  "type": "registry",
   "os_min": "Windows XP SP3 (Office 2010+)",
   "location": "NTUSER.DAT: Software\\Microsoft\\Office\\<Version>\\<AppName>\\Security\\Trusted Documents\\TrustRecords",
   "purpose": "Remembers a user's decision to trust a document that triggered a security warning, such as a Protected View or macro warning, so Office does not re-prompt the next time the same file is opened.",

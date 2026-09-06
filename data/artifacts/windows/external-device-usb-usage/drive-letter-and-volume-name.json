@@ -1,8 +1,7 @@
 {
   "id": "drive-letter-and-volume-name",
   "name": "Drive Letter and Volume Name",
-  "category": "registry",
-  "subcategory": "removable-media",
+  "type": "registry",
   "os_min": "Windows XP",
   "location": "Windows XP: SYSTEM\\CurrentControlSet\\Enum\\USBSTOR (find the device's ParentIdPrefix), then correlate that value against SYSTEM\\MountedDevices to find the last mount point. Windows 7+: SOFTWARE\\Microsoft\\Windows Portable Devices\\Devices; SYSTEM\\MountedDevices (examine \\DosDevices\\<letter> values for a matching device serial number); SOFTWARE\\Microsoft\\Windows Search\\VolumeInfoCache.",
   "purpose": "Discovers the last drive letter and volume name assigned to a specific USB device the last time it was connected to the system.",

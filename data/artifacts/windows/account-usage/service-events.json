@@ -1,8 +1,7 @@
 {
   "id": "service-events",
   "name": "Service Events",
-  "category": "file",
-  "subcategory": "authentication",
+  "type": "file",
   "os_min": "Event ID 7045 requires Windows Server 2008 R2+; 4697 auditing requires Windows 10+",
   "location": "System.evtx (Win7+): Event IDs 7034/7035/7036/7040/7045; Security.evtx (Win10+, requires auditing enabled). Event ID 4697",
   "purpose": "Analyzes logs for suspicious Windows service creation, persistence, and services started or stopped around the time of a suspected compromise; service events also record account information.",

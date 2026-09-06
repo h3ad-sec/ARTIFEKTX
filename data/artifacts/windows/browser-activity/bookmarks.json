@@ -1,8 +1,7 @@
 {
   "id": "bookmarks",
   "name": "Bookmarks",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Firefox: places.sqlite, bookmarkbackups\\bookmarks-<date>.jsonlz4 ; Chrome/Edge: Bookmarks (JSON), Bookmarks.bak (Chrome) / Bookmarks.msbak (Edge)",
   "purpose": "Records default browser items as well as sites a user chose to save for future reference.",

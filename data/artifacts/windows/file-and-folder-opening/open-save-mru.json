@@ -1,8 +1,7 @@
 {
   "id": "open-save-mru",
   "name": "Open/Save MRU",
-  "category": "registry",
-  "subcategory": "file-folder-access",
+  "type": "registry",
   "os_min": "Windows XP",
   "location": "XP: NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\OpenSaveMRU ; Windows 7/8/10: NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\OpenSavePidlMRU",
   "purpose": "Tracks individual files opened or saved through any application's standard Windows shell Open/Save dialog, spanning Office, browsers, chat clients, and most other common desktop software.",

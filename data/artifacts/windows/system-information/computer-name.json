@@ -1,8 +1,7 @@
 {
   "id": "computer-name",
   "name": "Computer Name",
-  "category": "registry",
-  "subcategory": "system-identification",
+  "type": "registry",
   "os_min": "Windows XP",
   "location": "SYSTEM\\CurrentControlSet\\Control\\ComputerName\\ComputerName",
   "purpose": "Stores the hostname of the system in the ComputerName value, used to identify the machine on a network and correlate its identity across logs and other artifacts.",

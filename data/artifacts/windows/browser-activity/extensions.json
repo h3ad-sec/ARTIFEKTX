@@ -1,8 +1,7 @@
 {
   "id": "extensions",
   "name": "Extensions",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Chrome/Edge: User Data\\Default\\Extensions\\<extension-id>\\<version>\\manifest.json; Preferences JSON also lists installed extension IDs",
   "purpose": "Identifies browser extensions installed for a profile, including sideloaded/unpacked extensions not from an official store.",

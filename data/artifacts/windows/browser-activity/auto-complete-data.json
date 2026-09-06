@@ -1,8 +1,7 @@
 {
   "id": "auto-complete-data",
   "name": "Auto-Complete Data",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Firefox: places.sqlite, formhistory.sqlite ; Chrome/Edge: History (keyword_search_terms table), Web Data (autofill table), Shortcuts, Network Action Predictor, Login Data",
   "purpose": "Aggregates data a user has typed into the browser across several distinct databases. Search-engine queries, web form entries, Omnibox/address-bar input, letter-by-letter typed predictions, and typed credentials.",

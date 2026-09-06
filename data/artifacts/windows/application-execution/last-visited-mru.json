@@ -1,8 +1,7 @@
 {
   "id": "last-visited-mru",
   "name": "Last Visited MRU",
-  "category": "registry",
-  "subcategory": "file-folder-access",
+  "type": "registry",
   "os_min": "Windows XP",
   "location": "XP: NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\LastVisitedMRU ; Windows 7+: NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\LastVisitedPidlMRU",
   "purpose": "Tracks which applications the user has run through a standard Open/Save dialog and the last folder location each application interacted with.",

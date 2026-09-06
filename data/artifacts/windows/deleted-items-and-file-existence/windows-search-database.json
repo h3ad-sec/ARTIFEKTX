@@ -1,8 +1,7 @@
 {
   "id": "windows-search-database",
   "name": "Windows Search Database",
-  "category": "file",
-  "subcategory": "search-indexing",
+  "type": "file",
   "os_min": "Windows XP",
   "location": "Windows XP: C:\\Documents and Settings\\All Users\\Application Data\\Microsoft\\Search\\Data\\Applications\\Windows\\Windows.edb; Windows 7+: C:\\ProgramData\\Microsoft\\Search\\Data\\Applications\\Windows\\Windows.edb, plus the GatherLogs\\SystemIndex subfolder under the same Applications\\Windows path",
   "purpose": "Windows Search maintains an Extensible Storage Engine (ESE) database indexing metadata-and in many cases partial content-from over 900 file types, plus email, so users can search by keyword. Because it indexes a file's metadata and content independent of the file's current location, it can preserve evidence of files later moved, renamed, or deleted.",

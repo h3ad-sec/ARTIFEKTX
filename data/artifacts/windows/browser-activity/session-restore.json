@@ -1,8 +1,7 @@
 {
   "id": "session-restore",
   "name": "Session Restore",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Firefox (older): sessionstore.js ; Firefox (newer): sessionstore.jsonlz4, sessionstore-backups\\ ; Chrome/Edge (older): Current Session, Current Tabs, Last Session, Last Tabs files in the profile root ; Chrome/Edge (newer): Sessions\\ folder with Session_<timestamp> / Tabs_<timestamp> files",
   "purpose": "Automatic crash-recovery feature that lets the browser restore open tabs and windows after a crash or restart.",

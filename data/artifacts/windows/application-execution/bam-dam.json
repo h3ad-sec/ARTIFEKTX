@@ -1,8 +1,7 @@
 {
   "id": "bam-dam",
   "name": "BAM/DAM",
-  "category": "registry",
-  "subcategory": "execution-evidence",
+  "type": "registry",
   "os_min": "Windows 10 version 1709 (Fall Creators Update)",
   "location": "Pre-Windows 10 1809: HKLM\\SYSTEM\\CurrentControlSet\\Services\\bam\\UserSettings\\{SID} and HKLM\\SYSTEM\\CurrentControlSet\\Services\\dam\\UserSettings\\{SID}. Windows 10 1809 and later: HKLM\\SYSTEM\\CurrentControlSet\\Services\\bam\\State\\UserSettings\\{SID} and \\dam\\State\\UserSettings\\{SID} (a 'State' subkey was inserted into the path).",
   "purpose": "BAM is a Windows service that throttles background application activity to conserve battery/resources; as a side effect it records, per user SID, the full path of each executable that ran and the timestamp of its last execution. DAM is the equivalent mechanism for devices supporting Connected Standby (primarily mobile/tablet hardware). Both key their entries under the executing user's SID, giving analysts direct user attribution for a launched binary even though the data lives in the machine-wide SYSTEM hive.",

@@ -1,8 +1,7 @@
 {
   "id": "usb-user-information",
   "name": "User Information",
-  "category": "registry",
-  "subcategory": "removable-media",
+  "type": "registry",
   "os_min": "Windows XP",
   "location": "SYSTEM\\MountedDevices (document the device's Volume GUID) correlated against each user's NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MountPoints2 (per-user subkeys, one per mounted volume GUID).",
   "purpose": "Identifies which user account(s) were logged on when a specific USB device was connected, by matching the device's Volume GUID between the system-wide MountedDevices key and individual users' per-profile MountPoints2 key.",

@@ -1,8 +1,7 @@
 {
   "id": "amcache-hve",
   "name": "Amcache.hve",
-  "category": "registry",
-  "subcategory": "execution-evidence",
+  "type": "registry",
   "os_min": "Windows 8 (backported to Windows 7 SP1 via KB2952664)",
   "location": "C:\\Windows\\AppCompat\\Programs\\Amcache.hve (standalone registry hive, plus Amcache.hve.LOG1/.LOG2 transaction logs in the same folder)",
   "purpose": "A registry hive maintained by the Microsoft Compatibility Appraiser / Inventory Collector that catalogs executables, installed applications, and loaded drivers seen on the system, recording each file's path, SHA-1 hash, and size. Because the entry is written independently of the file itself, it commonly survives after the underlying binary has been deleted, making it valuable evidence of program presence/first-run even post-deletion.",

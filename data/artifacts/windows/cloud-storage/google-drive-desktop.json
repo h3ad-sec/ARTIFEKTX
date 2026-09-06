@@ -1,8 +1,7 @@
 {
   "id": "google-drive-desktop",
   "name": "Google Drive for Desktop",
-  "category": "file",
-  "subcategory": "cloud-storage",
+  "type": "file",
   "os_min": "Windows 8",
   "location": "Local drive letter and account ID: NTUSER\\Software\\Google\\DriveFS\\Share\\. Default local file cache: %USERPROFILE%\\AppData\\Local\\Google\\DriveFS\\<account identifier>\\content_cache. File metadata: %USERPROFILE%\\AppData\\Local\\Google\\DriveFS\\<account identifier>\\metadata_sqlite_db.",
   "purpose": "Google Drive for Desktop is the merged successor to Google Backup and Sync and Drive File Stream; it presents a virtual FAT32 volume named \"My Drive\" that is only mounted and accessible while the associated Google account is logged in.",

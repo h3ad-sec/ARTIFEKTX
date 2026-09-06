@@ -1,8 +1,7 @@
 {
   "id": "cloud-account-details",
   "name": "Cloud Account Details",
-  "category": "registry",
-  "subcategory": "user-accounts",
+  "type": "registry",
   "os_min": "Windows 8 (Microsoft account login support)",
   "location": "SAM\\Domains\\Account\\Users\\<RID>\\InternetUserName",
   "purpose": "Identifies whether a local Windows account is actually a Microsoft cloud account by recording the email address tied to it, directly inside the SAM hive.",

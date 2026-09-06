@@ -1,8 +1,7 @@
 {
   "id": "internet-explorer-file-urls",
   "name": "Internet Explorer file:///",
-  "category": "file",
-  "subcategory": "file-folder-access",
+  "type": "file",
   "os_min": "Windows XP",
   "location": "IE6-7: %USERPROFILE%\\Local Settings\\History\\History.IE5; IE8-9: %USERPROFILE%\\AppData\\Local\\Microsoft\\Windows\\History\\History.IE5; IE10-11 and Windows 10+: %USERPROFILE%\\AppData\\Local\\Microsoft\\Windows\\WebCache\\WebCacheV*.dat",
   "purpose": "Internet Explorer's history databases record local and remote (network share) file-path access per user, logged as file:/// URL entries. Because the underlying database formats persist across OS versions, some of this evidence can still be recovered even on Windows 11+ systems that no longer ship Internet Explorer.",

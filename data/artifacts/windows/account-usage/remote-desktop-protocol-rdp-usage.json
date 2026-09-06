@@ -1,8 +1,7 @@
 {
   "id": "remote-desktop-protocol-rdp-usage",
   "name": "Remote Desktop Protocol (RDP) Usage",
-  "category": "file",
-  "subcategory": "authentication",
+  "type": "file",
   "os_min": "Windows 7 / Server 2008 R2",
   "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx",
   "purpose": "Tracks RDP logons and session reconnections to a target machine, and identifies which accounts were used to do so, purely from the Security log's account-usage perspective.",

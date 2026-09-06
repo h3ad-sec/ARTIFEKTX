@@ -1,8 +1,7 @@
 {
   "id": "windows-firewall-log",
   "name": "Windows Firewall Log",
-  "category": "file",
-  "subcategory": "network-activity",
+  "type": "file",
   "os_min": "Windows XP (legacy pfirewall.log); Windows Vista+ for the Windows Firewall with Advanced Security event log channel",
   "location": "Legacy text log, must be manually enabled and is off by default: %windir%\\System32\\LogFiles\\Firewall\\pfirewall.log. Rule-change/administrative history: Applications and Services Logs\\Microsoft-Windows-Windows Firewall With Advanced Security\\Firewall (.evtx).",
   "purpose": "Records network traffic Windows Firewall evaluated (dropped and/or allowed connections, once logging is enabled) and, separately in the WFAS event channel, administrative changes to firewall rules and profile state. Used to reconstruct blocked/allowed connection attempts and to detect firewall tampering.",

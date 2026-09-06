@@ -1,8 +1,7 @@
 {
   "id": "network-interfaces",
   "name": "Network Interfaces",
-  "category": "registry",
-  "subcategory": "network-configuration",
+  "type": "registry",
   "os_min": "Windows XP",
   "location": "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces ; SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\NetworkCards",
   "purpose": "Lists the network interfaces (physical and virtual adapters) available on the system and their last known configuration, including IP addressing, DHCP, and domain information.",

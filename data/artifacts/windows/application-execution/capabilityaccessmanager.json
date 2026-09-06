@@ -1,8 +1,7 @@
 {
   "id": "capabilityaccessmanager",
   "name": "CapabilityAccessManager",
-  "category": "registry",
-  "subcategory": "device-capability-access",
+  "type": "registry",
   "os_min": "Windows 10 1903+",
   "location": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore (machine-wide) ; NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore (per-user)",
   "purpose": "Records which applications accessed sensitive device capabilities, such as the microphone and camera, and when.",

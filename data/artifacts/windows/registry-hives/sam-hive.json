@@ -1,8 +1,7 @@
 {
   "id": "sam-hive",
   "name": "SAM (Security Account Manager) Hive",
-  "category": "registry",
-  "subcategory": "user-accounts",
+  "type": "registry",
   "os_min": "Windows 2000 (present in all NT-based Windows versions)",
   "location": "HKLM\\SAM (file: %SystemRoot%\\System32\\config\\SAM)",
   "purpose": "Stores local user account definitions for the machine. RIDs, group memberships, and encrypted password hashes. Plus per-account login metadata. It is unreadable in place even by local Administrator while Windows is running; access requires SYSTEM privileges or an offline copy.",

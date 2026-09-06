@@ -1,8 +1,7 @@
 {
   "id": "onedrive",
   "name": "OneDrive",
-  "category": "file",
-  "subcategory": "cloud-storage",
+  "type": "file",
   "os_min": "Windows 8",
   "location": "Default local file storage: %USERPROFILE%\\OneDrive (Personal) or %USERPROFILE%\\OneDrive - <CompanyName> (Business). File storage folder location: NTUSER\\Software\\Microsoft\\OneDrive\\Accounts\\<Personal|Business1>. File metadata: %USERPROFILE%\\AppData\\Local\\Microsoft\\OneDrive\\logs\\<Personal|Business1>\\ (SyncDiagnostics.log, SyncEngine \"odl\" logs). Settings/account data: %USERPROFILE%\\AppData\\Local\\Microsoft\\OneDrive\\settings\\<Personal|Business1>\\ (<UserCid>.dat).",
   "purpose": "OneDrive ships by default on Windows 8 and later but stays inactive until a user authenticates to a Microsoft cloud account, after which it silently maintains a two-way sync between a local folder and the associated Personal or Business OneDrive tenant.",

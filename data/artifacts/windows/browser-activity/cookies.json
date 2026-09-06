@@ -1,8 +1,7 @@
 {
   "id": "cookies",
   "name": "Cookies",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Firefox: cookies.sqlite ; Chrome/Edge (newer): Network\\Cookies ; Chrome/Edge (older, pre-network-isolation): Cookies",
   "purpose": "Site-set tokens that provide insight into what websites have been visited and, for authentication cookies, what activities might have taken place there.",

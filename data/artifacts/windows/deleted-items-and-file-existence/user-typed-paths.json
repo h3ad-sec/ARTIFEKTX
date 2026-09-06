@@ -1,8 +1,7 @@
 {
   "id": "user-typed-paths",
   "name": "User Typed Paths",
-  "category": "registry",
-  "subcategory": "file-folder-access",
+  "type": "registry",
   "os_min": "Windows Vista",
   "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TypedPaths",
   "purpose": "Records paths a user manually typed or pasted into the File Explorer address/path bar, including local paths and remote UNC paths to network shares. Proves deliberate navigation to a specific location rather than passive browsing.",

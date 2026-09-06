@@ -1,8 +1,7 @@
 {
   "id": "outlook-ost-pst",
   "name": "Outlook OST/PST Files",
-  "category": "file",
-  "subcategory": "communication-artifact",
+  "type": "file",
   "os_min": "Windows XP",
   "location": "Classic Outlook cached-mode OST: %LOCALAPPDATA%\\Microsoft\\Outlook\\ (default since Outlook 2013/2016). PST: %USERPROFILE%\\Documents\\Outlook Files\\ (Outlook 2013+ default) or %LOCALAPPDATA%\\Microsoft\\Outlook\\ (legacy/upgraded profiles, hidden folder). Exact per-store paths are recorded in HKEY_CURRENT_USER\\Software\\Microsoft\\Office\\<version>\\Outlook\\Profiles\\<profile>\\9375CFF0413111d3B88A00104B2A6676\\<service>\\001f6700 (or similarly-named binary values) and in the legacy HKCU\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows Messaging Subsystem\\Profiles\\<profile> key. Note: the current \"New Outlook\" / Outlook for Windows (Monarch) client does not use the classic Cached Exchange Mode/OST model for Exchange/M365 mailboxes - Microsoft does not document an equivalent user-accessible cache file path for it, so do not assume a New-Outlook mailbox has a parseable local OST.",
   "purpose": "OST (Offline Storage Table) is a local, encrypted cache of an Exchange/IMAP mailbox used for offline access and cached mode sync; PST (Personal Storage Table) is a self-contained archive/local-delivery store an analyst can open independently of any server. Both are structured containers (folders, messages, contacts, calendar) and are frequently the single richest local source of a user's email history, including items the user believes were deleted from the server.",

@@ -1,8 +1,7 @@
 {
   "id": "task-bar-feature-usage",
   "name": "Task Bar Feature Usage",
-  "category": "registry",
-  "subcategory": "execution-evidence",
+  "type": "registry",
   "os_min": "Windows 10 1903+",
   "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FeatureUsage",
   "purpose": "Logs how a signed-in user interacts with taskbar-pinned and running applications, distinguishing deliberately pinned apps from apps that merely received window focus.",

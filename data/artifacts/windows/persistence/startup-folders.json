@@ -1,8 +1,7 @@
 {
   "id": "startup-folders",
   "name": "Startup Folders",
-  "category": "file",
-  "subcategory": "persistence",
+  "type": "file",
   "os_min": "Windows NT 4.0",
   "location": "%AppData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup (per-user) and %ProgramData%\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp (all-users)",
   "purpose": "Any shortcut or executable placed here launches automatically at user logon.",

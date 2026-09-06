@@ -1,8 +1,7 @@
 {
   "id": "browser-url-parameters",
   "name": "Browser URL Parameters",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Embedded within ordinary browser history URL records (see chrome-edge-browser-artifacts / firefox-browser-artifacts) - not a dedicated artifact store of its own.",
   "purpose": "Captures geolocation and network-identification clues leaked within otherwise-ordinary browser history URL parameters - for example, captive-portal sign-in redirects or a Google Maps URL containing geocode/daddr parameters revealing a searched address - that can identify connected networks and approximate physical locations.",

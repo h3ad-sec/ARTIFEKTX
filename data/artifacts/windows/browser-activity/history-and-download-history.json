@@ -1,8 +1,7 @@
 {
   "id": "history-and-download-history",
   "name": "History and Download History",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Firefox: %USERPROFILE%\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\<randomtext>.default\\places.sqlite (Win7+; XP: %USERPROFILE%\\Application Data\\...) ; Chrome/Edge: %USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\<Profile>\\History and \\Microsoft\\Edge\\User Data\\<Profile>\\History (Win7+; XP under Local Settings\\Application Data)",
   "purpose": "Records websites visited by date and time, forming the primary source for reconstructing a user's browsing activity.",

@@ -1,8 +1,7 @@
 {
   "id": "operating-system-version",
   "name": "Operating System Version",
-  "category": "registry",
-  "subcategory": "system-identification",
+  "type": "registry",
   "os_min": "Windows XP (Source OS historical-update subkeys present on Windows 10+)",
   "location": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion ; SYSTEM\\Setup\\Source OS",
   "purpose": "Determines the operating system type, edition, version, and build number, plus installation date(s) for both the currently installed build and any prior builds the system was updated from.",

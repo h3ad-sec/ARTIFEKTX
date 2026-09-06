@@ -1,8 +1,7 @@
 {
   "id": "thumbcache",
   "name": "Thumbcache",
-  "category": "file",
-  "subcategory": "file-folder-access",
+  "type": "file",
   "os_min": "Windows Vista",
   "location": "%USERPROFILE%\\AppData\\Local\\Microsoft\\Windows\\Explorer (per-user; one database per thumbnail size, e.g. thumbcache_256.db)",
   "purpose": "Centralizes thumbnail images for pictures, documents, and folders into a per-user set of databases, one per thumbnail size (small/medium/large/extra large), replacing the per-folder Thumbs.db model used on Windows XP. Like Thumbs.db, it can retain evidence of a folder's prior contents after the source files are deleted.",

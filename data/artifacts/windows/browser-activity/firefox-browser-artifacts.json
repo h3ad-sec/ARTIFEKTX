@@ -1,8 +1,7 @@
 {
   "id": "firefox-browser-artifacts",
   "name": "Firefox Browser Artifacts",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "C:\\Users\\<user>\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\<profile>\\ ; places.sqlite (history/bookmarks), cookies.sqlite, formhistory.sqlite, logins.json + key4.db (saved passwords)",
   "purpose": "Stores browsing history, bookmarks, cookies, form autofill history, and encrypted saved logins in per-profile SQLite/JSON files.",

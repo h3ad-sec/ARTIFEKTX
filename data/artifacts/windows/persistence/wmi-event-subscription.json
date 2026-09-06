@@ -1,8 +1,7 @@
 {
   "id": "wmi-event-subscription",
   "name": "WMI Permanent Event Subscription",
-  "category": "file",
-  "subcategory": "persistence",
+  "type": "file",
   "os_min": "Windows XP (WMI infrastructure); technique common from Windows 7+",
   "location": "CIM repository: C:\\Windows\\System32\\wbem\\Repository\\OBJECTS.DATA (root\\subscription namespace: __EventFilter, __EventConsumer, __FilterToConsumerBinding)",
   "purpose": "Lets code execute automatically when a defined WMI event occurs (e.g. process start, time, logon), providing fileless, reboot-surviving persistence.",

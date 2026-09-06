@@ -1,8 +1,7 @@
 {
   "id": "network-history",
   "name": "Network History",
-  "category": "registry",
-  "subcategory": "network-configuration",
+  "type": "registry",
   "os_min": "Windows Vista (NetworkList keys); Interfaces/NetworkCards present since Windows XP",
   "location": "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces ; SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\NetworkCards ; SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\NetworkList\\Signatures\\Unmanaged ; \\NetworkList\\Signatures\\Managed ; \\NetworkList\\Nla\\Cache ; \\NetworkList\\Profiles",
   "purpose": "Identifies networks the computer has connected to, including domain/intranet name, SSID, first and last connection times, and the network gateway's MAC address; covers wired, wireless, and VPN connections.",

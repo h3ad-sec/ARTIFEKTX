@@ -1,8 +1,7 @@
 {
   "id": "security-hive",
   "name": "SECURITY Hive",
-  "category": "registry",
-  "subcategory": "credential-access",
+  "type": "registry",
   "os_min": "Windows 2000 (present in all NT-based Windows versions)",
   "location": "HKLM\\SECURITY (file: %SystemRoot%\\System32\\config\\SECURITY): not readable in place even by local Administrator; requires SYSTEM privileges",
   "purpose": "Stores the Local Security Authority's policy database: the effective local audit policy, LSA secrets (service-account passwords, autologon password, machine account secret), and cached domain-logon credentials used when a domain controller cannot be reached.",

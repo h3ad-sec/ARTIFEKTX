@@ -1,8 +1,7 @@
 {
   "id": "user-accounts",
   "name": "User Accounts",
-  "category": "registry",
-  "subcategory": "user-accounts",
+  "type": "registry",
   "os_min": "Windows XP",
   "location": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList",
   "purpose": "Identifies both local and domain accounts that have interactively logged on to the system, by enumerating one subkey per user SID with a pointer to that user's profile folder.",

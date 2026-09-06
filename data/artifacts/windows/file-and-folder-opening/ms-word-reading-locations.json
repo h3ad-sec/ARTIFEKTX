@@ -1,8 +1,7 @@
 {
   "id": "ms-word-reading-locations",
   "name": "MS Word Reading Locations",
-  "category": "registry",
-  "subcategory": "document-access",
+  "type": "registry",
   "os_min": "Windows 7 (Word 2013+)",
   "location": "NTUSER.DAT: Software\\Microsoft\\Office\\<Version>\\Word\\Reading Locations",
   "purpose": "Records the last cursor/scroll position a user reached within a specific Word document, along with when that reading session ended, so Word can resume the document at the same spot next time it's opened.",

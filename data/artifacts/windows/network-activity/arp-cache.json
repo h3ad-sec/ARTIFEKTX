@@ -1,8 +1,7 @@
 {
   "id": "arp-cache",
   "name": "ARP Cache",
-  "category": "file",
-  "subcategory": "network-activity",
+  "type": "file",
   "os_min": "Windows XP (caching mechanism changed significantly starting Windows Vista)",
   "location": "In-memory neighbor/ARP table maintained by the TCP/IP stack; not written to a file or registry hive. Viewed live via `arp -a` or PowerShell `Get-NetNeighbor` / `netsh interface ipv4 show neighbors`.",
   "purpose": "Maps IPv4 addresses on the local subnet to their resolved MAC (link-layer) addresses so the host doesn't re-broadcast an ARP request for every packet; shows which local hosts a machine has actually exchanged Layer 2 traffic with recently.",

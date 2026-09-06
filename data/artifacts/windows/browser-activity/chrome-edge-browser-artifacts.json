@@ -1,8 +1,7 @@
 {
   "id": "chrome-edge-browser-artifacts",
   "name": "Chrome / Edge (Chromium) Browser Artifacts",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "C:\\Users\\<user>\\AppData\\Local\\Google\\Chrome\\User Data\\Default (Chrome) or \\Microsoft\\Edge\\User Data\\Default (Edge); History, Login Data, Web Data, Cookies (under Network\\), Bookmarks, Preferences",
   "purpose": "SQLite databases and JSON files recording browsing history, downloads, saved logins, autofill, and cookies.",

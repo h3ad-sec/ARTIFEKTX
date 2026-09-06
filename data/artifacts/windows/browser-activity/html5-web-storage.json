@@ -1,8 +1,7 @@
 {
   "id": "html5-web-storage",
   "name": "HTML5 Web Storage",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Firefox: %USERPROFILE%\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\<randomtext>.default\\webappstore.sqlite ; Chrome: %USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\<Profile>\\Local Storage ; Edge: %USERPROFILE%\\AppData\\Local\\Microsoft\\Edge\\User Data\\<Profile>\\Local Storage",
   "purpose": "Per-domain, text-based persistent storage (up to 10MB per domain) that websites use for state and tracking data. Functionally a \"super cookie\" that outlives typical cookie settings.",

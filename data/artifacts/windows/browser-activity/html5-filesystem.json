@@ -1,8 +1,7 @@
 {
   "id": "html5-filesystem",
   "name": "HTML5 FileSystem",
-  "category": "file",
-  "subcategory": "browser-artifact",
+  "type": "file",
   "os_min": "N/A (application-level)",
   "location": "Chrome: %USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\<Profile>\\File System ; Edge: %USERPROFILE%\\AppData\\Local\\Microsoft\\Edge\\User Data\\<Profile>\\File System (Chromium browsers only; not implemented by Firefox)",
   "purpose": "Implements the HTML5 local storage FileSystem API, letting web applications store larger binary data locally than the 10MB text-only limit of HTML5 Web Storage allows.",

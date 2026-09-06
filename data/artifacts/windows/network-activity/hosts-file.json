@@ -1,8 +1,7 @@
 {
   "id": "hosts-file",
   "name": "Hosts File",
-  "category": "file",
-  "subcategory": "network-configuration",
+  "type": "file",
   "os_min": "Windows 2000 (path has remained stable through current Windows releases)",
   "location": "%SystemRoot%\\System32\\drivers\\etc\\hosts (typically C:\\Windows\\System32\\drivers\\etc\\hosts)",
   "purpose": "Plain-text, manually-maintained IP-to-hostname mapping table that the DNS Client consults before querying any DNS server; lets an administrator, or an attacker, override name resolution for specific domains without touching DNS infrastructure.",

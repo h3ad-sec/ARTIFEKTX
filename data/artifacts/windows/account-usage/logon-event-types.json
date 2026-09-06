@@ -1,8 +1,7 @@
 {
   "id": "logon-event-types",
   "name": "Logon Event Types",
-  "category": "file",
-  "subcategory": "authentication",
+  "type": "file",
   "os_min": "Windows 7 / Server 2008 R2",
   "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx: the Logon Type field within Event ID 4624",
   "purpose": "Determines by exactly what means a logon was attempted, in addition to date, time, username, hostname, and success/failure status. The single field that separates a console logon from a network logon, RDP session, or scheduled-task logon.",
