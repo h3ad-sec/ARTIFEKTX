@@ -2,7 +2,7 @@
   "id": "runmru",
   "name": "RunMRU",
   "category": "registry",
-  "subcategory": "user-activity/program-execution",
+  "subcategory": "program-execution",
   "os_min": "Windows XP",
   "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU",
   "purpose": "Records the most-recently-used command strings typed into the Run dialog (Win+R), letting an analyst reconstruct commands, paths, or scripts a user (or an attacker operating in that user's context) manually invoked via Run.",

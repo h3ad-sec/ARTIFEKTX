@@ -2,7 +2,7 @@
   "id": "shellbags",
   "name": "Shellbags",
   "category": "registry",
-  "subcategory": "user-activity/file-folder-access",
+  "subcategory": "file-folder-access",
   "os_min": "Windows XP",
   "location": "Windows XP: NTUSER.DAT: Software\\Microsoft\\Windows\\ShellNoRoam\\BagMRU and \\Bags. Windows Vista and later: NTUSER.DAT: Software\\Microsoft\\Windows\\Shell\\BagMRU and \\Bags, plus UsrClass.dat: Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\BagMRU and \\Bags",
   "purpose": "Stores Windows Explorer's per-folder view preferences (icon size, view mode, window position). As a side effect of tracking which folder each preference belongs to, it preserves a record of every folder a user has browsed in Explorer, including folders on removable media, network shares, and mounted volumes that no longer exist on the system.",

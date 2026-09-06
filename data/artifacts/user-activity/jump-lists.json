@@ -2,7 +2,7 @@
   "id": "jump-lists",
   "name": "Jump Lists",
   "category": "file",
-  "subcategory": "user-activity",
+  "subcategory": "file-folder-access",
   "os_min": "Windows 7",
   "location": "AutomaticDestinations: %AppData%\\Microsoft\\Windows\\Recent\\AutomaticDestinations\\<AppID>.automaticDestinations-ms; CustomDestinations: \\CustomDestinations\\<AppID>.customDestinations-ms",
   "purpose": "Tracks recently/frequently accessed files per application via embedded shell-link data, providing file-access evidence even for files later deleted.",

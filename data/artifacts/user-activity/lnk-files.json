@@ -2,7 +2,7 @@
   "id": "lnk-files",
   "name": "LNK (Shortcut) Files",
   "category": "file",
-  "subcategory": "user-activity",
+  "subcategory": "file-folder-access",
   "os_min": "Windows 95",
   "location": "%AppData%\\Microsoft\\Windows\\Recent\\ and Desktop/Start Menu locations",
   "purpose": "Auto-created shortcuts to recently opened files/folders, encoding target path, volume serial, and MAC timestamps of the target at time of access.",

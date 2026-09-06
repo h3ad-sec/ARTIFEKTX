@@ -2,7 +2,7 @@
   "id": "setupapi-devlog",
   "name": "SetupAPI Device Install Log (setupapi.dev.log)",
   "category": "file",
-  "subcategory": "user-activity/removable-media",
+  "subcategory": "removable-media",
   "os_min": "Windows XP",
   "location": "%SystemRoot%\\inf\\setupapi.dev.log (Windows Vista and later). On Windows XP/2000/Server 2003 the equivalent file is %SystemRoot%\\setupapi.log (note: no 'inf' subfolder, different filename). ANSI plain-text file; when it grows large it is not simply truncated - a related setupapi.upgrade.log is created during OS upgrades to record driver migration for previously-installed devices.",
   "purpose": "System-wide, chronological plain-text log written by the Plug and Play (PnP) manager and SetupAPI recording every device/driver installation operation on the host, including the exact local-time timestamp a device's driver was first installed. For removable media this is the highest-confidence source for establishing precisely when a USB device was FIRST connected to a system, complementing (and independently corroborating) the registry-based USBSTOR 'last connected/removed' property timestamps.",
