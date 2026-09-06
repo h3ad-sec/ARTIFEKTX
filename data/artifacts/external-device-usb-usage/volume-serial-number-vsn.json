@@ -36,6 +36,7 @@
     "usb-user-information",
     "shortcut-lnk-files",
     "shell-bags",
-    "jump-lists"
+    "jump-lists",
+    "connection-timestamps"
   ]
 }

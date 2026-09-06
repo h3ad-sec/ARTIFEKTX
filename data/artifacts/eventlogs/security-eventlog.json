@@ -60,6 +60,7 @@
     "powershell-operational",
     "service-events",
     "successful-failed-logons",
-    "logon-event-types"
+    "logon-event-types",
+    "remote-desktop-protocol-rdp-usage"
   ]
 }

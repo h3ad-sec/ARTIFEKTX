@@ -33,6 +33,7 @@
   "interpretation": "4778/4779 track the session-lifecycle at the Security-log level (connect/reconnect vs. disconnect), complementing 1149's network-authentication signal and the LocalSessionManager channel's 21-25 events. All four sources should agree on the shape of a session; a mismatch between them (e.g. a 4778 reconnect with no matching LocalSessionManager Event ID 25) is worth investigating on its own.",
   "related_artifacts": [
     "security-eventlog",
-    "logon-event-types"
+    "logon-event-types",
+    "remote-desktop-protocol-rdp-usage"
   ]
 }

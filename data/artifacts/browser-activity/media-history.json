@@ -29,6 +29,7 @@
   "anti_forensic_notes": "Clearing browsing data through the standard browser history-clearing UI does not clear Media History, so surviving media playback records can corroborate or contradict a claim that all browsing history was wiped.",
   "interpretation": "Three primary tables link together: playbackSession (session-level playback events), origin (site-level aggregation), and playback (individual playback records) — join on their session/origin identifiers to reconstruct which site was played, when, and for how long. Because Media History is not cleared by normal history-clearing actions, its presence alongside an empty History file is itself significant.",
   "related_artifacts": [
-    "chrome-edge-browser-artifacts"
+    "chrome-edge-browser-artifacts",
+    "history-and-download-history"
   ]
 }

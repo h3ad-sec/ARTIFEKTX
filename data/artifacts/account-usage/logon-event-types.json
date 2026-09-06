@@ -27,9 +27,20 @@
     "Logon Type 9 (different credentials than the logged-on user) on a host with no legitimate reason for credential switching, consistent with pass-the-hash or RunAs abuse",
     "Logon Type 5 (service logon) tied to an account that isn't a known service account"
   ],
-  "parsing_tools": ["Event Viewer", "EvtxECmd (Eric Zimmerman)"],
-  "attack_techniques": ["T1078", "T1021"],
+  "parsing_tools": [
+    "Event Viewer",
+    "EvtxECmd (Eric Zimmerman)"
+  ],
+  "attack_techniques": [
+    "T1078",
+    "T1021"
+  ],
   "anti_forensic_notes": "The Logon Type is only as trustworthy as the 4624 event itself — if Security-log auditing is disabled or the log is cleared, this classification is lost along with the rest of the logon record.",
   "interpretation": "Always read the Logon Type alongside the account name and source IP/workstation fields on the same 4624 event — the type alone tells you the *mechanism*, not whether the logon itself was legitimate. Use this table to disambiguate `successful-failed-logons` records and to interpret Type 10 correctly for `rdp-eventlogs` correlation.",
-  "related_artifacts": ["security-eventlog", "successful-failed-logons", "rdp-eventlogs"]
+  "related_artifacts": [
+    "security-eventlog",
+    "successful-failed-logons",
+    "rdp-eventlogs",
+    "remote-desktop-protocol-rdp-usage"
+  ]
 }

@@ -1,6 +1,6 @@
 {
-  "generated": "2026-09-06T06:19:48.100567+00:00",
-  "count": 104,
+  "generated": "2026-09-06T06:27:43.550380+00:00",
+  "count": 107,
   "artifacts": [
     {
       "id": "ntuser-dat-hive",
@@ -1357,17 +1357,18 @@
       "os": "Windows",
       "os_min": "N/A (application-level)",
       "location": "Chrome/Edge: History.downloads table in the profile folder; Firefox: downloads recorded via moz_annos in places.sqlite (or separate downloads.sqlite on older versions)",
-      "purpose": "Records files downloaded through the browser (source URL, save path, timestamp) and, via session-restore files, the set of tabs/windows open at last shutdown or crash.",
+      "purpose": "Modern browsers include a built-in download manager capable of keeping a history of every file downloaded by the user, providing information about websites visited and corresponding items retrieved.",
       "key_fields": [
-        "Download source URL",
-        "Local save path",
-        "Download start/end time",
-        "Session-restore tab URLs"
+        "Filename, size, and type",
+        "Source website and referring page",
+        "Download start and end times",
+        "File system save location",
+        "State information — success or failure"
       ],
       "normal_baseline": "Downloads correspond to work-related documents/installers from known sources.",
       "anomalies": [
         "Download from a known malicious-tool distribution site or file-sharing service immediately preceding execution evidence for the same file",
-        "Session-restore tabs referencing an exfiltration or C2 panel URL"
+        "A download recorded as failed/incomplete that nonetheless has execution evidence, suggesting the file was retrieved through another channel and the browser record was only partial"
       ],
       "parsing_tools": [
         "Hindsight",
@@ -1375,10 +1376,12 @@
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "Downloads table entries can be cleared alongside general history clearing; the downloaded file itself, if kept, will separately carry Zone.Identifier MOTW evidence of its origin.",
-      "interpretation": "",
+      "interpretation": "This entry is downloads specifically; the browser's separate crash-recovery tab/window state is its own dedicated `session-restore` artifact, not part of this one — the two used to be combined here but were split to match the poster's own separate boxes.",
       "related_artifacts": [
         "chrome-edge-browser-artifacts",
-        "motw-zone-identifier"
+        "motw-zone-identifier",
+        "session-restore",
+        "history-and-download-history"
       ],
       "group": "browser-activity",
       "file": "data/artifacts/browser-activity/browser-downloads.json"
@@ -1487,7 +1490,8 @@
       "anti_forensic_notes": "Clearing browsing history removes rows from the SQLite tables but does not necessarily overwrite the underlying file pages, so carving deleted SQLite records can sometimes recover cleared history.",
       "interpretation": "",
       "related_artifacts": [
-        "firefox-browser-artifacts"
+        "firefox-browser-artifacts",
+        "history-and-download-history"
       ],
       "group": "browser-activity",
       "file": "data/artifacts/browser-activity/chrome-edge-browser-artifacts.json"
@@ -1594,10 +1598,49 @@
       "anti_forensic_notes": "Deleting the whole profile folder removes all Firefox artifacts at once; profile folder can be copied off intact even after the browser is closed, as recommended by Mozilla for backups.",
       "interpretation": "",
       "related_artifacts": [
-        "chrome-edge-browser-artifacts"
+        "chrome-edge-browser-artifacts",
+        "history-and-download-history"
       ],
       "group": "browser-activity",
       "file": "data/artifacts/browser-activity/firefox-browser-artifacts.json"
+    },
+    {
+      "id": "history-and-download-history",
+      "name": "History and Download History",
+      "category": "file",
+      "subcategory": "browser-artifact",
+      "os": "Windows",
+      "os_min": "N/A (application-level)",
+      "location": "Firefox: %USERPROFILE%\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\<randomtext>.default\\places.sqlite (Win7+; XP: %USERPROFILE%\\Application Data\\...) ; Chrome/Edge: %USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\<Profile>\\History and \\Microsoft\\Edge\\User Data\\<Profile>\\History (Win7+; XP under Local Settings\\Application Data)",
+      "purpose": "Records websites visited by date and time, forming the primary source for reconstructing a user's browsing activity.",
+      "key_fields": [
+        "Visit URL and page title",
+        "Visit timestamp",
+        "Visit count / frequency of visits",
+        "Profile identifier — look for multiple Chromium profiles (\"Default\", \"Profile 1\", etc.)"
+      ],
+      "normal_baseline": "History entries correspond to expected work-related or personal browsing consistent with the user's role, spread across normal business hours.",
+      "anomalies": [
+        "History entries for known malicious-tool distribution sites, paste sites, or C2 infrastructure",
+        "A second, unexpected Chromium profile directory (e.g. \"Profile 1\") with its own separate history, suggesting an attempt to segregate activity from the primary profile",
+        "A visit-count spike to a single external domain immediately preceding a security incident"
+      ],
+      "parsing_tools": [
+        "BrowsingHistoryView (Nirsoft)",
+        "DB Browser for SQLite",
+        "Hindsight"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "Web browser artifacts are stored per local user account, so history for one account tells you nothing about another; clearing history removes rows from the SQLite tables but does not necessarily overwrite the underlying database pages, so carving deleted records can sometimes recover cleared history.",
+      "interpretation": "Always check for multiple profiles in Chromium-based browsers before concluding history is complete — a single \"History\" file query against the wrong profile folder silently misses activity in another profile. This is the general browsing-history counterpart to the more specific `browser-downloads` (download manager metadata) and `media-history` (audio/video playback) entries.",
+      "related_artifacts": [
+        "chrome-edge-browser-artifacts",
+        "firefox-browser-artifacts",
+        "browser-downloads",
+        "media-history"
+      ],
+      "group": "browser-activity",
+      "file": "data/artifacts/browser-activity/history-and-download-history.json"
     },
     {
       "id": "html5-filesystem",
@@ -1700,7 +1743,8 @@
       "anti_forensic_notes": "Clearing browsing data through the standard browser history-clearing UI does not clear Media History, so surviving media playback records can corroborate or contradict a claim that all browsing history was wiped.",
       "interpretation": "Three primary tables link together: playbackSession (session-level playback events), origin (site-level aggregation), and playback (individual playback records) — join on their session/origin identifiers to reconstruct which site was played, when, and for how long. Because Media History is not cleared by normal history-clearing actions, its presence alongside an empty History file is itself significant.",
       "related_artifacts": [
-        "chrome-edge-browser-artifacts"
+        "chrome-edge-browser-artifacts",
+        "history-and-download-history"
       ],
       "group": "browser-activity",
       "file": "data/artifacts/browser-activity/media-history.json"
@@ -1948,6 +1992,49 @@
       "file": "data/artifacts/cloud-storage/onedrive.json"
     },
     {
+      "id": "connection-timestamps",
+      "name": "Connection Timestamps",
+      "category": "file",
+      "subcategory": "removable-media",
+      "os": "Windows",
+      "os_min": "First Install/Last Connected/Last Removal properties require Windows 7+ (0064) / Windows 8+ (0066, 0067)",
+      "location": "Plug and Play log — XP: C:\\Windows\\setupapi.log ; Win7+: C:\\Windows\\inf\\setupapi.dev.log. Registry — Win7+: SYSTEM\\CurrentControlSet\\Enum\\USBSTOR\\Disk&Ven_&Prod_\\<USBSerial#>\\Properties\\{83da6326-97a6-4088-9453-a19231573b29}\\####(0064=First Install, 0066=Last Connected, 0067=Last Removal); mirrored under \\Enum\\SCSI\\... . Also Win10+: Microsoft-Windows-Partition/Diagnostic.evtx Event ID 1006 per device connect/disconnect.",
+      "purpose": "Determines the temporal usage of specific USB devices connected to a Windows machine by combining the plug-and-play log file (first-ever install) with the registry's Properties GUID subkeys (first install, last connected, last removed) and the Partition/Diagnostic event log (every connect/disconnect).",
+      "key_fields": [
+        "setupapi.dev.log entries — search for the device's serial number; log timestamps are in local time zone",
+        "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0064 — First Install (Win7+)",
+        "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0066 — Last Connected (Win8+)",
+        "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0067 — Last Removal (Win8+)",
+        "Timestamps stored in Windows 64-bit FILETIME format",
+        "Partition/Diagnostic Event ID 1006 — recorded for each device connect/disconnect (log cleared during major OS updates)"
+      ],
+      "normal_baseline": "Connection timestamps for known, approved removable media align with expected work usage windows and match the device inventory the user is authorized to use.",
+      "anomalies": [
+        "A First Install timestamp for a USB device with no corresponding approval/inventory record, especially shortly before a data-loss incident",
+        "A Last Connected/Last Removal pair spanning a very short window immediately followed by evidence of large file transfers, consistent with rapid exfiltration to removable media",
+        "setupapi.dev.log entries for a device that has no matching USBSTOR registry key, or vice versa, suggesting partial artifact cleanup"
+      ],
+      "parsing_tools": [
+        "Registry Explorer (Eric Zimmerman)",
+        "USB Detective",
+        "KAPE",
+        "EvtxECmd (Eric Zimmerman)"
+      ],
+      "attack_techniques": [
+        "T1091",
+        "T1052.001"
+      ],
+      "anti_forensic_notes": "The Partition/Diagnostic event log is cleared during major Windows OS updates, so its coverage window can be shorter than the registry Properties subkeys, which persist across updates unless the device is fully removed from the registry.",
+      "interpretation": "This is the correlation layer across three separate data sources: the plug-and-play log gives the very first time a device's driver was ever installed, the Properties GUID subkeys refine that into first/last-connected/last-removed, and Partition/Diagnostic gives a per-event connect/disconnect timeline (when not yet rolled off by an OS update). Use all three together rather than relying on one, since each has a different retention/coverage limitation. See `usb-device-identification` for the broader device-identity fields and `setupapi-devlog` for the log file format itself.",
+      "related_artifacts": [
+        "usb-device-identification",
+        "setupapi-devlog",
+        "volume-serial-number-vsn"
+      ],
+      "group": "external-device-usb-usage",
+      "file": "data/artifacts/external-device-usb-usage/connection-timestamps.json"
+    },
+    {
       "id": "drive-letter-and-volume-name",
       "name": "Drive Letter and Volume Name",
       "category": "registry",
@@ -2027,7 +2114,8 @@
       "anti_forensic_notes": "setupapi.dev.log only records the FIRST installation of a given device/driver combination system-wide - it does not log every subsequent reconnect, so later connect/disconnect timing must still come from registry property timestamps (USBSTOR Properties 0x0066/0x0067) or MountPoints2. Because it is a plain-text, non-protected file under %SystemRoot%\\inf, it is straightforward to delete or edit and is explicitly called out in anti-forensic guidance as a file to remove to obscure USB history; deletion removes the earliest-connection evidence but does not affect the registry-based artifacts, so the two sources should always be checked together. A Windows Feature Update/in-place upgrade can also effectively reset this log, though a setupapi.upgrade.log may retain some historical migration records for devices that existed before the upgrade.",
       "interpretation": "",
       "related_artifacts": [
-        "usb-device-identification"
+        "usb-device-identification",
+        "connection-timestamps"
       ],
       "group": "external-device-usb-usage",
       "file": "data/artifacts/external-device-usb-usage/setupapi-devlog.json"
@@ -2071,7 +2159,8 @@
       "anti_forensic_notes": "The commonly cited rule that a serial number with '&' as its second character is always system-generated (i.e., the device itself has no hardware serial) has been shown to be unreliable in practice-Windows-reported values can be inconsistent across enclosures/adapters even for the same physical drive, so serial numbers should be treated as identifiers to correlate rather than as trustworthy hardware fingerprints. setupapi.dev.log only records the first installation of a given device/driver combination system-wide (not per subsequent reconnect), so later connect/disconnect timing must come from the registry property timestamps or MountPoints2, and deleting or rolling back that log removes the earliest-connection evidence.",
       "interpretation": "",
       "related_artifacts": [
-        "shell-bags"
+        "shell-bags",
+        "connection-timestamps"
       ],
       "group": "external-device-usb-usage",
       "file": "data/artifacts/external-device-usb-usage/usb-device-identification.json"
@@ -2202,7 +2291,8 @@
         "usb-user-information",
         "shortcut-lnk-files",
         "shell-bags",
-        "jump-lists"
+        "jump-lists",
+        "connection-timestamps"
       ],
       "group": "external-device-usb-usage",
       "file": "data/artifacts/external-device-usb-usage/volume-serial-number-vsn.json"
@@ -2523,10 +2613,50 @@
       "related_artifacts": [
         "security-eventlog",
         "successful-failed-logons",
-        "rdp-eventlogs"
+        "rdp-eventlogs",
+        "remote-desktop-protocol-rdp-usage"
       ],
       "group": "account-usage",
       "file": "data/artifacts/account-usage/logon-event-types.json"
+    },
+    {
+      "id": "remote-desktop-protocol-rdp-usage",
+      "name": "Remote Desktop Protocol (RDP) Usage",
+      "category": "file",
+      "subcategory": "authentication",
+      "os": "Windows",
+      "os_min": "Windows 7 / Server 2008 R2",
+      "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx",
+      "purpose": "Tracks RDP logons and session reconnections to a target machine, and identifies which accounts were used to do so, purely from the Security log's account-usage perspective.",
+      "key_fields": [
+        "Event ID 4624 — Logon Type 10 (remote interactive logon)",
+        "Event ID 4778 — session connected/reconnected",
+        "Event ID 4779 — session disconnected",
+        "Hostname and IP address of the remote machine making the connection, recorded on the 4624/4778/4779 events"
+      ],
+      "normal_baseline": "RDP account usage aligns with known admin jump-box or approved remote-work sources, at expected times and from expected source hosts.",
+      "anomalies": [
+        "Logon Type 10 from an account with no legitimate remote-access business need",
+        "4778/4779 reconnect/disconnect pairs from a source IP that changes mid-session, suggesting session hijacking",
+        "RDP account usage outside normal business hours with no corresponding change ticket or on-call justification"
+      ],
+      "parsing_tools": [
+        "Event Viewer",
+        "EvtxECmd (Eric Zimmerman)"
+      ],
+      "attack_techniques": [
+        "T1021.001"
+      ],
+      "anti_forensic_notes": "This account-usage view is narrower than the full RDP session-lifecycle picture — it only sees what the Security log's 4624/4778/4779 triad records. For the fuller cross-channel session timeline (including the RemoteConnectionManager and LocalSessionManager Operational logs' 1149 and 21-25 events), see `rdp-eventlogs`, which is the more complete, multi-channel version of this same evidence.",
+      "interpretation": "Use this entry when the question is specifically \"which accounts used RDP and from where\" (an account-usage/audit question); use `rdp-eventlogs` when the question is \"reconstruct the full session timeline for this RDP connection\" (a session-forensics question) — the two overlap on 4624/4778/4779 but `rdp-eventlogs` adds the pre-auth and session-lifecycle channels this entry doesn't cover.",
+      "related_artifacts": [
+        "rdp-eventlogs",
+        "security-eventlog",
+        "logon-event-types",
+        "successful-failed-logons"
+      ],
+      "group": "account-usage",
+      "file": "data/artifacts/account-usage/remote-desktop-protocol-rdp-usage.json"
     },
     {
       "id": "service-events",
@@ -2608,7 +2738,8 @@
         "security-eventlog",
         "logon-event-types",
         "authentication-events",
-        "user-accounts"
+        "user-accounts",
+        "remote-desktop-protocol-rdp-usage"
       ],
       "group": "account-usage",
       "file": "data/artifacts/account-usage/successful-failed-logons.json"
@@ -3199,7 +3330,8 @@
       "interpretation": "4778/4779 track the session-lifecycle at the Security-log level (connect/reconnect vs. disconnect), complementing 1149's network-authentication signal and the LocalSessionManager channel's 21-25 events. All four sources should agree on the shape of a session; a mismatch between them (e.g. a 4778 reconnect with no matching LocalSessionManager Event ID 25) is worth investigating on its own.",
       "related_artifacts": [
         "security-eventlog",
-        "logon-event-types"
+        "logon-event-types",
+        "remote-desktop-protocol-rdp-usage"
       ],
       "group": "eventlogs",
       "file": "data/artifacts/eventlogs/rdp-eventlogs.json"
@@ -3266,7 +3398,8 @@
         "powershell-operational",
         "service-events",
         "successful-failed-logons",
-        "logon-event-types"
+        "logon-event-types",
+        "remote-desktop-protocol-rdp-usage"
       ],
       "group": "eventlogs",
       "file": "data/artifacts/eventlogs/security-eventlog.json"

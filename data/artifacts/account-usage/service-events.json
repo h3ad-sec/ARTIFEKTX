@@ -22,9 +22,19 @@
     "7040 start-type change flipping a security-relevant service to Disabled shortly before or during an incident",
     "4697 present with no corresponding 7045, or vice versa, when both logs should be capturing the same install and auditing is enabled for both — suggests log tampering or a gap in visibility"
   ],
-  "parsing_tools": ["Event Viewer", "EvtxECmd (Eric Zimmerman)"],
-  "attack_techniques": ["T1543.003", "T1489"],
+  "parsing_tools": [
+    "Event Viewer",
+    "EvtxECmd (Eric Zimmerman)"
+  ],
+  "attack_techniques": [
+    "T1543.003",
+    "T1489"
+  ],
   "anti_forensic_notes": "A large amount of malware and worms in the wild utilize services for persistence and privilege; services started on boot illustrate persistence (desirable to malware), and services can also be intentionally crashed via attacks like process injection to disable defensive tooling. 4697 requires the Audit Other Object Access Events subcategory to be enabled, which many environments don't turn on by default, leaving 7045 as the only reliable source.",
   "interpretation": "Treat System.evtx as the baseline source for service lifecycle events (available without extra auditing) and Security.evtx's 4697 as a bonus corroborating source only where that audit policy is already enabled. Cross-reference the service name/ImagePath against the `services-persistence` artifact's registry-level view (CurrentControlSet\\Services) to confirm what the service was actually configured to run.",
-  "related_artifacts": ["services-persistence", "system-eventlog", "security-eventlog"]
+  "related_artifacts": [
+    "services-persistence",
+    "system-eventlog",
+    "security-eventlog"
+  ]
 }

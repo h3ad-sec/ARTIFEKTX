@@ -6,17 +6,18 @@
   "os": "Windows",
   "os_min": "N/A (application-level)",
   "location": "Chrome/Edge: History.downloads table in the profile folder; Firefox: downloads recorded via moz_annos in places.sqlite (or separate downloads.sqlite on older versions)",
-  "purpose": "Records files downloaded through the browser (source URL, save path, timestamp) and, via session-restore files, the set of tabs/windows open at last shutdown or crash.",
+  "purpose": "Modern browsers include a built-in download manager capable of keeping a history of every file downloaded by the user, providing information about websites visited and corresponding items retrieved.",
   "key_fields": [
-    "Download source URL",
-    "Local save path",
-    "Download start/end time",
-    "Session-restore tab URLs"
+    "Filename, size, and type",
+    "Source website and referring page",
+    "Download start and end times",
+    "File system save location",
+    "State information — success or failure"
   ],
   "normal_baseline": "Downloads correspond to work-related documents/installers from known sources.",
   "anomalies": [
     "Download from a known malicious-tool distribution site or file-sharing service immediately preceding execution evidence for the same file",
-    "Session-restore tabs referencing an exfiltration or C2 panel URL"
+    "A download recorded as failed/incomplete that nonetheless has execution evidence, suggesting the file was retrieved through another channel and the browser record was only partial"
   ],
   "parsing_tools": [
     "Hindsight",
@@ -24,9 +25,11 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "Downloads table entries can be cleared alongside general history clearing; the downloaded file itself, if kept, will separately carry Zone.Identifier MOTW evidence of its origin.",
-  "interpretation": "",
+  "interpretation": "This entry is downloads specifically; the browser's separate crash-recovery tab/window state is its own dedicated `session-restore` artifact, not part of this one — the two used to be combined here but were split to match the poster's own separate boxes.",
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
-    "motw-zone-identifier"
+    "motw-zone-identifier",
+    "session-restore",
+    "history-and-download-history"
   ]
 }

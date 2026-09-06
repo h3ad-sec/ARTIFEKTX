@@ -18,9 +18,22 @@
     "A new autostart entry added in a user-writable path with no corresponding software installation event",
     "A driver or service Start value flipped to boot-start (0x00/0x02) shortly before or during a suspected compromise"
   ],
-  "parsing_tools": ["Autoruns (Sysinternals)", "RegRipper (H. Carvey)", "Registry Explorer (Eric Zimmerman)"],
-  "attack_techniques": ["T1547.001", "T1543.003"],
+  "parsing_tools": [
+    "Autoruns (Sysinternals)",
+    "RegRipper (H. Carvey)",
+    "Registry Explorer (Eric Zimmerman)"
+  ],
+  "attack_techniques": [
+    "T1547.001",
+    "T1543.003"
+  ],
   "anti_forensic_notes": "This is not an exhaustive list of autorun locations — dozens of other registry and file-system locations can achieve autostart (see the dedicated `run-runonce-keys`, `services-persistence`, `startup-folders`, `ifeo-appinit`, and `wmi-event-subscription` artifacts for the more specific mechanisms this overview summarizes).",
   "interpretation": "Treat this as the summary/checklist view the SANS poster uses under its 'System Information' category; for the actual per-mechanism detail (exact registry paths, anomaly patterns, and anti-forensic notes specific to each autostart technique), use the dedicated artifacts it points to rather than treating this entry as complete on its own.",
-  "related_artifacts": ["run-runonce-keys", "services-persistence", "startup-folders", "ifeo-appinit", "wmi-event-subscription"]
+  "related_artifacts": [
+    "run-runonce-keys",
+    "services-persistence",
+    "startup-folders",
+    "ifeo-appinit",
+    "wmi-event-subscription"
+  ]
 }

@@ -22,9 +22,21 @@
     "4672 superuser logon for an account outside the expected administrator list",
     "4720 account creation outside a documented change window, especially followed shortly by a 4672 admin-rights logon for the same account"
   ],
-  "parsing_tools": ["Event Viewer", "EvtxECmd (Eric Zimmerman)"],
-  "attack_techniques": ["T1078", "T1110"],
+  "parsing_tools": [
+    "Event Viewer",
+    "EvtxECmd (Eric Zimmerman)"
+  ],
+  "attack_techniques": [
+    "T1078",
+    "T1110"
+  ],
   "anti_forensic_notes": "The Security log can be cleared (itself logged as Event ID 1102) or rotated out under high logon volume; correlate with a SIEM/forwarder for retention beyond local log rotation limits.",
   "interpretation": "Use 4624/4625 as the anchor pair for any account-usage timeline, then layer 4648 (explicit creds) and 4672 (elevated rights) on top to distinguish a routine logon from a privilege-escalation-relevant one. Cross-reference with `logon-event-types` for what each 4624 Logon Type code actually means (console vs network vs RDP vs service, etc.) before drawing conclusions from the raw event alone.",
-  "related_artifacts": ["security-eventlog", "logon-event-types", "authentication-events", "user-accounts"]
+  "related_artifacts": [
+    "security-eventlog",
+    "logon-event-types",
+    "authentication-events",
+    "user-accounts",
+    "remote-desktop-protocol-rdp-usage"
+  ]
 }
