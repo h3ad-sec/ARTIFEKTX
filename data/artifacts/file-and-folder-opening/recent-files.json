@@ -25,7 +25,7 @@
   "parsing_tools": [
     "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
     "RegRipper (recentdocs.pl plugin)",
-    "KAPE — e.g. kape.exe --msource source-volume --mdest output-folder --module RECmd_UserActivity --mef csv",
+    "KAPE: e.g. kape.exe --msource source-volume --mdest output-folder --module RECmd_UserActivity --mef csv",
     "Velociraptor (windows.registry.recentdocs artifact)"
   ],
   "attack_techniques": [

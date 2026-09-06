@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-06T06:38:03.924885+00:00",
+  "generated": "2026-09-06T15:30:40.510408+00:00",
   "count": 107,
   "artifacts": [
     {
@@ -10,18 +10,18 @@
       "os": "Windows",
       "os_min": "Windows 2000 (present in all NT-based Windows versions)",
       "location": "Mounted as HKEY_CURRENT_USER while the user is logged on; also reachable as HKEY_USERS\\<SID> for a non-interactive profile. File: %UserProfile%\\NTUSER.DAT (e.g. C:\\Users\\<username>\\NTUSER.DAT)",
-      "purpose": "Root of a single user's registry — mounted as HKEY_CURRENT_USER for the duration of that user's session. Holds per-user application settings and UI preferences and, forensically, a per-user Run/RunOnce autostart location. User-activity artifacts that also live in this hive — UserAssist, RunMRU, TypedPaths, RecentDocs — are documented as separate artifacts; this entry covers the hive's general role and its own persistence keys.",
+      "purpose": "Root of a single user's registry: mounted as HKEY_CURRENT_USER for the duration of that user's session. Holds per-user application settings and UI preferences and, forensically, a per-user Run/RunOnce autostart location. User-activity artifacts that also live in this hive. UserAssist, RunMRU, TypedPaths, RecentDocs. Are documented as separate artifacts; this entry covers the hive's general role and its own persistence keys.",
       "key_fields": [
-        "Software\\Microsoft\\Windows\\CurrentVersion\\Run and \\RunOnce — per-user autostart entries, executed only when that specific user logs on",
-        "Software\\Classes — per-user COM/file-association overrides layered on top of HKLM\\SOFTWARE\\Classes (the underlying per-user Classes data itself is stored in the separate UsrClass.dat hive)",
-        "Volatile Environment — session-specific environment variables (e.g. USERNAME, USERDOMAIN, logon server) recreated at each logon",
+        "Software\\Microsoft\\Windows\\CurrentVersion\\Run and \\RunOnce: per-user autostart entries, executed only when that specific user logs on",
+        "Software\\Classes: per-user COM/file-association overrides layered on top of HKLM\\SOFTWARE\\Classes (the underlying per-user Classes data itself is stored in the separate UsrClass.dat hive)",
+        "Volatile Environment: session-specific environment variables (e.g. USERNAME, USERDOMAIN, logon server) recreated at each logon",
         "Hive last-write time and the paired NTUSER.DAT.LOG1/.LOG2 transaction logs"
       ],
       "normal_baseline": "Per-user Run entries correspond to user-installed, signed applications (chat clients, cloud-sync apps); the hive's last-write time tracks with the account's actual last logoff or sync cycle.",
       "anomalies": [
         "A per-user Run/RunOnce entry pointing to a script or binary the profile owner denies installing, especially one staged in %AppData%\\Roaming or %AppData%\\Local.",
         "NTUSER.DAT's last-write time falling outside any interactive logon recorded for that account in the Security event log, suggesting the hive was modified offline or via a remote/administrative technique rather than by the user themselves.",
-        "An NTUSER.DAT file present under a user-profile folder with no corresponding account in the SAM (or SECURITY domain-cache) — an orphaned profile from a deleted account, or vice versa, a profile folder with no NTUSER.DAT."
+        "An NTUSER.DAT file present under a user-profile folder with no corresponding account in the SAM (or SECURITY domain-cache). An orphaned profile from a deleted account, or vice versa, a profile folder with no NTUSER.DAT."
       ],
       "parsing_tools": [
         "Registry Explorer / RECmd (Eric Zimmerman)",
@@ -37,7 +37,6 @@
         "usrclass-dat-hive",
         "software-hive"
       ],
-      "group": "registry-hives",
       "file": "data/artifacts/registry-hives/ntuser-dat-hive.json"
     },
     {
@@ -48,13 +47,13 @@
       "os": "Windows",
       "os_min": "Windows 2000 (present in all NT-based Windows versions)",
       "location": "HKLM\\SAM (file: %SystemRoot%\\System32\\config\\SAM)",
-      "purpose": "Stores local user account definitions for the machine — RIDs, group memberships, and encrypted password hashes — plus per-account login metadata. It is unreadable in place even by local Administrator while Windows is running; access requires SYSTEM privileges or an offline copy.",
+      "purpose": "Stores local user account definitions for the machine. RIDs, group memberships, and encrypted password hashes. Plus per-account login metadata. It is unreadable in place even by local Administrator while Windows is running; access requires SYSTEM privileges or an offline copy.",
       "key_fields": [
-        "SAM\\Domains\\Account\\Users\\<RID in 8-digit hex> — one subkey per local account (e.g. 000001F4 = RID 500)",
-        "V value — username, full name, comment, and the encrypted LM/NT hash blob",
-        "F value — account flags and timestamps: last logon, password last set, account expires, failed-logon count",
-        "SAM\\Domains\\Account\\Users\\Names — maps account name to RID",
-        "SAM\\Domains\\Builtin\\Aliases — builtin group (e.g. Administrators, RID 544) membership"
+        "SAM\\Domains\\Account\\Users\\<RID in 8-digit hex>: one subkey per local account (e.g. 000001F4 = RID 500)",
+        "V value: username, full name, comment, and the encrypted LM/NT hash blob",
+        "F value: account flags and timestamps: last logon, password last set, account expires, failed-logon count",
+        "SAM\\Domains\\Account\\Users\\Names: maps account name to RID",
+        "SAM\\Domains\\Builtin\\Aliases: builtin group (e.g. Administrators, RID 544) membership"
       ],
       "normal_baseline": "RID 500 is the built-in Administrator (often renamed and/or disabled per hardening baselines); RID 501 is the built-in Guest (disabled by default); real user accounts start at RID 1000 and increment sequentially as created. F-value timestamps track plausibly with the account's known usage and the org's password-rotation policy.",
       "anomalies": [
@@ -81,7 +80,6 @@
         "cloud-account-details",
         "last-login-and-password-change"
       ],
-      "group": "registry-hives",
       "file": "data/artifacts/registry-hives/sam-hive.json"
     },
     {
@@ -91,17 +89,17 @@
       "subcategory": "credential-access",
       "os": "Windows",
       "os_min": "Windows 2000 (present in all NT-based Windows versions)",
-      "location": "HKLM\\SECURITY (file: %SystemRoot%\\System32\\config\\SECURITY) — not readable in place even by local Administrator; requires SYSTEM privileges",
+      "location": "HKLM\\SECURITY (file: %SystemRoot%\\System32\\config\\SECURITY): not readable in place even by local Administrator; requires SYSTEM privileges",
       "purpose": "Stores the Local Security Authority's policy database: the effective local audit policy, LSA secrets (service-account passwords, autologon password, machine account secret), and cached domain-logon credentials used when a domain controller cannot be reached.",
       "key_fields": [
-        "Policy\\Secrets\\<name> — encrypted LSA secrets (service-account credentials, machine account secret, autologon password)",
-        "Policy\\PolSecretEncryptionKey — LSA key material, combined with the SYSTEM hive's boot key to decrypt Secrets",
-        "Policy\\PolAdtEv — binary-encoded effective audit policy that LSASS consumes",
-        "Cache\\NL$1 through NL$10 — DCC2/MSCache v2 cached domain-credential hashes (Windows Vista and later)"
+        "Policy\\Secrets\\<name>: encrypted LSA secrets (service-account credentials, machine account secret, autologon password)",
+        "Policy\\PolSecretEncryptionKey: LSA key material, combined with the SYSTEM hive's boot key to decrypt Secrets",
+        "Policy\\PolAdtEv: binary-encoded effective audit policy that LSASS consumes",
+        "Cache\\NL$1 through NL$10: DCC2/MSCache v2 cached domain-credential hashes (Windows Vista and later)"
       ],
       "normal_baseline": "Cache slots (NL$x) are populated only on domain-joined systems that log on while off-network; Policy\\Secrets contains only entries tied to known, installed services or scheduled-task run-as accounts; the audit policy reflected in PolAdtEv matches the organization's GPO baseline.",
       "anomalies": [
-        "PolAdtEv reflects fewer audit categories enabled than the organization's GPO baseline defines — e.g. process-creation or logon auditing disabled locally shortly before other suspicious activity, blinding downstream logging.",
+        "PolAdtEv reflects fewer audit categories enabled than the organization's GPO baseline defines. E.g. process-creation or logon auditing disabled locally shortly before other suspicious activity, blinding downstream logging.",
         "New or unexpected entries under Policy\\Secrets that aren't tied to any known installed service (possible credential staging/harvesting).",
         "Cache entries present on a system that isn't supposed to be domain-joined.",
         "A Cache slot's last-write time with no corresponding logon event in the Security event log."
@@ -121,7 +119,6 @@
         "sam-hive",
         "system-hive"
       ],
-      "group": "registry-hives",
       "file": "data/artifacts/registry-hives/security-hive.json"
     },
     {
@@ -134,16 +131,16 @@
       "location": "HKLM\\SOFTWARE (file: %SystemRoot%\\System32\\config\\SOFTWARE)",
       "purpose": "Stores machine-wide installed-application data, OS version/build identity, and system-wide autostart (Run/RunOnce) persistence locations that apply to every user of the machine.",
       "key_fields": [
-        "Microsoft\\Windows\\CurrentVersion\\Run and \\RunOnce — machine-wide autostart command lines (REG_SZ/REG_EXPAND_SZ), run at every user logon",
-        "Microsoft\\Windows\\CurrentVersion\\Uninstall\\<AppGUID or Name> — DisplayName, DisplayVersion, Publisher, InstallDate, UninstallString, InstallLocation",
-        "Microsoft\\Windows NT\\CurrentVersion — ProductName, CurrentBuildNumber, InstallDate, RegisteredOwner",
+        "Microsoft\\Windows\\CurrentVersion\\Run and \\RunOnce: machine-wide autostart command lines (REG_SZ/REG_EXPAND_SZ), run at every user logon",
+        "Microsoft\\Windows\\CurrentVersion\\Uninstall\\<AppGUID or Name>: DisplayName, DisplayVersion, Publisher, InstallDate, UninstallString, InstallLocation",
+        "Microsoft\\Windows NT\\CurrentVersion: ProductName, CurrentBuildNumber, InstallDate, RegisteredOwner",
         "Wow6432Node mirror of the above Run/Uninstall keys, holding 32-bit software entries on 64-bit Windows"
       ],
       "normal_baseline": "Run/RunOnce entries correspond to known, digitally-signed vendor software (AV agents, GPU tray utilities, cloud-sync clients) launched from Program Files. Uninstall entries match software the organization actually deployed, with plausible InstallDate and Publisher values.",
       "anomalies": [
         "A Run or RunOnce value pointing to an executable or script in a user-writable path (%Temp%, %AppData%, Downloads) instead of Program Files.",
-        "A Run key value invoking powershell.exe, cmd.exe, mshta.exe, or rundll32.exe with an encoded or heavily obfuscated argument string — a common Registry Run Key persistence pattern.",
-        "An Uninstall key entry with no corresponding installed files on disk, or an InstallDate immediately followed by execution of its own UninstallString — suggesting a dropper that installs, runs, and removes its own uninstall metadata to reduce visibility.",
+        "A Run key value invoking powershell.exe, cmd.exe, mshta.exe, or rundll32.exe with an encoded or heavily obfuscated argument string. A common Registry Run Key persistence pattern.",
+        "An Uninstall key entry with no corresponding installed files on disk, or an InstallDate immediately followed by execution of its own UninstallString. Suggesting a dropper that installs, runs, and removes its own uninstall metadata to reduce visibility.",
         "An Uninstall entry's Publisher/DisplayName spoofing a well-known, trusted vendor."
       ],
       "parsing_tools": [
@@ -154,13 +151,12 @@
       "attack_techniques": [
         "T1547.001"
       ],
-      "anti_forensic_notes": "RunOnce values are deleted by Windows automatically once the referenced command has executed, so a RunOnce-based dropper leaves nothing behind in this key after it fires — its absence is expected behavior, not evidence of tampering, and must be correlated with Prefetch or event-log data instead. An attacker may also manually delete a Run value once a longer-term persistence mechanism (e.g. a scheduled task or service) has taken over, leaving only the key's last-write time as a narrow window of evidence.",
+      "anti_forensic_notes": "RunOnce values are deleted by Windows automatically once the referenced command has executed, so a RunOnce-based dropper leaves nothing behind in this key after it fires. Its absence is expected behavior, not evidence of tampering, and must be correlated with Prefetch or event-log data instead. An attacker may also manually delete a Run value once a longer-term persistence mechanism (e.g. a scheduled task or service) has taken over, leaving only the key's last-write time as a narrow window of evidence.",
       "interpretation": "",
       "related_artifacts": [
         "ntuser-dat-hive",
         "system-hive"
       ],
-      "group": "registry-hives",
       "file": "data/artifacts/registry-hives/software-hive.json"
     },
     {
@@ -173,17 +169,17 @@
       "location": "HKLM\\SYSTEM (file: %SystemRoot%\\System32\\config\\SYSTEM)",
       "purpose": "Stores machine-wide configuration needed to boot and run Windows, kept as multiple redundant ControlSets. This entry focuses on services/drivers, network configuration, and hardware (USB) enumeration data; BAM and Shimcache also live under this hive but are documented as separate artifacts.",
       "key_fields": [
-        "Select\\Current — index of which ControlSetNNN is the active configuration this boot",
-        "CurrentControlSet\\Services\\<name>\\Start, Type, ErrorControl, ImagePath, DisplayName — per-service/driver configuration",
-        "CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\<GUID> — DhcpIPAddress, IPAddress, DhcpServer, DhcpDomain (historical network config per interface)",
-        "CurrentControlSet\\Enum\\USBSTOR\\<Device Class>\\<Serial Number> — USB mass-storage device instance keys, with a first-connect timestamp implicit in key creation and a last-write time on the device subkey",
-        "CurrentControlSet\\Control\\ComputerName\\ComputerName — hostname"
+        "Select\\Current: index of which ControlSetNNN is the active configuration this boot",
+        "CurrentControlSet\\Services\\<name>\\Start, Type, ErrorControl, ImagePath, DisplayName. Per-service/driver configuration",
+        "CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\<GUID>: DhcpIPAddress, IPAddress, DhcpServer, DhcpDomain (historical network config per interface)",
+        "CurrentControlSet\\Enum\\USBSTOR\\<Device Class>\\<Serial Number>: USB mass-storage device instance keys, with a first-connect timestamp implicit in key creation and a last-write time on the device subkey",
+        "CurrentControlSet\\Control\\ComputerName\\ComputerName: hostname"
       ],
       "normal_baseline": "Select\\Current typically points to the ControlSet the system last booted successfully with (which ControlSet number that is varies by machine and isn't itself meaningful). Installed services' Start/Type values match their documented purpose and vendor; ImagePath values point into Program Files or System32; USBSTOR entries correspond to devices the user/organization recognizes.",
       "anomalies": [
         "A service key with ImagePath pointing to a binary in a user-writable location (%AppData%, %Temp%, C:\\Windows\\Temp) rather than Program Files or System32.",
         "Start value changed to 0x2 (Automatic) on a service that should be Manual (0x3) or Disabled (0x4), so it now persists across reboots.",
-        "ImagePath referencing rundll32.exe, cmd.exe, mshta.exe, or powershell.exe with an encoded or unusually long argument string — classic service-based LOLBin persistence.",
+        "ImagePath referencing rundll32.exe, cmd.exe, mshta.exe, or powershell.exe with an encoded or unusually long argument string. Classic service-based LOLBin persistence.",
         "ImagePath on an existing, previously legitimate service silently changed (service hijacking), especially where DisplayName/Description no longer match what the binary actually is.",
         "A USBSTOR device's connect/last-write timestamp falling immediately before a mass file-copy, deletion, or exfiltration event of interest.",
         "Select\\Current pointing to a different ControlSet than Select\\Default/LastKnownGood around the time of an incident, indicating the system booted into an alternate/recovery configuration."
@@ -198,13 +194,12 @@
         "T1543.003",
         "T1200"
       ],
-      "anti_forensic_notes": "Deleting a malicious service key removes it from the active ControlSet's live view, but a non-active ControlSet, registry transaction logs, or unallocated hive slack space can still retain remnants until the hive is compacted. USBSTOR entries are not automatically cleared when a device is removed and persist indefinitely — their absence for a device an organization or witness says was used is itself suspicious and suggests deliberate key deletion.",
+      "anti_forensic_notes": "Deleting a malicious service key removes it from the active ControlSet's live view, but a non-active ControlSet, registry transaction logs, or unallocated hive slack space can still retain remnants until the hive is compacted. USBSTOR entries are not automatically cleared when a device is removed and persist indefinitely. Their absence for a device an organization or witness says was used is itself suspicious and suggests deliberate key deletion.",
       "interpretation": "",
       "related_artifacts": [
         "software-hive",
         "sam-hive"
       ],
-      "group": "registry-hives",
       "file": "data/artifacts/registry-hives/system-hive.json"
     },
     {
@@ -217,15 +212,15 @@
       "location": "Mounted as HKEY_CURRENT_USER\\Software\\Classes (a per-user view of HKEY_CLASSES_ROOT) while the user is logged on. File: %LocalAppData%\\Microsoft\\Windows\\UsrClass.dat (Vista and later; Windows XP path was %UserProfile%\\Local Settings\\Application Data\\Microsoft\\Windows\\UsrClass.dat)",
       "purpose": "A separate per-user hive, distinct from NTUSER.DAT, that holds the user-specific portion of the Classes registry: per-user COM class registrations and shell-extension data that override or supplement the machine-wide HKLM\\SOFTWARE\\Classes. It is also one of the two locations where Shellbags data is stored (the other being NTUSER.DAT on pre-Vista systems).",
       "key_fields": [
-        "Local Settings\\Software\\Microsoft\\Windows\\Shell\\BagMRU — folder paths/names visited in Explorer, tracked as a most-recently-used tree",
-        "Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bags — per-folder view settings (window size, position, view mode) referenced by BagMRU entries",
-        "CLSID\\<GUID> subkeys — per-user COM class registrations (e.g. shell extension handlers, context-menu/property-sheet handlers)",
+        "Local Settings\\Software\\Microsoft\\Windows\\Shell\\BagMRU: folder paths/names visited in Explorer, tracked as a most-recently-used tree",
+        "Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bags: per-folder view settings (window size, position, view mode) referenced by BagMRU entries",
+        "CLSID\\<GUID> subkeys: per-user COM class registrations (e.g. shell extension handlers, context-menu/property-sheet handlers)",
         "Wow6432Node mirror for 32-bit COM registrations on 64-bit Windows"
       ],
       "normal_baseline": "COM/CLSID entries correspond to installed, legitimate applications' shell-extension components (e.g. archive managers, cloud-sync icon overlays); BagMRU/Bags entries reflect folders the user is known to have browsed, including removable and network paths no longer present on the system.",
       "anomalies": [
-        "A CLSID entry registering a shell extension (context-menu handler, icon handler, property-sheet handler) whose InprocServer32 path points to a binary in a user-writable or unusual location rather than a normal application install directory — a known technique for gaining persistence that loads automatically whenever Explorer touches a file/folder.",
-        "BagMRU/Bags entries referencing paths on removable or network volumes that align with known data-staging or exfiltration locations, present even though the volume itself is no longer attached to the system — proving the folder was browsed at some point regardless of current volume presence.",
+        "A CLSID entry registering a shell extension (context-menu handler, icon handler, property-sheet handler) whose InprocServer32 path points to a binary in a user-writable or unusual location rather than a normal application install directory. A known technique for gaining persistence that loads automatically whenever Explorer touches a file/folder.",
+        "BagMRU/Bags entries referencing paths on removable or network volumes that align with known data-staging or exfiltration locations, present even though the volume itself is no longer attached to the system. Proving the folder was browsed at some point regardless of current volume presence.",
         "Shellbags entries showing folder access to a sensitive directory that the account has no legitimate business reason to browse."
       ],
       "parsing_tools": [
@@ -234,12 +229,11 @@
         "RegRipper"
       ],
       "attack_techniques": [],
-      "anti_forensic_notes": "Shellbags entries in this hive are not tied to a file's own metadata and are not cleared when the referenced folder or volume is deleted or removed, so they can outlive the evidence they point to — an analyst can prove a folder was accessed even after the folder, and the drive it was on, are both gone. Because the hive loads only for its owning user, correlating it correctly requires matching the hive to the right SID/profile.",
+      "anti_forensic_notes": "Shellbags entries in this hive are not tied to a file's own metadata and are not cleared when the referenced folder or volume is deleted or removed, so they can outlive the evidence they point to. An analyst can prove a folder was accessed even after the folder, and the drive it was on, are both gone. Because the hive loads only for its owning user, correlating it correctly requires matching the hive to the right SID/profile.",
       "interpretation": "",
       "related_artifacts": [
         "ntuser-dat-hive"
       ],
-      "group": "registry-hives",
       "file": "data/artifacts/registry-hives/usrclass-dat-hive.json"
     },
     {
@@ -252,20 +246,20 @@
       "location": "C:\\Windows\\AppCompat\\Programs\\Amcache.hve (standalone registry hive, plus Amcache.hve.LOG1/.LOG2 transaction logs in the same folder)",
       "purpose": "A registry hive maintained by the Microsoft Compatibility Appraiser / Inventory Collector that catalogs executables, installed applications, and loaded drivers seen on the system, recording each file's path, SHA-1 hash, and size. Because the entry is written independently of the file itself, it commonly survives after the underlying binary has been deleted, making it valuable evidence of program presence/first-run even post-deletion.",
       "key_fields": [
-        "LowerCaseLongPath — full file path of the executable",
-        "FileId — a 41-character value: literal prefix \"0000\" + the SHA-1 hex digest (hashed over roughly the first 31 MiB of the file)",
-        "KeyLastWriteTimestamp — registry last-write time of the entry; the closest available proxy for when the entry was first inventoried",
-        "LinkDate — PE header compile/link timestamp (attacker-controllable, not a filesystem time)",
-        "Size — file size in bytes",
-        "Publisher / Version / BinFileVersion — PE resource / code-signing metadata",
-        "ProgramId — links a file entry (InventoryApplicationFile) to its parent install record (InventoryApplication)"
+        "LowerCaseLongPath: full file path of the executable",
+        "FileId: a 41-character value: literal prefix \"0000\" + the SHA-1 hex digest (hashed over roughly the first 31 MiB of the file)",
+        "KeyLastWriteTimestamp: registry last-write time of the entry; the closest available proxy for when the entry was first inventoried",
+        "LinkDate: PE header compile/link timestamp (attacker-controllable, not a filesystem time)",
+        "Size: file size in bytes",
+        "Publisher / Version / BinFileVersion: PE resource / code-signing metadata",
+        "ProgramId: links a file entry (InventoryApplicationFile) to its parent install record (InventoryApplication)"
       ],
       "normal_baseline": "On Windows 10 1607+ / Windows 11, entries live under Root\\InventoryApplicationFile, Root\\InventoryApplication, and Root\\InventoryDriverBinary inside the hive (older Windows 7 SP1 / Windows 8.x builds instead use a legacy Root\\File\\{VolumeGUID}\\{FileRef} and Root\\Programs layout). A clean system accumulates entries for OS binaries, installed applications, and drivers over its lifetime, with plausible LinkDate values consistent with each vendor's known build/release dates and paths under Program Files, Windows, or System32.",
       "anomalies": [
         "Executable path under Temp, Downloads, AppData\\Local\\Temp, ProgramData, or another user-writable/unusual directory with no corresponding InventoryApplication install record",
         "FileId (SHA-1) matches a known-malicious hash, especially when the path is atypical for that hash's known-good usage",
-        "Amcache entry exists (proving the file was once present/executed) with no matching file on disk — evidence of a deleted binary, especially valuable when the same timeframe shows corroborating Prefetch, Shimcache, or BAM entries",
-        "LinkDate that postdates KeyLastWriteTimestamp, or is otherwise inconsistent with the rest of the file's metadata — a sign the PE compile timestamp was forged",
+        "Amcache entry exists (proving the file was once present/executed) with no matching file on disk. Evidence of a deleted binary, especially valuable when the same timeframe shows corroborating Prefetch, Shimcache, or BAM entries",
+        "LinkDate that postdates KeyLastWriteTimestamp, or is otherwise inconsistent with the rest of the file's metadata. A sign the PE compile timestamp was forged",
         "The same SHA-1 recorded across many hosts under different file names/paths, consistent with a single payload redeployed by an actor"
       ],
       "parsing_tools": [
@@ -281,7 +275,6 @@
         "prefetch",
         "bam-dam"
       ],
-      "group": "application-execution",
       "file": "data/artifacts/application-execution/amcache-hve.json"
     },
     {
@@ -294,30 +287,29 @@
       "location": "Pre-Windows 10 1809: HKLM\\SYSTEM\\CurrentControlSet\\Services\\bam\\UserSettings\\{SID} and HKLM\\SYSTEM\\CurrentControlSet\\Services\\dam\\UserSettings\\{SID}. Windows 10 1809 and later: HKLM\\SYSTEM\\CurrentControlSet\\Services\\bam\\State\\UserSettings\\{SID} and \\dam\\State\\UserSettings\\{SID} (a 'State' subkey was inserted into the path).",
       "purpose": "BAM is a Windows service that throttles background application activity to conserve battery/resources; as a side effect it records, per user SID, the full path of each executable that ran and the timestamp of its last execution. DAM is the equivalent mechanism for devices supporting Connected Standby (primarily mobile/tablet hardware). Both key their entries under the executing user's SID, giving analysts direct user attribution for a launched binary even though the data lives in the machine-wide SYSTEM hive.",
       "key_fields": [
-        "Value name — full path of the executable that was run",
-        "Value data — an 8-byte little-endian FILETIME embedded in the REG_BINARY value, representing the last execution time of that executable for that user",
-        "SID subkey — identifies which user account ran the executable"
+        "Value name: full path of the executable that was run",
+        "Value data: an 8-byte little-endian FILETIME embedded in the REG_BINARY value, representing the last execution time of that executable for that user",
+        "SID subkey: identifies which user account ran the executable"
       ],
       "normal_baseline": "Under each active user's SID subkey, a list of paths to applications that user has run recently (within roughly the last 7 days), covering normal OS components, shell integrations, and everyday applications launched from local disk.",
       "anomalies": [
         "Executable path under Temp, Downloads, or another user-writable/unusual directory attributed to a SID for a user who wouldn't normally run such tools",
-        "A BAM/DAM entry for an executable whose file no longer exists on disk (deleted after execution) — corroborate against Amcache/Prefetch/Shimcache for the same binary",
+        "A BAM/DAM entry for an executable whose file no longer exists on disk (deleted after execution). Corroborate against Amcache/Prefetch/Shimcache for the same binary",
         "Execution attributed to a SID inconsistent with the expected interactive user (e.g. a service account or a rarely-used local account) at an unusual time of day",
-        "Entries missing entirely for a period where other execution artifacts (Prefetch, Shimcache) show activity — since BAM/DAM only covers roughly the trailing 7 days and purges on reboot, absence does not by itself prove non-execution and must be time-correlated"
+        "Entries missing entirely for a period where other execution artifacts (Prefetch, Shimcache) show activity, since BAM/DAM only covers roughly the trailing 7 days and purges on reboot, absence does not by itself prove non-execution and must be time-correlated"
       ],
       "parsing_tools": [
         "Registry Explorer (Eric Zimmerman)",
         "RegRipper (bam.pl plugin)"
       ],
       "attack_techniques": [],
-      "anti_forensic_notes": "BAM/DAM entries are automatically purged roughly 7 days after the recorded activity, and an entry is removed once its associated executable no longer exists at its original location, and again on the next reboot — so this artifact has a naturally short retention window even with no attacker interference. It only records executables launched from local storage; programs run from removable media or network shares are not captured. Because the data lives in the live SYSTEM hive rather than a separate log, wiping it requires direct registry-key deletion (an unusual, detectable action) rather than simple file deletion.",
+      "anti_forensic_notes": "BAM/DAM entries are automatically purged roughly 7 days after the recorded activity, and an entry is removed once its associated executable no longer exists at its original location, and again on the next reboot, so this artifact has a naturally short retention window even with no attacker interference. It only records executables launched from local storage; programs run from removable media or network shares are not captured. Because the data lives in the live SYSTEM hive rather than a separate log, wiping it requires direct registry-key deletion (an unusual, detectable action) rather than simple file deletion.",
       "interpretation": "",
       "related_artifacts": [
         "amcache-hve",
         "shimcache",
         "prefetch"
       ],
-      "group": "application-execution",
       "file": "data/artifacts/application-execution/bam-dam.json"
     },
     {
@@ -357,7 +349,6 @@
         "software-hive",
         "ntuser-dat-hive"
       ],
-      "group": "application-execution",
       "file": "data/artifacts/application-execution/capabilityaccessmanager.json"
     },
     {
@@ -396,7 +387,6 @@
         "userassist",
         "user-typed-paths"
       ],
-      "group": "application-execution",
       "file": "data/artifacts/application-execution/commands-executed-in-run-dialog.json"
     },
     {
@@ -420,19 +410,18 @@
         "Target file path pointing to a staging or exfiltration directory"
       ],
       "parsing_tools": [
-        "JLECmd (Eric Zimmerman) — e.g. JLECmd.exe -d AutomaticDestinations --csv output-folder --csvf JumpLists.csv",
+        "JLECmd (Eric Zimmerman): e.g. JLECmd.exe -d AutomaticDestinations --csv output-folder --csvf JumpLists.csv",
         "JumpList Explorer (Eric Zimmerman)",
         "TZWorks jmp",
         "Velociraptor (windows.forensics.jumplists artifact)"
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "The referenced file does not need to still exist for the Jump List entry to remain, aiding recovery after deletion; can be individually pruned via 'Remove from this list'.",
-      "interpretation": "A Jump List entry is created the first time an application is used by that user account — it does NOT record whether an application is currently pinned to the taskbar, so it cannot be used to determine pinned-app status. Best used in combination with Prefetch, LNK files, RecentDocs, and Shellbags to strengthen an activity timeline rather than relied on alone.",
+      "interpretation": "A Jump List entry is created the first time an application is used by that user account. It does NOT record whether an application is currently pinned to the taskbar, so it cannot be used to determine pinned-app status. Best used in combination with Prefetch, LNK files, RecentDocs, and Shellbags to strengthen an activity timeline rather than relied on alone.",
       "related_artifacts": [
         "usrclass-dat-hive",
         "shortcut-lnk-files"
       ],
-      "group": "application-execution",
       "file": "data/artifacts/application-execution/jump-lists.json"
     },
     {
@@ -468,7 +457,6 @@
         "shell-bags",
         "user-typed-paths"
       ],
-      "group": "application-execution",
       "file": "data/artifacts/application-execution/last-visited-mru.json"
     },
     {
@@ -482,22 +470,22 @@
       "purpose": "Windows' prefetcher records which files and directories an executable references during its first ~10 seconds of launch, storing that data in a .pf file so future launches can be sped up by pre-loading those resources. Because a .pf file is created/updated only when the named executable actually runs, Prefetch is one of the strongest single-artifact indicators of program execution and its history (run count, run times).",
       "key_fields": [
         "Executable name (limited to 29 characters in the filename)",
-        "Run count — total number of times the executable has been launched since the .pf file was created",
+        "Run count: total number of times the executable has been launched since the .pf file was created",
         "Last-run timestamp, plus (format version 26 and later, i.e. Windows 8 and newer) up to 7 additional previous run timestamps for a maximum of 8 stored execution times; format version 23 (Vista/Windows 7) records only the single last-run timestamp with no run history array",
-        "Volume information — source volume path, serial number, and creation time",
+        "Volume information: source volume path, serial number, and creation time",
         "List of files and directories referenced during the executable's startup phase",
-        "Prefetch file format version number (17 = XP/2003, 23 = Vista/7/2008/2012, 26 = Windows 8/8.1, 30 = Windows 10) — identifies which decompression/parsing logic applies (Windows 10 .pf files are compressed and require Windows 8+ APIs to decompress)"
+        "Prefetch file format version number (17 = XP/2003, 23 = Vista/7/2008/2012, 26 = Windows 8/8.1, 30 = Windows 10). Identifies which decompression/parsing logic applies (Windows 10 .pf files are compressed and require Windows 8+ APIs to decompress)"
       ],
       "normal_baseline": "One .pf file per distinct executable path that has been run, up to a Microsoft-documented cap of 128 retained files on Windows XP/7 (oldest purged once the cap is reached) or up to 1,024 files on Windows 8 and later; run counts and run-time clusters that line up with normal user/application behavior (e.g. daily logon scripts, frequently used applications).",
       "anomalies": [
         "A .pf file for an executable run from a Temp, Downloads, or other user-writable/unusual path, especially with a low run count consistent with a one-off tool execution",
         "A high run count concentrated in a very short time window, consistent with automated/scripted repeated execution rather than normal interactive use",
-        "Referenced-files list inside the .pf naming unusual DLLs, staging directories, or files that no longer exist on disk — useful for recovering paths of since-deleted malware components",
-        "A .pf file whose executable no longer exists at the referenced path (deleted post-execution) while the .pf itself remains — direct evidence of a since-removed binary having run",
-        "Complete absence of expected Prefetch activity on a system that should have it enabled — always confirm EnablePrefetcher's registry value and whether the boot volume is an SSD (which disables prefetching by default) before treating an empty/sparse Prefetch folder as suspicious"
+        "Referenced-files list inside the .pf naming unusual DLLs, staging directories, or files that no longer exist on disk. Useful for recovering paths of since-deleted malware components",
+        "A .pf file whose executable no longer exists at the referenced path (deleted post-execution) while the .pf itself remains. Direct evidence of a since-removed binary having run",
+        "Complete absence of expected Prefetch activity on a system that should have it enabled. Always confirm EnablePrefetcher's registry value and whether the boot volume is an SSD (which disables prefetching by default) before treating an empty/sparse Prefetch folder as suspicious"
       ],
       "parsing_tools": [
-        "PECmd (Eric Zimmerman) — e.g. PECmd.exe -d \"C:\\Windows\\Prefetch\" --csv output-folder --csvf prefetch.csv",
+        "PECmd (Eric Zimmerman): e.g. PECmd.exe -d \"C:\\Windows\\Prefetch\" --csv output-folder --csvf prefetch.csv",
         "WinPrefetchView (Nirsoft)",
         "TZWorks Windows Prefetch Parser (pf)",
         "Velociraptor (windows.forensics.prefetch artifact)"
@@ -505,14 +493,13 @@
       "attack_techniques": [
         "T1070.004"
       ],
-      "anti_forensic_notes": "Prefetch files are ordinary files on disk (not registry-embedded), so they can be deleted individually or in bulk with simple filesystem operations — a documented anti-forensic technique corresponding to ATT&CK T1070.004 (Indicator Removal: File Deletion). Deletion of .pf files does not remove all trace, however: the NTFS Master File Table ($MFT) retains a record of the deleted file's name, size, and timestamps, and the $UsnJrnl records the deletion event itself. Because prefetching is off by default on SSD-booted systems and can be disabled entirely via EnablePrefetcher, a sparse or empty Prefetch folder is not inherently suspicious and must be evaluated against the system's actual configuration before being treated as evidence of tampering.",
-      "interpretation": "Combine Prefetch with SRUM, BAM/DAM, and UserAssist for a fuller execution story — each has different retention limits and blind spots, so the overlap is what makes the finding solid. The first-run time is only an approximation: it's derived from the .pf file's own creation time minus up to ~10 seconds, not a directly recorded field.",
+      "anti_forensic_notes": "Prefetch files are ordinary files on disk (not registry-embedded), so they can be deleted individually or in bulk with simple filesystem operations. A documented anti-forensic technique corresponding to ATT&CK T1070.004 (Indicator Removal: File Deletion). Deletion of .pf files does not remove all trace, however: the NTFS Master File Table ($MFT) retains a record of the deleted file's name, size, and timestamps, and the $UsnJrnl records the deletion event itself. Because prefetching is off by default on SSD-booted systems and can be disabled entirely via EnablePrefetcher, a sparse or empty Prefetch folder is not inherently suspicious and must be evaluated against the system's actual configuration before being treated as evidence of tampering.",
+      "interpretation": "Combine Prefetch with SRUM, BAM/DAM, and UserAssist for a fuller execution story. Each has different retention limits and blind spots, so the overlap is what makes the finding solid. The first-run time is only an approximation: it's derived from the .pf file's own creation time minus up to ~10 seconds, not a directly recorded field.",
       "related_artifacts": [
         "amcache-hve",
         "shimcache",
         "bam-dam"
       ],
-      "group": "application-execution",
       "file": "data/artifacts/application-execution/prefetch.json"
     },
     {
@@ -528,14 +515,14 @@
         "File full path",
         "$STANDARD_INFORMATION last-modified timestamp of the file (NOT a run time)",
         "File size (present on some Windows versions)",
-        "Process Execution Flag — present on Windows Vista, 7, Server 2008, and Server 2012 only; TRUE indicates the entry reflects actual execution, FALSE indicates the file was merely referenced (e.g. via directory browsing by the Application Experience Lookup Service) without running",
+        "Process Execution Flag: present on Windows Vista, 7, Server 2008, and Server 2012 only; TRUE indicates the entry reflects actual execution, FALSE indicates the file was merely referenced (e.g. via directory browsing by the Application Experience Lookup Service) without running",
         "Cache entry position/order (reflects last-update order, exploited for approximate sequencing)"
       ],
       "normal_baseline": "A large list of legitimate OS and application binaries with last-modified timestamps matching their known install/patch dates, generally clustered around Windows Update and application install events; entry order roughly tracks last-referenced order rather than true execution order.",
       "anomalies": [
         "Entry for an executable in a Temp, Downloads, or other user-writable path with a last-modified timestamp inconsistent with any known legitimate install",
-        "On Windows Vista/7/2008/2012, an entry with the Process Execution Flag set to TRUE for a binary in a suspicious location — a stronger indicator of actual execution than presence alone",
-        "A single-use or renamed binary appearing once with no corresponding Prefetch, Amcache, or event-log evidence of execution — consistent with a tool that was staged/inspected but not run, or with an execution artifact that was separately cleared",
+        "On Windows Vista/7/2008/2012, an entry with the Process Execution Flag set to TRUE for a binary in a suspicious location. A stronger indicator of actual execution than presence alone",
+        "A single-use or renamed binary appearing once with no corresponding Prefetch, Amcache, or event-log evidence of execution. Consistent with a tool that was staged/inspected but not run, or with an execution artifact that was separately cleared",
         "Timestamp manipulation: because the cached time is the file's $STANDARD_INFORMATION last-modified value (attacker-controllable via timestomping), a suspiciously 'clean' or backdated last-modified time on a malicious binary should be cross-checked against $FILE_NAME timestamps or other artifacts"
       ],
       "parsing_tools": [
@@ -543,14 +530,13 @@
         "ShimCacheParser (Mandiant)"
       ],
       "attack_techniques": [],
-      "anti_forensic_notes": "Critical version-dependent caveat: Shimcache reliability as proof of execution has changed across Windows releases. On Windows XP/2003 there is no execution flag at all, so presence alone was historically treated as a rough proxy for execution. On Windows Vista, 7, Server 2008, and Server 2012 a Process Execution Flag was added that distinguishes actual execution (TRUE) from mere presence, e.g. directory browsing (FALSE) — though Mandiant notes the flag's true internal semantics were never officially documented by Microsoft. On Windows 8 and later the execution-flag behavior changed again and is widely reported as unreliable/removed, meaning an entry can exist for a file that was never executed. Because of this, Shimcache should never be used alone to prove execution on modern Windows — always corroborate with Prefetch, Amcache, or BAM/DAM. The cache itself lives in memory and is only flushed to the registry hive periodically (typically at shutdown), so a hard power-off can lose recent updates, and clearing/rebuilding it requires kernel-level access rather than a simple deletion.",
+      "anti_forensic_notes": "Critical version-dependent caveat: Shimcache reliability as proof of execution has changed across Windows releases. On Windows XP/2003 there is no execution flag at all, so presence alone was historically treated as a rough proxy for execution. On Windows Vista, 7, Server 2008, and Server 2012 a Process Execution Flag was added that distinguishes actual execution (TRUE) from mere presence, e.g. directory browsing (FALSE), though Mandiant notes the flag's true internal semantics were never officially documented by Microsoft. On Windows 8 and later the execution-flag behavior changed again and is widely reported as unreliable/removed, meaning an entry can exist for a file that was never executed. Because of this, Shimcache should never be used alone to prove execution on modern Windows. Always corroborate with Prefetch, Amcache, or BAM/DAM. The cache itself lives in memory and is only flushed to the registry hive periodically (typically at shutdown), so a hard power-off can lose recent updates, and clearing/rebuilding it requires kernel-level access rather than a simple deletion.",
       "interpretation": "",
       "related_artifacts": [
         "amcache-hve",
         "prefetch",
         "bam-dam"
       ],
-      "group": "application-execution",
       "file": "data/artifacts/application-execution/shimcache.json"
     },
     {
@@ -567,7 +553,7 @@
         "Timestamp",
         "BytesSent/BytesRecvd",
         "UserSID",
-        "Table name/identifier mappings stored in SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SRUM\\Extensions — needed to correlate SRUDB.dat's internal table GUIDs back to what they actually represent"
+        "Table name/identifier mappings stored in SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SRUM\\Extensions. Needed to correlate SRUDB.dat's internal table GUIDs back to what they actually represent"
       ],
       "normal_baseline": "Reflects normal application and network usage; retention commonly cited as 30-60 days depending on configuration.",
       "anomalies": [
@@ -575,18 +561,17 @@
         "Execution record for an application with no matching Prefetch/Amcache entry"
       ],
       "parsing_tools": [
-        "SRUM-DUMP (Mark Baggett) — e.g. srum_dump.exe -i SRUDB.dat -o output-folder -r SOFTWARE -f xls",
-        "SRUMECmd (Eric Zimmerman) — e.g. SrumECmd.exe -f SRUDB.dat -r SOFTWARE --csv output-folder",
+        "SRUM-DUMP (Mark Baggett): e.g. srum_dump.exe -i SRUDB.dat -o output-folder -r SOFTWARE -f xls",
+        "SRUMECmd (Eric Zimmerman): e.g. SrumECmd.exe -f SRUDB.dat -r SOFTWARE --csv output-folder",
         "KAPE + SRUM module",
         "Velociraptor (windows.forensics.srum artifact)"
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "SRUDB.dat can be deleted directly and Windows will recreate an empty one at next write, so a suspiciously short-lived SRUM history around an incident is itself a signal.",
-      "interpretation": "Entries are written into the database in periodic (roughly hourly) blocks rather than at the moment activity occurs, so the exact time an action happened cannot be pinned down from SRUM alone — treat its timestamps as approximate. SRUDB.dat is also not guaranteed to be flushed to disk on every shutdown, so the most recent activity before a crash or abrupt power-off may be missing entirely. Parsing the SOFTWARE hive alongside SRUDB.dat (most tools accept both together) is required to resolve the raw table GUIDs into human-readable field names.",
+      "interpretation": "Entries are written into the database in periodic (roughly hourly) blocks rather than at the moment activity occurs, so the exact time an action happened cannot be pinned down from SRUM alone. Treat its timestamps as approximate. SRUDB.dat is also not guaranteed to be flushed to disk on every shutdown, so the most recent activity before a crash or abrupt power-off may be missing entirely. Parsing the SOFTWARE hive alongside SRUDB.dat (most tools accept both together) is required to resolve the raw table GUIDs into human-readable field names.",
       "related_artifacts": [
         "prefetch"
       ],
-      "group": "application-execution",
       "file": "data/artifacts/application-execution/srum.json"
     },
     {
@@ -625,7 +610,6 @@
         "bam-dam",
         "prefetch"
       ],
-      "group": "application-execution",
       "file": "data/artifacts/application-execution/task-bar-feature-usage.json"
     },
     {
@@ -666,7 +650,6 @@
         "shell-bags",
         "recent-files"
       ],
-      "group": "application-execution",
       "file": "data/artifacts/application-execution/userassist.json"
     },
     {
@@ -706,7 +689,6 @@
         "prefetch",
         "userassist"
       ],
-      "group": "application-execution",
       "file": "data/artifacts/application-execution/windows-10-timeline.json"
     },
     {
@@ -748,7 +730,6 @@
         "shell-bags",
         "windows-search-database"
       ],
-      "group": "file-and-folder-opening",
       "file": "data/artifacts/file-and-folder-opening/internet-explorer-file-urls.json"
     },
     {
@@ -783,7 +764,6 @@
         "office-recent-files",
         "office-trust-records"
       ],
-      "group": "file-and-folder-opening",
       "file": "data/artifacts/file-and-folder-opening/ms-word-reading-locations.json"
     },
     {
@@ -818,7 +798,6 @@
         "office-recent-files",
         "application-eventlog"
       ],
-      "group": "file-and-folder-opening",
       "file": "data/artifacts/file-and-folder-opening/office-oalerts.json"
     },
     {
@@ -855,7 +834,6 @@
         "office-trust-records",
         "open-save-mru"
       ],
-      "group": "file-and-folder-opening",
       "file": "data/artifacts/file-and-folder-opening/office-recent-files.json"
     },
     {
@@ -893,7 +871,6 @@
         "ms-word-reading-locations",
         "motw-zone-identifier"
       ],
-      "group": "file-and-folder-opening",
       "file": "data/artifacts/file-and-folder-opening/office-trust-records.json"
     },
     {
@@ -932,7 +909,6 @@
         "recent-files",
         "office-recent-files"
       ],
-      "group": "file-and-folder-opening",
       "file": "data/artifacts/file-and-folder-opening/open-save-mru.json"
     },
     {
@@ -962,7 +938,7 @@
       "parsing_tools": [
         "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
         "RegRipper (recentdocs.pl plugin)",
-        "KAPE — e.g. kape.exe --msource source-volume --mdest output-folder --module RECmd_UserActivity --mef csv",
+        "KAPE: e.g. kape.exe --msource source-volume --mdest output-folder --module RECmd_UserActivity --mef csv",
         "Velociraptor (windows.registry.recentdocs artifact)"
       ],
       "attack_techniques": [
@@ -974,7 +950,6 @@
         "shell-bags",
         "userassist"
       ],
-      "group": "file-and-folder-opening",
       "file": "data/artifacts/file-and-folder-opening/recent-files.json"
     },
     {
@@ -1014,7 +989,6 @@
         "recent-files",
         "usb-device-identification"
       ],
-      "group": "file-and-folder-opening",
       "file": "data/artifacts/file-and-folder-opening/shell-bags.json"
     },
     {
@@ -1039,18 +1013,17 @@
         "LNK referencing a file staged in a temp/exfil directory"
       ],
       "parsing_tools": [
-        "LECmd (Eric Zimmerman) — e.g. LECmd.exe -d \"%AppData%\\Microsoft\\Windows\\Recent\" --csv output-folder --csvf LNK.csv",
+        "LECmd (Eric Zimmerman): e.g. LECmd.exe -d \"%AppData%\\Microsoft\\Windows\\Recent\" --csv output-folder --csvf LNK.csv",
         "TZWorks lp",
         "Velociraptor (windows.forensics.lnk artifact)"
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "Persists after the target file is deleted, preserving path and volume evidence; the TrackerDataBlock MAC address can help attribute the originating machine when a file was moved across systems.",
-      "interpretation": "A LNK file is created whenever a file or folder is created or opened, and Windows also creates LNK files for the parent and grandparent folders in the same operation — so the mere existence of a LNK file does not by itself prove the target file was actually opened, nor whether its contents were modified. Always interpret alongside other artifacts (Jump Lists, MRU keys) rather than in isolation.",
+      "interpretation": "A LNK file is created whenever a file or folder is created or opened, and Windows also creates LNK files for the parent and grandparent folders in the same operation, so the mere existence of a LNK file does not by itself prove the target file was actually opened, nor whether its contents were modified. Always interpret alongside other artifacts (Jump Lists, MRU keys) rather than in isolation.",
       "related_artifacts": [
         "jump-lists",
         "usrclass-dat-hive"
       ],
-      "group": "file-and-folder-opening",
       "file": "data/artifacts/file-and-folder-opening/shortcut-lnk-files.json"
     },
     {
@@ -1090,7 +1063,6 @@
         "usn-journal",
         "shell-bags"
       ],
-      "group": "deleted-items-and-file-existence",
       "file": "data/artifacts/deleted-items-and-file-existence/recycle-bin.json"
     },
     {
@@ -1127,7 +1099,6 @@
         "user-typed-paths",
         "shell-bags"
       ],
-      "group": "deleted-items-and-file-existence",
       "file": "data/artifacts/deleted-items-and-file-existence/search-wordwheelquery.json"
     },
     {
@@ -1165,7 +1136,6 @@
         "windows-search-database",
         "shell-bags"
       ],
-      "group": "deleted-items-and-file-existence",
       "file": "data/artifacts/deleted-items-and-file-existence/thumbcache.json"
     },
     {
@@ -1204,7 +1174,6 @@
         "windows-search-database",
         "shell-bags"
       ],
-      "group": "deleted-items-and-file-existence",
       "file": "data/artifacts/deleted-items-and-file-existence/thumbs-db.json"
     },
     {
@@ -1242,7 +1211,6 @@
         "commands-executed-in-run-dialog",
         "shell-bags"
       ],
-      "group": "deleted-items-and-file-existence",
       "file": "data/artifacts/deleted-items-and-file-existence/user-typed-paths.json"
     },
     {
@@ -1282,7 +1250,6 @@
         "recent-files",
         "outlook-ost-pst"
       ],
-      "group": "deleted-items-and-file-existence",
       "file": "data/artifacts/deleted-items-and-file-existence/windows-search-database.json"
     },
     {
@@ -1293,13 +1260,13 @@
       "os": "Windows",
       "os_min": "N/A (application-level)",
       "location": "Firefox: places.sqlite, formhistory.sqlite ; Chrome/Edge: History (keyword_search_terms table), Web Data (autofill table), Shortcuts, Network Action Predictor, Login Data",
-      "purpose": "Aggregates data a user has typed into the browser across several distinct databases — search-engine queries, web form entries, Omnibox/address-bar input, letter-by-letter typed predictions, and typed credentials.",
+      "purpose": "Aggregates data a user has typed into the browser across several distinct databases. Search-engine queries, web form entries, Omnibox/address-bar input, letter-by-letter typed predictions, and typed credentials.",
       "key_fields": [
-        "keyword_search_terms table (History) — items typed into search engines",
-        "autofill table (Web Data) — items typed into web forms",
-        "Shortcuts table — items typed in the Omnibox URL bar",
-        "Network Action Predictor — records what was typed letter by letter",
-        "Login Data — inputted user credentials",
+        "keyword_search_terms table (History): items typed into search engines",
+        "autofill table (Web Data): items typed into web forms",
+        "Shortcuts table: items typed in the Omnibox URL bar",
+        "Network Action Predictor: records what was typed letter by letter",
+        "Login Data: inputted user credentials",
         "moz_formhistory (Firefox formhistory.sqlite)"
       ],
       "normal_baseline": "Typed terms and form entries reflect routine work tasks and known account usage for the profile owner.",
@@ -1322,7 +1289,6 @@
         "firefox-browser-artifacts",
         "stored-credentials"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/auto-complete-data.json"
     },
     {
@@ -1353,13 +1319,12 @@
       "attack_techniques": [
         "T1217"
       ],
-      "anti_forensic_notes": "Firefox retains multiple dated backups in bookmarkbackups\\, and Chrome/Edge keep a .bak/.msbak copy of the prior save, so deleting a single live bookmark file does not remove these backup copies — recently-deleted bookmarks are frequently recoverable.",
-      "interpretation": "Firefox's bookmarkbackups folder can hold multiple backup copies of the entire bookmark set in JSON format inside a compressed jsonlz4 container, letting an analyst diff bookmark state across dates. Chromium Bookmark files are plain JSON. Not all bookmarks are user-generated intent to visit — a URL can be bookmarked and never actually visited, so a bookmark alone is not proof of a visit.",
+      "anti_forensic_notes": "Firefox retains multiple dated backups in bookmarkbackups\\, and Chrome/Edge keep a .bak/.msbak copy of the prior save, so deleting a single live bookmark file does not remove these backup copies. Recently-deleted bookmarks are frequently recoverable.",
+      "interpretation": "Firefox's bookmarkbackups folder can hold multiple backup copies of the entire bookmark set in JSON format inside a compressed jsonlz4 container, letting an analyst diff bookmark state across dates. Chromium Bookmark files are plain JSON. Not all bookmarks are user-generated intent to visit. A URL can be bookmarked and never actually visited, so a bookmark alone is not proof of a visit.",
       "related_artifacts": [
         "chrome-edge-browser-artifacts",
         "firefox-browser-artifacts"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/bookmarks.json"
     },
     {
@@ -1376,7 +1341,7 @@
         "Source website and referring page",
         "Download start and end times",
         "File system save location",
-        "State information — success or failure"
+        "State information: success or failure"
       ],
       "normal_baseline": "Downloads correspond to work-related documents/installers from known sources.",
       "anomalies": [
@@ -1389,14 +1354,13 @@
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "Downloads table entries can be cleared alongside general history clearing; the downloaded file itself, if kept, will separately carry Zone.Identifier MOTW evidence of its origin.",
-      "interpretation": "This entry is downloads specifically; the browser's separate crash-recovery tab/window state is its own dedicated `session-restore` artifact, not part of this one — the two used to be combined here but were split to match the poster's own separate boxes.",
+      "interpretation": "This entry is downloads specifically; the browser's separate crash-recovery tab/window state is its own dedicated `session-restore` artifact, not part of this one. The two used to be combined here but were split to match the poster's own separate boxes.",
       "related_artifacts": [
         "chrome-edge-browser-artifacts",
         "motw-zone-identifier",
         "session-restore",
         "history-and-download-history"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/browser-downloads.json"
     },
     {
@@ -1428,12 +1392,11 @@
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "Preferences/prefs.js is a live file rewritten frequently during normal use, so it reflects only the current/recent configuration; prior settings changes are not versioned unless captured through other means (backups, Volume Shadow Copies).",
-      "interpretation": "Firefox's prefs.js exposes sync status, last sync time, and which artifact categories (history, passwords, bookmarks, etc.) are configured to sync — useful for tracing data that may have propagated to another device. Chrome's per_host_zoom_levels, media_engagement, and site_engagement values are indirect but useful proxies for how much a user actually interacted with a given site, beyond a simple visit count. Edge preferences additionally carry account_info and clear_data_on_exit/sync settings.",
+      "interpretation": "Firefox's prefs.js exposes sync status, last sync time, and which artifact categories (history, passwords, bookmarks, etc.) are configured to sync. Useful for tracing data that may have propagated to another device. Chrome's per_host_zoom_levels, media_engagement, and site_engagement values are indirect but useful proxies for how much a user actually interacted with a given site, beyond a simple visit count. Edge preferences additionally carry account_info and clear_data_on_exit/sync settings.",
       "related_artifacts": [
         "chrome-edge-browser-artifacts",
         "firefox-browser-artifacts"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/browser-preferences.json"
     },
     {
@@ -1463,14 +1426,13 @@
         "NirSoft MZCacheView (Firefox)"
       ],
       "attack_techniques": [],
-      "anti_forensic_notes": "Cache is typically cleared separately from History in browser \"clear data\" dialogs unless a user explicitly selects it, so an emptied History with an intact Cache (or vice versa) is common — each should be checked independently.",
-      "interpretation": "Cache provides a genuine snapshot in time of what a user was looking at, including the literal files rendered (images, scripts) rather than just a URL reference — useful for confirming exactly what content a page displayed at a given moment. It is tied to the specific local user account whose profile holds it, and its two timestamps (first-saved vs. last-viewed) can separate a one-time visit from repeated return visits.",
+      "anti_forensic_notes": "Cache is typically cleared separately from History in browser \"clear data\" dialogs unless a user explicitly selects it, so an emptied History with an intact Cache (or vice versa) is common. Each should be checked independently.",
+      "interpretation": "Cache provides a genuine snapshot in time of what a user was looking at, including the literal files rendered (images, scripts) rather than just a URL reference. Useful for confirming exactly what content a page displayed at a given moment. It is tied to the specific local user account whose profile holds it, and its two timestamps (first-saved vs. last-viewed) can separate a one-time visit from repeated return visits.",
       "related_artifacts": [
         "chrome-edge-browser-artifacts",
         "firefox-browser-artifacts",
         "browser-downloads"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/cache.json"
     },
     {
@@ -1506,7 +1468,6 @@
         "firefox-browser-artifacts",
         "history-and-download-history"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/chrome-edge-browser-artifacts.json"
     },
     {
@@ -1543,13 +1504,12 @@
         "T1539"
       ],
       "anti_forensic_notes": "Clearing cookies through browser settings removes the underlying SQLite rows, but a stolen/exported session cookie used elsewhere (pass-the-cookie) leaves no trace in the victim's own cookie store, so local absence does not rule out prior capture and reuse.",
-      "interpretation": "Cookies establish that a site was visited and, via their secure/httponly flags and expiration, how the site intended the cookie to be used (session-only vs. persistent, script-accessible vs. not) along with origin site and last-access time. Session/authentication cookies are the direct target of session-hijacking attacks — an adversary holding a valid, unexpired session cookie can access an account without ever touching the stored password.",
+      "interpretation": "Cookies establish that a site was visited and, via their secure/httponly flags and expiration, how the site intended the cookie to be used (session-only vs. persistent, script-accessible vs. not) along with origin site and last-access time. Session/authentication cookies are the direct target of session-hijacking attacks. An adversary holding a valid, unexpired session cookie can access an account without ever touching the stored password.",
       "related_artifacts": [
         "chrome-edge-browser-artifacts",
         "firefox-browser-artifacts",
         "session-restore"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/cookies.json"
     },
     {
@@ -1581,7 +1541,6 @@
       "related_artifacts": [
         "chrome-edge-browser-artifacts"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/extensions.json"
     },
     {
@@ -1614,7 +1573,6 @@
         "chrome-edge-browser-artifacts",
         "history-and-download-history"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/firefox-browser-artifacts.json"
     },
     {
@@ -1630,7 +1588,7 @@
         "Visit URL and page title",
         "Visit timestamp",
         "Visit count / frequency of visits",
-        "Profile identifier — look for multiple Chromium profiles (\"Default\", \"Profile 1\", etc.)"
+        "Profile identifier: look for multiple Chromium profiles (\"Default\", \"Profile 1\", etc.)"
       ],
       "normal_baseline": "History entries correspond to expected work-related or personal browsing consistent with the user's role, spread across normal business hours.",
       "anomalies": [
@@ -1645,14 +1603,13 @@
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "Web browser artifacts are stored per local user account, so history for one account tells you nothing about another; clearing history removes rows from the SQLite tables but does not necessarily overwrite the underlying database pages, so carving deleted records can sometimes recover cleared history.",
-      "interpretation": "Always check for multiple profiles in Chromium-based browsers before concluding history is complete — a single \"History\" file query against the wrong profile folder silently misses activity in another profile. This is the general browsing-history counterpart to the more specific `browser-downloads` (download manager metadata) and `media-history` (audio/video playback) entries.",
+      "interpretation": "Always check for multiple profiles in Chromium-based browsers before concluding history is complete. A single \"History\" file query against the wrong profile folder silently misses activity in another profile. This is the general browsing-history counterpart to the more specific `browser-downloads` (download manager metadata) and `media-history` (audio/video playback) entries.",
       "related_artifacts": [
         "chrome-edge-browser-artifacts",
         "firefox-browser-artifacts",
         "browser-downloads",
         "media-history"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/history-and-download-history.json"
     },
     {
@@ -1677,16 +1634,15 @@
         "Recently modified File System data timestamped within a known compromise window"
       ],
       "parsing_tools": [
-        "ccl_chrome_indexeddb (CCL / obsidianforensics — includes a FileSystem API module)"
+        "ccl_chrome_indexeddb (CCL / obsidianforensics: includes a FileSystem API module)"
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "Clearing \"site data\" in browser settings removes File System storage for that origin; because it is a lesser-known storage mechanism, it is less commonly targeted for anti-forensic cleanup than history or cookies and can retain data longer as a result.",
-      "interpretation": "A LevelDB database within the File System folder maps visited URLs/origins to the numbered subfolders that actually hold the stored files. Data splits between \"t\" (temporary, browser-managed, evictable) and \"p\" (permanent, explicitly requested by the site) storage — content in permanent storage reflects a more deliberate site action and is generally more forensically interesting.",
+      "interpretation": "A LevelDB database within the File System folder maps visited URLs/origins to the numbered subfolders that actually hold the stored files. Data splits between \"t\" (temporary, browser-managed, evictable) and \"p\" (permanent, explicitly requested by the site) storage. Content in permanent storage reflects a more deliberate site action and is generally more forensically interesting.",
       "related_artifacts": [
         "chrome-edge-browser-artifacts",
         "html5-web-storage"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/html5-filesystem.json"
     },
     {
@@ -1697,7 +1653,7 @@
       "os": "Windows",
       "os_min": "N/A (application-level)",
       "location": "Firefox: %USERPROFILE%\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\<randomtext>.default\\webappstore.sqlite ; Chrome: %USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\<Profile>\\Local Storage ; Edge: %USERPROFILE%\\AppData\\Local\\Microsoft\\Edge\\User Data\\<Profile>\\Local Storage",
-      "purpose": "Per-domain, text-based persistent storage (up to 10MB per domain) that websites use for state and tracking data — functionally a \"super cookie\" that outlives typical cookie settings.",
+      "purpose": "Per-domain, text-based persistent storage (up to 10MB per domain) that websites use for state and tracking data. Functionally a \"super cookie\" that outlives typical cookie settings.",
       "key_fields": [
         "Domain/origin key",
         "Stored key-value text data",
@@ -1711,18 +1667,17 @@
         "Storage entries encoding obfuscated, base64, or otherwise encoded script content rather than typical application state"
       ],
       "parsing_tools": [
-        "ccl_chrome_indexeddb (CCL / obsidianforensics — LevelDB Local Storage parser)",
+        "ccl_chrome_indexeddb (CCL / obsidianforensics: LevelDB Local Storage parser)",
         "DB Browser for SQLite (Firefox webappstore.sqlite)"
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "Web Storage is cleared only when a user clears \"site data\" (not just cookies/history) or removes the profile, so it survives many routine cleanup actions and is less commonly targeted precisely because it is less well known than cookies.",
-      "interpretation": "Chrome and Edge store Local Storage as LevelDB databases — a binary key-value store requiring a LevelDB-aware parser rather than a text editor, since keys can remain in unflushed .log files. Firefox uses SQLite (webappstore.sqlite). Legacy IE/EdgeHTML stored the equivalent data in XML files.",
+      "interpretation": "Chrome and Edge store Local Storage as LevelDB databases: a binary key-value store requiring a LevelDB-aware parser rather than a text editor, since keys can remain in unflushed .log files. Firefox uses SQLite (webappstore.sqlite). Legacy IE/EdgeHTML stored the equivalent data in XML files.",
       "related_artifacts": [
         "chrome-edge-browser-artifacts",
         "firefox-browser-artifacts",
         "html5-filesystem"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/html5-web-storage.json"
     },
     {
@@ -1754,12 +1709,11 @@
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "Clearing browsing data through the standard browser history-clearing UI does not clear Media History, so surviving media playback records can corroborate or contradict a claim that all browsing history was wiped.",
-      "interpretation": "Three primary tables link together: playbackSession (session-level playback events), origin (site-level aggregation), and playback (individual playback records) — join on their session/origin identifiers to reconstruct which site was played, when, and for how long. Because Media History is not cleared by normal history-clearing actions, its presence alongside an empty History file is itself significant.",
+      "interpretation": "Three primary tables link together: playbackSession (session-level playback events), origin (site-level aggregation), and playback (individual playback records). Join on their session/origin identifiers to reconstruct which site was played, when, and for how long. Because Media History is not cleared by normal history-clearing actions, its presence alongside an empty History file is itself significant.",
       "related_artifacts": [
         "chrome-edge-browser-artifacts",
         "history-and-download-history"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/media-history.json"
     },
     {
@@ -1788,18 +1742,17 @@
       ],
       "parsing_tools": [
         "Manual JSON review (after jsonlz4/mozLz4 decompression, Firefox)",
-        "Manual/hex review of Session_*/Tabs_* files (Chrome/Edge — no universal open-source parser)"
+        "Manual/hex review of Session_*/Tabs_* files (Chrome/Edge: no universal open-source parser)"
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "Because these files exist specifically to survive crashes, even a normal, clean browser shutdown can leave the prior session's data in \"Last Session\"/backup files; fully suppressing this evidence requires clearing both the live session files and profile-level backups (e.g., sessionstore-backups\\).",
-      "interpretation": "Session restore can retain far more than URLs: the actual HTML/JavaScript/XML/form data present on a page, the referring site, transition type (typed, link, reload), window size, and which tabs were pinned — a richer point-in-time capture of browsing state than history alone, useful for reconstructing exactly what was on-screen at shutdown or crash time.",
+      "interpretation": "Session restore can retain far more than URLs: the actual HTML/JavaScript/XML/form data present on a page, the referring site, transition type (typed, link, reload), window size, and which tabs were pinned. A richer point-in-time capture of browsing state than history alone, useful for reconstructing exactly what was on-screen at shutdown or crash time.",
       "related_artifacts": [
         "chrome-edge-browser-artifacts",
         "firefox-browser-artifacts",
         "browser-downloads",
         "cookies"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/session-restore.json"
     },
     {
@@ -1829,14 +1782,13 @@
       "attack_techniques": [
         "T1555.003"
       ],
-      "anti_forensic_notes": "DPAPI ties decryption to the Windows user account — and, for Microsoft cloud accounts on Windows 10/11, to a 44-character randomly generated password rather than the account's actual password — so decrypting real credential values is far easier on a live, logged-in system than from an offline disk image. Metadata (URLs, timestamps, usage counts) remains readable regardless of whether the credential value itself can be decrypted offline.",
+      "anti_forensic_notes": "DPAPI ties decryption to the Windows user account, and, for Microsoft cloud accounts on Windows 10/11, to a 44-character randomly generated password rather than the account's actual password, so decrypting real credential values is far easier on a live, logged-in system than from an offline disk image. Metadata (URLs, timestamps, usage counts) remains readable regardless of whether the credential value itself can be decrypted offline.",
       "interpretation": "Firefox stores hostname, URL, creation time, last-used time, times-used count, and last-password-change time in JSON even when the credential value itself is encrypted. Chromium browsers store the equivalent in SQLite with origin URL, action URL, username, and created/last-used dates. In both cases, credential metadata is forensically useful even when the encrypted credential value cannot be recovered offline.",
       "related_artifacts": [
         "chrome-edge-browser-artifacts",
         "firefox-browser-artifacts",
         "auto-complete-data"
       ],
-      "group": "browser-activity",
       "file": "data/artifacts/browser-activity/stored-credentials.json"
     },
     {
@@ -1877,7 +1829,6 @@
         "dropbox",
         "teams-slack-cache"
       ],
-      "group": "cloud-storage",
       "file": "data/artifacts/cloud-storage/box-drive.json"
     },
     {
@@ -1921,7 +1872,6 @@
         "box-drive",
         "teams-slack-cache"
       ],
-      "group": "cloud-storage",
       "file": "data/artifacts/cloud-storage/dropbox.json"
     },
     {
@@ -1960,7 +1910,6 @@
         "dropbox",
         "teams-slack-cache"
       ],
-      "group": "cloud-storage",
       "file": "data/artifacts/cloud-storage/google-drive-desktop.json"
     },
     {
@@ -2001,7 +1950,6 @@
         "dropbox",
         "teams-slack-cache"
       ],
-      "group": "cloud-storage",
       "file": "data/artifacts/cloud-storage/onedrive.json"
     },
     {
@@ -2011,15 +1959,15 @@
       "subcategory": "removable-media",
       "os": "Windows",
       "os_min": "First Install/Last Connected/Last Removal properties require Windows 7+ (0064) / Windows 8+ (0066, 0067)",
-      "location": "Plug and Play log — XP: C:\\Windows\\setupapi.log ; Win7+: C:\\Windows\\inf\\setupapi.dev.log. Registry — Win7+: SYSTEM\\CurrentControlSet\\Enum\\USBSTOR\\Disk&Ven_&Prod_\\<USBSerial#>\\Properties\\{83da6326-97a6-4088-9453-a19231573b29}\\####(0064=First Install, 0066=Last Connected, 0067=Last Removal); mirrored under \\Enum\\SCSI\\... . Also Win10+: Microsoft-Windows-Partition/Diagnostic.evtx Event ID 1006 per device connect/disconnect.",
+      "location": "Plug and Play log: XP: C:\\Windows\\setupapi.log ; Win7+: C:\\Windows\\inf\\setupapi.dev.log. Registry. Win7+: SYSTEM\\CurrentControlSet\\Enum\\USBSTOR\\Disk&Ven_&Prod_\\<USBSerial#>\\Properties\\{83da6326-97a6-4088-9453-a19231573b29}\\####(0064=First Install, 0066=Last Connected, 0067=Last Removal); mirrored under \\Enum\\SCSI\\... . Also Win10+: Microsoft-Windows-Partition/Diagnostic.evtx Event ID 1006 per device connect/disconnect.",
       "purpose": "Determines the temporal usage of specific USB devices connected to a Windows machine by combining the plug-and-play log file (first-ever install) with the registry's Properties GUID subkeys (first install, last connected, last removed) and the Partition/Diagnostic event log (every connect/disconnect).",
       "key_fields": [
-        "setupapi.dev.log entries — search for the device's serial number; log timestamps are in local time zone",
-        "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0064 — First Install (Win7+)",
-        "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0066 — Last Connected (Win8+)",
-        "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0067 — Last Removal (Win8+)",
+        "setupapi.dev.log entries: search for the device's serial number; log timestamps are in local time zone",
+        "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0064: First Install (Win7+)",
+        "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0066: Last Connected (Win8+)",
+        "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0067: Last Removal (Win8+)",
         "Timestamps stored in Windows 64-bit FILETIME format",
-        "Partition/Diagnostic Event ID 1006 — recorded for each device connect/disconnect (log cleared during major OS updates)"
+        "Partition/Diagnostic Event ID 1006: recorded for each device connect/disconnect (log cleared during major OS updates)"
       ],
       "normal_baseline": "Connection timestamps for known, approved removable media align with expected work usage windows and match the device inventory the user is authorized to use.",
       "anomalies": [
@@ -2044,7 +1992,6 @@
         "setupapi-devlog",
         "volume-serial-number-vsn"
       ],
-      "group": "external-device-usb-usage",
       "file": "data/artifacts/external-device-usb-usage/connection-timestamps.json"
     },
     {
@@ -2087,7 +2034,6 @@
         "shell-bags",
         "shortcut-lnk-files"
       ],
-      "group": "external-device-usb-usage",
       "file": "data/artifacts/external-device-usb-usage/drive-letter-and-volume-name.json"
     },
     {
@@ -2130,7 +2076,6 @@
         "usb-device-identification",
         "connection-timestamps"
       ],
-      "group": "external-device-usb-usage",
       "file": "data/artifacts/external-device-usb-usage/setupapi-devlog.json"
     },
     {
@@ -2175,7 +2120,6 @@
         "shell-bags",
         "connection-timestamps"
       ],
-      "group": "external-device-usb-usage",
       "file": "data/artifacts/external-device-usb-usage/usb-device-identification.json"
     },
     {
@@ -2222,7 +2166,6 @@
         "security-eventlog",
         "system-eventlog"
       ],
-      "group": "external-device-usb-usage",
       "file": "data/artifacts/external-device-usb-usage/usb-event-logs.json"
     },
     {
@@ -2263,7 +2206,6 @@
         "ntuser-dat-hive",
         "shell-bags"
       ],
-      "group": "external-device-usb-usage",
       "file": "data/artifacts/external-device-usb-usage/usb-user-information.json"
     },
     {
@@ -2307,7 +2249,6 @@
         "jump-lists",
         "connection-timestamps"
       ],
-      "group": "external-device-usb-usage",
       "file": "data/artifacts/external-device-usb-usage/volume-serial-number-vsn.json"
     },
     {
@@ -2345,7 +2286,6 @@
         "system-hive",
         "security-eventlog"
       ],
-      "group": "system-information",
       "file": "data/artifacts/system-information/computer-name.json"
     },
     {
@@ -2387,7 +2327,6 @@
         "system-hive",
         "software-hive"
       ],
-      "group": "system-information",
       "file": "data/artifacts/system-information/operating-system-version.json"
     },
     {
@@ -2402,7 +2341,7 @@
       "key_fields": [
         "HKCU/HKLM Run and RunOnce value names and their command/executable paths",
         "SOFTWARE\\...\\Policies\\Explorer\\Run (GPO-pushed autostart entries)",
-        "SYSTEM\\CurrentControlSet\\Services Start value — 0x02 means the service starts at boot (0x00 for drivers)"
+        "SYSTEM\\CurrentControlSet\\Services Start value: 0x02 means the service starts at boot (0x00 for drivers)"
       ],
       "normal_baseline": "Entries correspond to known startup agents: antivirus/EDR, cloud-sync clients, and vendor-installed utilities consistent with the machine's software inventory.",
       "anomalies": [
@@ -2419,7 +2358,7 @@
         "T1547.001",
         "T1543.003"
       ],
-      "anti_forensic_notes": "This is not an exhaustive list of autorun locations — dozens of other registry and file-system locations can achieve autostart (see the dedicated `run-runonce-keys`, `services-persistence`, `startup-folders`, `ifeo-appinit`, and `wmi-event-subscription` artifacts for the more specific mechanisms this overview summarizes).",
+      "anti_forensic_notes": "This is not an exhaustive list of autorun locations. Dozens of other registry and file-system locations can achieve autostart (see the dedicated `run-runonce-keys`, `services-persistence`, `startup-folders`, `ifeo-appinit`, and `wmi-event-subscription` artifacts for the more specific mechanisms this overview summarizes).",
       "interpretation": "Treat this as the summary/checklist view the SANS poster uses under its 'System Information' category; for the actual per-mechanism detail (exact registry paths, anomaly patterns, and anti-forensic notes specific to each autostart technique), use the dedicated artifacts it points to rather than treating this entry as complete on its own.",
       "related_artifacts": [
         "run-runonce-keys",
@@ -2428,7 +2367,6 @@
         "ifeo-appinit",
         "wmi-event-subscription"
       ],
-      "group": "system-information",
       "file": "data/artifacts/system-information/system-boot-and-autostart-programs.json"
     },
     {
@@ -2463,7 +2401,6 @@
         "system-eventlog",
         "system-hive"
       ],
-      "group": "system-information",
       "file": "data/artifacts/system-information/system-last-shutdown-time.json"
     },
     {
@@ -2506,7 +2443,6 @@
         "successful-failed-logons",
         "logon-event-types"
       ],
-      "group": "account-usage",
       "file": "data/artifacts/account-usage/authentication-events.json"
     },
     {
@@ -2519,7 +2455,7 @@
       "location": "SAM\\Domains\\Account\\Users\\<RID>\\InternetUserName",
       "purpose": "Identifies whether a local Windows account is actually a Microsoft cloud account by recording the email address tied to it, directly inside the SAM hive.",
       "key_fields": [
-        "InternetUserName value under the account's RID subkey — contains the email address tied to the Microsoft cloud account"
+        "InternetUserName value under the account's RID subkey: contains the email address tied to the Microsoft cloud account"
       ],
       "normal_baseline": "Accounts known to be signed in with a Microsoft account (personal or Azure AD-backed) show an InternetUserName value matching the expected corporate or personal email; accounts that are genuinely local-only have no InternetUserName value at all.",
       "anomalies": [
@@ -2535,13 +2471,12 @@
         "T1078.004"
       ],
       "anti_forensic_notes": "The value only exists if the account was ever configured to sign in with a Microsoft cloud account; a purely local account will simply have no InternetUserName value, which is not itself suspicious. Converting a cloud-linked account back to local removes this value going forward, but historical evidence may still be recoverable from registry hive backups (RegBack) or Volume Shadow Copies.",
-      "interpretation": "The presence of this value is what distinguishes a Microsoft cloud account from a purely local one at the SAM level — check it whenever you need to know whether a given local username actually authenticates against a Microsoft identity rather than a locally-stored password. Cross-reference the email domain against known-good corporate domains to catch personal-account usage on managed hardware.",
+      "interpretation": "The presence of this value is what distinguishes a Microsoft cloud account from a purely local one at the SAM level. Check it whenever you need to know whether a given local username actually authenticates against a Microsoft identity rather than a locally-stored password. Cross-reference the email domain against known-good corporate domains to catch personal-account usage on managed hardware.",
       "related_artifacts": [
         "sam-hive",
         "user-accounts",
         "last-login-and-password-change"
       ],
-      "group": "account-usage",
       "file": "data/artifacts/account-usage/cloud-account-details.json"
     },
     {
@@ -2581,7 +2516,6 @@
         "cloud-account-details",
         "user-accounts"
       ],
-      "group": "account-usage",
       "file": "data/artifacts/account-usage/last-login-and-password-change.json"
     },
     {
@@ -2591,20 +2525,20 @@
       "subcategory": "authentication",
       "os": "Windows",
       "os_min": "Windows 7 / Server 2008 R2",
-      "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx — the Logon Type field within Event ID 4624",
-      "purpose": "Determines by exactly what means a logon was attempted, in addition to date, time, username, hostname, and success/failure status — the single field that separates a console logon from a network logon, RDP session, or scheduled-task logon.",
+      "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx: the Logon Type field within Event ID 4624",
+      "purpose": "Determines by exactly what means a logon was attempted, in addition to date, time, username, hostname, and success/failure status. The single field that separates a console logon from a network logon, RDP session, or scheduled-task logon.",
       "key_fields": [
-        "Logon Type 2 — logon via console",
-        "Logon Type 3 — network logon",
-        "Logon Type 4 — batch logon",
-        "Logon Type 5 — Windows service logon",
-        "Logon Type 7 — credentials used to unlock screen, or an RDP session reconnect",
-        "Logon Type 8 — network logon sending credentials in cleartext",
-        "Logon Type 9 — different credentials used than the logged-on user",
-        "Logon Type 10 — remote interactive logon (RDP)",
-        "Logon Type 11 — cached credentials used to logon",
-        "Logon Type 12 — cached remote interactive (similar to Type 10)",
-        "Logon Type 13 — cached unlock (similar to Type 7)"
+        "Logon Type 2: logon via console",
+        "Logon Type 3: network logon",
+        "Logon Type 4: batch logon",
+        "Logon Type 5: Windows service logon",
+        "Logon Type 7: credentials used to unlock screen, or an RDP session reconnect",
+        "Logon Type 8: network logon sending credentials in cleartext",
+        "Logon Type 9: different credentials used than the logged-on user",
+        "Logon Type 10: remote interactive logon (RDP)",
+        "Logon Type 11: cached credentials used to logon",
+        "Logon Type 12: cached remote interactive (similar to Type 10)",
+        "Logon Type 13: cached unlock (similar to Type 7)"
       ],
       "normal_baseline": "Logon Type 2 for regular console users during business hours; Type 3 for expected file-share/network access; Type 10 only from known admin or remote-work sources.",
       "anomalies": [
@@ -2621,15 +2555,14 @@
         "T1078",
         "T1021"
       ],
-      "anti_forensic_notes": "The Logon Type is only as trustworthy as the 4624 event itself — if Security-log auditing is disabled or the log is cleared, this classification is lost along with the rest of the logon record.",
-      "interpretation": "Always read the Logon Type alongside the account name and source IP/workstation fields on the same 4624 event — the type alone tells you the *mechanism*, not whether the logon itself was legitimate. Use this table to disambiguate `successful-failed-logons` records and to interpret Type 10 correctly for `rdp-eventlogs` correlation.",
+      "anti_forensic_notes": "The Logon Type is only as trustworthy as the 4624 event itself, if Security-log auditing is disabled or the log is cleared, this classification is lost along with the rest of the logon record.",
+      "interpretation": "Always read the Logon Type alongside the account name and source IP/workstation fields on the same 4624 event. The type alone tells you the *mechanism*, not whether the logon itself was legitimate. Use this table to disambiguate `successful-failed-logons` records and to interpret Type 10 correctly for `rdp-eventlogs` correlation.",
       "related_artifacts": [
         "security-eventlog",
         "successful-failed-logons",
         "rdp-eventlogs",
         "remote-desktop-protocol-rdp-usage"
       ],
-      "group": "account-usage",
       "file": "data/artifacts/account-usage/logon-event-types.json"
     },
     {
@@ -2642,9 +2575,9 @@
       "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx",
       "purpose": "Tracks RDP logons and session reconnections to a target machine, and identifies which accounts were used to do so, purely from the Security log's account-usage perspective.",
       "key_fields": [
-        "Event ID 4624 — Logon Type 10 (remote interactive logon)",
-        "Event ID 4778 — session connected/reconnected",
-        "Event ID 4779 — session disconnected",
+        "Event ID 4624: Logon Type 10 (remote interactive logon)",
+        "Event ID 4778: session connected/reconnected",
+        "Event ID 4779: session disconnected",
         "Hostname and IP address of the remote machine making the connection, recorded on the 4624/4778/4779 events"
       ],
       "normal_baseline": "RDP account usage aligns with known admin jump-box or approved remote-work sources, at expected times and from expected source hosts.",
@@ -2660,15 +2593,14 @@
       "attack_techniques": [
         "T1021.001"
       ],
-      "anti_forensic_notes": "This account-usage view is narrower than the full RDP session-lifecycle picture — it only sees what the Security log's 4624/4778/4779 triad records. For the fuller cross-channel session timeline (including the RemoteConnectionManager and LocalSessionManager Operational logs' 1149 and 21-25 events), see `rdp-eventlogs`, which is the more complete, multi-channel version of this same evidence.",
-      "interpretation": "Use this entry when the question is specifically \"which accounts used RDP and from where\" (an account-usage/audit question); use `rdp-eventlogs` when the question is \"reconstruct the full session timeline for this RDP connection\" (a session-forensics question) — the two overlap on 4624/4778/4779 but `rdp-eventlogs` adds the pre-auth and session-lifecycle channels this entry doesn't cover.",
+      "anti_forensic_notes": "This account-usage view is narrower than the full RDP session-lifecycle picture. It only sees what the Security log's 4624/4778/4779 triad records. For the fuller cross-channel session timeline (including the RemoteConnectionManager and LocalSessionManager Operational logs' 1149 and 21-25 events), see `rdp-eventlogs`, which is the more complete, multi-channel version of this same evidence.",
+      "interpretation": "Use this entry when the question is specifically \"which accounts used RDP and from where\" (an account-usage/audit question); use `rdp-eventlogs` when the question is \"reconstruct the full session timeline for this RDP connection\" (a session-forensics question). The two overlap on 4624/4778/4779 but `rdp-eventlogs` adds the pre-auth and session-lifecycle channels this entry doesn't cover.",
       "related_artifacts": [
         "rdp-eventlogs",
         "security-eventlog",
         "logon-event-types",
         "successful-failed-logons"
       ],
-      "group": "account-usage",
       "file": "data/artifacts/account-usage/remote-desktop-protocol-rdp-usage.json"
     },
     {
@@ -2678,22 +2610,22 @@
       "subcategory": "authentication",
       "os": "Windows",
       "os_min": "Event ID 7045 requires Windows Server 2008 R2+; 4697 auditing requires Windows 10+",
-      "location": "System.evtx (Win7+) — Event IDs 7034/7035/7036/7040/7045; Security.evtx (Win10+, requires auditing enabled) — Event ID 4697",
+      "location": "System.evtx (Win7+): Event IDs 7034/7035/7036/7040/7045; Security.evtx (Win10+, requires auditing enabled). Event ID 4697",
       "purpose": "Analyzes logs for suspicious Windows service creation, persistence, and services started or stopped around the time of a suspected compromise; service events also record account information.",
       "key_fields": [
-        "Event ID 7034 (System log) — service crashed unexpectedly",
-        "Event ID 7035 (System log) — service sent a Start/Stop control",
-        "Event ID 7036 (System log) — service started or stopped",
-        "Event ID 7040 (System log) — start type changed (Boot | On Request | Disabled)",
-        "Event ID 7045 (System log, Win2008R2+) — a service was installed on the system",
-        "Event ID 4697 (Security log, Win10+) — a service was installed on the system, requires auditing enabled"
+        "Event ID 7034 (System log): service crashed unexpectedly",
+        "Event ID 7035 (System log): service sent a Start/Stop control",
+        "Event ID 7036 (System log): service started or stopped",
+        "Event ID 7040 (System log): start type changed (Boot | On Request | Disabled)",
+        "Event ID 7045 (System log, Win2008R2+): a service was installed on the system",
+        "Event ID 4697 (Security log, Win10+): a service was installed on the system, requires auditing enabled"
       ],
       "normal_baseline": "Service creation/start/stop events correspond to known software installs, Windows updates, and expected maintenance windows.",
       "anomalies": [
         "Event ID 7045 for a service with a suspicious ImagePath, an unsigned binary, or a name mimicking a legitimate Windows service",
         "A service repeatedly crashing (7034) coinciding with a known attack technique that targets that specific service or process",
         "7040 start-type change flipping a security-relevant service to Disabled shortly before or during an incident",
-        "4697 present with no corresponding 7045, or vice versa, when both logs should be capturing the same install and auditing is enabled for both — suggests log tampering or a gap in visibility"
+        "4697 present with no corresponding 7045, or vice versa, when both logs should be capturing the same install and auditing is enabled for both. Suggests log tampering or a gap in visibility"
       ],
       "parsing_tools": [
         "Event Viewer",
@@ -2703,14 +2635,13 @@
         "T1543.003",
         "T1489"
       ],
-      "anti_forensic_notes": "A large amount of malware and worms in the wild utilize services for persistence and privilege; services started on boot illustrate persistence (desirable to malware), and services can also be intentionally crashed via attacks like process injection to disable defensive tooling. 4697 requires the Audit Other Object Access Events subcategory to be enabled, which many environments don't turn on by default, leaving 7045 as the only reliable source.",
+      "anti_forensic_notes": "A large amount of malware and worms in the wild use services for persistence and privilege; services started on boot illustrate persistence (desirable to malware), and services can also be intentionally crashed via attacks like process injection to disable defensive tooling. 4697 requires the Audit Other Object Access Events subcategory to be enabled, which many environments don't turn on by default, leaving 7045 as the only reliable source.",
       "interpretation": "Treat System.evtx as the baseline source for service lifecycle events (available without extra auditing) and Security.evtx's 4697 as a bonus corroborating source only where that audit policy is already enabled. Cross-reference the service name/ImagePath against the `services-persistence` artifact's registry-level view (CurrentControlSet\\Services) to confirm what the service was actually configured to run.",
       "related_artifacts": [
         "services-persistence",
         "system-eventlog",
         "security-eventlog"
       ],
-      "group": "account-usage",
       "file": "data/artifacts/account-usage/service-events.json"
     },
     {
@@ -2723,12 +2654,12 @@
       "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx",
       "purpose": "Profiles account creation, attempted logons, and account usage through the core Security-log authentication event IDs.",
       "key_fields": [
-        "Event ID 4624 — successful logon",
-        "Event ID 4625 — failed logon",
-        "Event ID 4634 / 4647 — successful logoff",
-        "Event ID 4648 — logon using explicit credentials (runas)",
-        "Event ID 4672 — account logon with superuser (administrator) rights",
-        "Event ID 4720 — an account was created"
+        "Event ID 4624: successful logon",
+        "Event ID 4625: failed logon",
+        "Event ID 4634 / 4647: successful logoff",
+        "Event ID 4648: logon using explicit credentials (runas)",
+        "Event ID 4672: account logon with superuser (administrator) rights",
+        "Event ID 4720: an account was created"
       ],
       "normal_baseline": "4624/4634 pairs align with expected work-hours usage for known accounts; 4625 failures are isolated and infrequent; 4672/superuser logons correspond to known administrative activity; 4720 account-creation events align with change-managed onboarding.",
       "anomalies": [
@@ -2754,7 +2685,6 @@
         "user-accounts",
         "remote-desktop-protocol-rdp-usage"
       ],
-      "group": "account-usage",
       "file": "data/artifacts/account-usage/successful-failed-logons.json"
     },
     {
@@ -2797,7 +2727,6 @@
         "successful-failed-logons",
         "last-login-and-password-change"
       ],
-      "group": "account-usage",
       "file": "data/artifacts/account-usage/user-accounts.json"
     },
     {
@@ -2836,7 +2765,6 @@
         "windows-firewall-log",
         "sysmon"
       ],
-      "group": "network-activity",
       "file": "data/artifacts/network-activity/arp-cache.json"
     },
     {
@@ -2872,7 +2800,6 @@
         "firefox-browser-artifacts",
         "network-history"
       ],
-      "group": "network-activity",
       "file": "data/artifacts/network-activity/browser-url-parameters.json"
     },
     {
@@ -2914,7 +2841,6 @@
         "arp-cache",
         "windows-firewall-log"
       ],
-      "group": "network-activity",
       "file": "data/artifacts/network-activity/dns-client-cache.json"
     },
     {
@@ -2936,7 +2862,7 @@
         "Entries redirecting security-vendor, Windows Update, or telemetry domains to 0.0.0.0 or 127.0.0.1 (defense/update crippling)",
         "Entries redirecting a legitimate domain (bank, SSO/MFA provider) to an attacker-controlled IP for credential harvesting, or to localhost specifically to break MFA callback traffic",
         "File modification timestamp falling outside any known admin change window, or the file made hidden/read-only to resist casual edits",
-        "Unexpected growth into a long list of redirect entries, which can indicate either malicious blocking/redirection or a legitimate ad-blocking hosts file — intent must be judged by the specific target domains"
+        "Unexpected growth into a long list of redirect entries, which can indicate either malicious blocking/redirection or a legitimate ad-blocking hosts file. Intent must be judged by the specific target domains"
       ],
       "parsing_tools": [
         "Any text editor / PowerShell Get-Content",
@@ -2953,7 +2879,6 @@
         "windows-firewall-log",
         "defender-eventlog"
       ],
-      "group": "network-activity",
       "file": "data/artifacts/network-activity/hosts-file.json"
     },
     {
@@ -2994,7 +2919,6 @@
         "wifi-profiles",
         "timezone"
       ],
-      "group": "network-activity",
       "file": "data/artifacts/network-activity/network-history.json"
     },
     {
@@ -3032,7 +2956,6 @@
         "arp-cache",
         "dns-client-cache"
       ],
-      "group": "network-activity",
       "file": "data/artifacts/network-activity/network-interfaces.json"
     },
     {
@@ -3073,7 +2996,6 @@
         "network-history",
         "ntfs-timestamp-rules"
       ],
-      "group": "network-activity",
       "file": "data/artifacts/network-activity/timezone.json"
     },
     {
@@ -3084,7 +3006,7 @@
       "os": "Windows",
       "os_min": "Windows Vista (Native Wifi / WLAN AutoConfig service and WLAN_profile XML schema)",
       "location": "XML files under %ALLUSERSPROFILE%\\Microsoft\\Wlansvc\\Profiles\\Interfaces\\{interface-GUID}\\{profile-GUID}.xml, one file per saved network per wireless adapter; also queryable live via `netsh wlan show profiles` and `netsh wlan show profile name=\"SSID\" key=clear`.",
-      "purpose": "Stores every wireless network (SSID) a machine has been configured to connect to, including its authentication/encryption settings and, unless cleared, its pre-shared key — providing SSID connection history and potential credential recovery.",
+      "purpose": "Stores every wireless network (SSID) a machine has been configured to connect to, including its authentication/encryption settings and, unless cleared, its pre-shared key. Providing SSID connection history and potential credential recovery.",
       "key_fields": [
         "name (SSID / profile name)",
         "connectionMode (auto / manual)",
@@ -3113,7 +3035,6 @@
         "arp-cache",
         "dns-client-cache"
       ],
-      "group": "network-activity",
       "file": "data/artifacts/network-activity/wifi-profiles.json"
     },
     {
@@ -3124,7 +3045,7 @@
       "os": "Windows",
       "os_min": "Windows XP (legacy pfirewall.log); Windows Vista+ for the Windows Firewall with Advanced Security event log channel",
       "location": "Legacy text log, must be manually enabled and is off by default: %windir%\\System32\\LogFiles\\Firewall\\pfirewall.log. Rule-change/administrative history: Applications and Services Logs\\Microsoft-Windows-Windows Firewall With Advanced Security\\Firewall (.evtx).",
-      "purpose": "Records network traffic Windows Firewall evaluated (dropped and/or allowed connections, once logging is enabled) and, separately in the WFAS event channel, administrative changes to firewall rules and profile state — used to reconstruct blocked/allowed connection attempts and to detect firewall tampering.",
+      "purpose": "Records network traffic Windows Firewall evaluated (dropped and/or allowed connections, once logging is enabled) and, separately in the WFAS event channel, administrative changes to firewall rules and profile state. Used to reconstruct blocked/allowed connection attempts and to detect firewall tampering.",
       "key_fields": [
         "date, time",
         "action (ALLOW / DROP)",
@@ -3155,7 +3076,6 @@
         "security-eventlog",
         "arp-cache"
       ],
-      "group": "network-activity",
       "file": "data/artifacts/network-activity/windows-firewall-log.json"
     },
     {
@@ -3196,7 +3116,6 @@
         "network-interfaces",
         "system-eventlog"
       ],
-      "group": "network-activity",
       "file": "data/artifacts/network-activity/wlan-event-log.json"
     },
     {
@@ -3228,7 +3147,6 @@
       "related_artifacts": [
         "security-eventlog"
       ],
-      "group": "eventlogs",
       "file": "data/artifacts/eventlogs/application-eventlog.json"
     },
     {
@@ -3261,7 +3179,6 @@
       "related_artifacts": [
         "application-eventlog"
       ],
-      "group": "eventlogs",
       "file": "data/artifacts/eventlogs/defender-eventlog.json"
     },
     {
@@ -3305,7 +3222,6 @@
         "security-eventlog",
         "sysmon"
       ],
-      "group": "eventlogs",
       "file": "data/artifacts/eventlogs/powershell-operational.json"
     },
     {
@@ -3346,7 +3262,6 @@
         "logon-event-types",
         "remote-desktop-protocol-rdp-usage"
       ],
-      "group": "eventlogs",
       "file": "data/artifacts/eventlogs/rdp-eventlogs.json"
     },
     {
@@ -3414,7 +3329,6 @@
         "logon-event-types",
         "remote-desktop-protocol-rdp-usage"
       ],
-      "group": "eventlogs",
       "file": "data/artifacts/eventlogs/security-eventlog.json"
     },
     {
@@ -3466,7 +3380,6 @@
         "prefetch",
         "shimcache"
       ],
-      "group": "eventlogs",
       "file": "data/artifacts/eventlogs/sysmon.json"
     },
     {
@@ -3517,7 +3430,6 @@
         "sysmon",
         "service-events"
       ],
-      "group": "eventlogs",
       "file": "data/artifacts/eventlogs/system-eventlog.json"
     },
     {
@@ -3552,7 +3464,6 @@
         "software-hive",
         "system-boot-and-autostart-programs"
       ],
-      "group": "persistence",
       "file": "data/artifacts/persistence/ifeo-appinit.json"
     },
     {
@@ -3588,7 +3499,6 @@
         "ntuser-dat-hive",
         "system-boot-and-autostart-programs"
       ],
-      "group": "persistence",
       "file": "data/artifacts/persistence/run-runonce-keys.json"
     },
     {
@@ -3624,7 +3534,6 @@
       "related_artifacts": [
         "security-eventlog"
       ],
-      "group": "persistence",
       "file": "data/artifacts/persistence/scheduled-tasks.json"
     },
     {
@@ -3662,7 +3571,6 @@
         "system-eventlog",
         "service-events"
       ],
-      "group": "persistence",
       "file": "data/artifacts/persistence/services-persistence.json"
     },
     {
@@ -3697,7 +3605,6 @@
         "shortcut-lnk-files",
         "system-boot-and-autostart-programs"
       ],
-      "group": "persistence",
       "file": "data/artifacts/persistence/startup-folders.json"
     },
     {
@@ -3734,7 +3641,6 @@
         "sysmon",
         "system-boot-and-autostart-programs"
       ],
-      "group": "persistence",
       "file": "data/artifacts/persistence/wmi-event-subscription.json"
     },
     {
@@ -3777,7 +3683,6 @@
         "memory-network-connections",
         "memory-commandline-history"
       ],
-      "group": "memory",
       "file": "data/artifacts/memory/memory-code-injection.json"
     },
     {
@@ -3825,7 +3730,6 @@
         "memory-process-list",
         "powershell-operational"
       ],
-      "group": "memory",
       "file": "data/artifacts/memory/memory-commandline-history.json"
     },
     {
@@ -3870,7 +3774,6 @@
         "memory-code-injection",
         "memory-commandline-history"
       ],
-      "group": "memory",
       "file": "data/artifacts/memory/memory-network-connections.json"
     },
     {
@@ -3920,7 +3823,6 @@
         "shimcache",
         "amcache-hve"
       ],
-      "group": "memory",
       "file": "data/artifacts/memory/memory-process-list.json"
     },
     {
@@ -3963,7 +3865,6 @@
       "related_artifacts": [
         "outlook-ost-pst"
       ],
-      "group": "communication",
       "file": "data/artifacts/communication/msg-eml-files.json"
     },
     {
@@ -4006,7 +3907,6 @@
         "msg-eml-files",
         "ntuser-dat-hive"
       ],
-      "group": "communication",
       "file": "data/artifacts/communication/outlook-ost-pst.json"
     },
     {
@@ -4046,7 +3946,6 @@
       "related_artifacts": [
         "chrome-edge-browser-artifacts"
       ],
-      "group": "communication",
       "file": "data/artifacts/communication/teams-slack-cache.json"
     },
     {
@@ -4086,7 +3985,6 @@
         "mft",
         "usn-journal"
       ],
-      "group": "filesystem",
       "file": "data/artifacts/filesystem/logfile.json"
     },
     {
@@ -4131,7 +4029,6 @@
         "prefetch",
         "ntfs-timestamp-rules"
       ],
-      "group": "filesystem",
       "file": "data/artifacts/filesystem/mft.json"
     },
     {
@@ -4166,7 +4063,6 @@
       "related_artifacts": [
         "browser-downloads"
       ],
-      "group": "filesystem",
       "file": "data/artifacts/filesystem/motw-zone-identifier.json"
     },
     {
@@ -4175,9 +4071,9 @@
       "category": "file",
       "subcategory": "filesystem-metadata",
       "os": "Windows",
-      "os_min": "Behavior documented for Windows 10 v1903 and Windows 11 v22H2 (SANS FOR500 poster testing) — varies by OS version and action combination on other builds",
-      "location": "Not a location itself — this is a reference matrix describing how the $MFT's $STANDARD_INFORMATION attribute (Modified/Access/Creation/Metadata-change, i.e. MACE) changes under common file operations. See the `mft` artifact for where this data physically lives.",
-      "purpose": "Documents exactly which of the four $STANDARD_INFORMATION timestamps (Modified, Access, Creation, Metadata/MFT-entry-change) update, stay unchanged, or get inherited from the source file for each common file operation (creation, access, modification, rename, local move, volume move via CLI, volume move via cut/paste, copy, deletion) — the single most load-bearing reference for timeline reconstruction and timestomping detection.",
+      "os_min": "Behavior documented for Windows 10 v1903 and Windows 11 v22H2 (SANS FOR500 poster testing). Varies by OS version and action combination on other builds",
+      "location": "Not a location itself: this is a reference matrix describing how the $MFT's $STANDARD_INFORMATION attribute (Modified/Access/Creation/Metadata-change, i.e. MACE) changes under common file operations. See the `mft` artifact for where this data physically lives.",
+      "purpose": "Documents exactly which of the four $STANDARD_INFORMATION timestamps (Modified, Access, Creation, Metadata/MFT-entry-change) update, stay unchanged, or get inherited from the source file for each common file operation (creation, access, modification, rename, local move, volume move via CLI, volume move via cut/paste, copy, deletion). The single most load-bearing reference for timeline reconstruction and timestomping detection.",
       "key_fields": [
         "File Creation: Creation/Metadata/Modified all set to time of creation; Access set to time of creation (Win11 access time may differ by a few seconds from actual activity)",
         "File Access: only Access updates (to time of access); on Windows 11 with the system volume over 128 GiB, Access may show No Change at all due to the last-access-update throttling introduced in that build",
@@ -4187,11 +4083,11 @@
         "Volume File Move via CLI (cross-volume, command line): Creation, Access, and Metadata all update to the time of the move; Modified is inherited from the original",
         "Volume File Move via cut/paste in Explorer (cross-volume): Access and Metadata update to time of cut/paste; Modified and Creation are inherited from the original",
         "File Copy (new file created): Access, Creation, and Metadata all set to time of copy; Modified is inherited from the original file",
-        "File Deletion (Shift+Delete): no $STANDARD_INFORMATION change at all on the now-deleted MFT record — Modified/Access/Creation/Metadata remain exactly as they were before deletion"
+        "File Deletion (Shift+Delete): no $STANDARD_INFORMATION change at all on the now-deleted MFT record. Modified/Access/Creation/Metadata remain exactly as they were before deletion"
       ],
-      "normal_baseline": "Timestamp deltas across an evidence file's MACE values are internally consistent with one of the operation patterns above — e.g. a file with Creation and Modified times that differ, and a Metadata time matching neither, is consistent with an ordinary copy rather than tampering.",
+      "normal_baseline": "Timestamp deltas across an evidence file's MACE values are internally consistent with one of the operation patterns above. E.g. a file with Creation and Modified times that differ, and a Metadata time matching neither, is consistent with an ordinary copy rather than tampering.",
       "anomalies": [
-        "$STANDARD_INFORMATION Creation time later than the $FILE_NAME attribute's creation time for the same MFT record — the classic timestomping signature, since common timestomp tools rewrite $SI but not $FN",
+        "$STANDARD_INFORMATION Creation time later than the $FILE_NAME attribute's creation time for the same MFT record. The classic timestomping signature, since common timestomp tools rewrite $SI but not $FN",
         "A timestamp pattern that matches none of the known operation signatures above for the OS in use (e.g. Modified predating Creation with no corresponding move/copy/rename context)",
         "Batch of files sharing suspiciously identical MACE values inconsistent with individual creation/access history, suggesting a scripted timestamp-setting tool rather than organic use"
       ],
@@ -4203,13 +4099,12 @@
       "attack_techniques": [
         "T1070.006"
       ],
-      "anti_forensic_notes": "This behavior is highly version- and action-specific (the SANS poster itself documents meaningful differences between Windows 10 v1903 and Windows 11 v22H2 for the same operations), so rules here are heuristics for common actions, not guarantees — always validate against the specific OS build and exact action sequence when the finding is load-bearing for a case. Attackers who timestomp $SI but leave $FN untouched are still caught by comparing the two attributes.",
+      "anti_forensic_notes": "This behavior is highly version- and action-specific (the SANS poster itself documents meaningful differences between Windows 10 v1903 and Windows 11 v22H2 for the same operations), so rules here are heuristics for common actions, not guarantees. Always validate against the specific OS build and exact action sequence when the finding is load-bearing for a case. Attackers who timestomp $SI but leave $FN untouched are still caught by comparing the two attributes.",
       "interpretation": "Read as: given an observed MACE pattern on a file, work backward to the most likely operation that produced it, then check whether that operation is consistent with the rest of the case timeline. Windows 11 introduces two specific quirks worth remembering: (1) Access time updates can be fully suppressed if the system volume exceeds 128 GiB, so a static-looking Access time on Win11 does not by itself prove the file was never accessed; (2) some Access-time updates on Win11 (e.g. after data modification or rename) were observed to differ from the true activity time by up to a few seconds, so treat Win11 Access times as approximate, not exact, when timing precision matters. Cross-reference the `mft` artifact for the $STANDARD_INFORMATION vs $FILE_NAME structural distinction that makes timestomp detection possible in the first place.",
       "related_artifacts": [
         "mft",
         "usn-journal"
       ],
-      "group": "filesystem",
       "file": "data/artifacts/filesystem/ntfs-timestamp-rules.json"
     },
     {
@@ -4251,7 +4146,6 @@
         "logfile",
         "recycle-bin"
       ],
-      "group": "filesystem",
       "file": "data/artifacts/filesystem/usn-journal.json"
     },
     {
@@ -4294,7 +4188,6 @@
         "recycle-bin",
         "system-hive"
       ],
-      "group": "filesystem",
       "file": "data/artifacts/filesystem/volume-shadow-copies.json"
     }
   ]

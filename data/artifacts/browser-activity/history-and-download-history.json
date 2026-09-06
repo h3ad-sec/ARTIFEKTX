@@ -11,7 +11,7 @@
     "Visit URL and page title",
     "Visit timestamp",
     "Visit count / frequency of visits",
-    "Profile identifier — look for multiple Chromium profiles (\"Default\", \"Profile 1\", etc.)"
+    "Profile identifier: look for multiple Chromium profiles (\"Default\", \"Profile 1\", etc.)"
   ],
   "normal_baseline": "History entries correspond to expected work-related or personal browsing consistent with the user's role, spread across normal business hours.",
   "anomalies": [
@@ -26,7 +26,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "Web browser artifacts are stored per local user account, so history for one account tells you nothing about another; clearing history removes rows from the SQLite tables but does not necessarily overwrite the underlying database pages, so carving deleted records can sometimes recover cleared history.",
-  "interpretation": "Always check for multiple profiles in Chromium-based browsers before concluding history is complete — a single \"History\" file query against the wrong profile folder silently misses activity in another profile. This is the general browsing-history counterpart to the more specific `browser-downloads` (download manager metadata) and `media-history` (audio/video playback) entries.",
+  "interpretation": "Always check for multiple profiles in Chromium-based browsers before concluding history is complete. A single \"History\" file query against the wrong profile folder silently misses activity in another profile. This is the general browsing-history counterpart to the more specific `browser-downloads` (download manager metadata) and `media-history` (audio/video playback) entries.",
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "firefox-browser-artifacts",

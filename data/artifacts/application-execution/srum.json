@@ -12,7 +12,7 @@
     "Timestamp",
     "BytesSent/BytesRecvd",
     "UserSID",
-    "Table name/identifier mappings stored in SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SRUM\\Extensions — needed to correlate SRUDB.dat's internal table GUIDs back to what they actually represent"
+    "Table name/identifier mappings stored in SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SRUM\\Extensions. Needed to correlate SRUDB.dat's internal table GUIDs back to what they actually represent"
   ],
   "normal_baseline": "Reflects normal application and network usage; retention commonly cited as 30-60 days depending on configuration.",
   "anomalies": [
@@ -20,14 +20,14 @@
     "Execution record for an application with no matching Prefetch/Amcache entry"
   ],
   "parsing_tools": [
-    "SRUM-DUMP (Mark Baggett) — e.g. srum_dump.exe -i SRUDB.dat -o output-folder -r SOFTWARE -f xls",
-    "SRUMECmd (Eric Zimmerman) — e.g. SrumECmd.exe -f SRUDB.dat -r SOFTWARE --csv output-folder",
+    "SRUM-DUMP (Mark Baggett): e.g. srum_dump.exe -i SRUDB.dat -o output-folder -r SOFTWARE -f xls",
+    "SRUMECmd (Eric Zimmerman): e.g. SrumECmd.exe -f SRUDB.dat -r SOFTWARE --csv output-folder",
     "KAPE + SRUM module",
     "Velociraptor (windows.forensics.srum artifact)"
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "SRUDB.dat can be deleted directly and Windows will recreate an empty one at next write, so a suspiciously short-lived SRUM history around an incident is itself a signal.",
-  "interpretation": "Entries are written into the database in periodic (roughly hourly) blocks rather than at the moment activity occurs, so the exact time an action happened cannot be pinned down from SRUM alone — treat its timestamps as approximate. SRUDB.dat is also not guaranteed to be flushed to disk on every shutdown, so the most recent activity before a crash or abrupt power-off may be missing entirely. Parsing the SOFTWARE hive alongside SRUDB.dat (most tools accept both together) is required to resolve the raw table GUIDs into human-readable field names.",
+  "interpretation": "Entries are written into the database in periodic (roughly hourly) blocks rather than at the moment activity occurs, so the exact time an action happened cannot be pinned down from SRUM alone. Treat its timestamps as approximate. SRUDB.dat is also not guaranteed to be flushed to disk on every shutdown, so the most recent activity before a crash or abrupt power-off may be missing entirely. Parsing the SOFTWARE hive alongside SRUDB.dat (most tools accept both together) is required to resolve the raw table GUIDs into human-readable field names.",
   "related_artifacts": [
     "prefetch"
   ]

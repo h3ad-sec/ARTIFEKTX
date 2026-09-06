@@ -6,7 +6,7 @@
   "os": "Windows",
   "os_min": "Windows Vista (Native Wifi / WLAN AutoConfig service and WLAN_profile XML schema)",
   "location": "XML files under %ALLUSERSPROFILE%\\Microsoft\\Wlansvc\\Profiles\\Interfaces\\{interface-GUID}\\{profile-GUID}.xml, one file per saved network per wireless adapter; also queryable live via `netsh wlan show profiles` and `netsh wlan show profile name=\"SSID\" key=clear`.",
-  "purpose": "Stores every wireless network (SSID) a machine has been configured to connect to, including its authentication/encryption settings and, unless cleared, its pre-shared key — providing SSID connection history and potential credential recovery.",
+  "purpose": "Stores every wireless network (SSID) a machine has been configured to connect to, including its authentication/encryption settings and, unless cleared, its pre-shared key. Providing SSID connection history and potential credential recovery.",
   "key_fields": [
     "name (SSID / profile name)",
     "connectionMode (auto / manual)",

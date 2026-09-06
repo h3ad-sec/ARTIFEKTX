@@ -8,12 +8,12 @@
   "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx",
   "purpose": "Profiles account creation, attempted logons, and account usage through the core Security-log authentication event IDs.",
   "key_fields": [
-    "Event ID 4624 — successful logon",
-    "Event ID 4625 — failed logon",
-    "Event ID 4634 / 4647 — successful logoff",
-    "Event ID 4648 — logon using explicit credentials (runas)",
-    "Event ID 4672 — account logon with superuser (administrator) rights",
-    "Event ID 4720 — an account was created"
+    "Event ID 4624: successful logon",
+    "Event ID 4625: failed logon",
+    "Event ID 4634 / 4647: successful logoff",
+    "Event ID 4648: logon using explicit credentials (runas)",
+    "Event ID 4672: account logon with superuser (administrator) rights",
+    "Event ID 4720: an account was created"
   ],
   "normal_baseline": "4624/4634 pairs align with expected work-hours usage for known accounts; 4625 failures are isolated and infrequent; 4672/superuser logons correspond to known administrative activity; 4720 account-creation events align with change-managed onboarding.",
   "anomalies": [

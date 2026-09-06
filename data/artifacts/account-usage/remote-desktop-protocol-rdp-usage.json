@@ -8,9 +8,9 @@
   "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx",
   "purpose": "Tracks RDP logons and session reconnections to a target machine, and identifies which accounts were used to do so, purely from the Security log's account-usage perspective.",
   "key_fields": [
-    "Event ID 4624 — Logon Type 10 (remote interactive logon)",
-    "Event ID 4778 — session connected/reconnected",
-    "Event ID 4779 — session disconnected",
+    "Event ID 4624: Logon Type 10 (remote interactive logon)",
+    "Event ID 4778: session connected/reconnected",
+    "Event ID 4779: session disconnected",
     "Hostname and IP address of the remote machine making the connection, recorded on the 4624/4778/4779 events"
   ],
   "normal_baseline": "RDP account usage aligns with known admin jump-box or approved remote-work sources, at expected times and from expected source hosts.",
@@ -26,8 +26,8 @@
   "attack_techniques": [
     "T1021.001"
   ],
-  "anti_forensic_notes": "This account-usage view is narrower than the full RDP session-lifecycle picture — it only sees what the Security log's 4624/4778/4779 triad records. For the fuller cross-channel session timeline (including the RemoteConnectionManager and LocalSessionManager Operational logs' 1149 and 21-25 events), see `rdp-eventlogs`, which is the more complete, multi-channel version of this same evidence.",
-  "interpretation": "Use this entry when the question is specifically \"which accounts used RDP and from where\" (an account-usage/audit question); use `rdp-eventlogs` when the question is \"reconstruct the full session timeline for this RDP connection\" (a session-forensics question) — the two overlap on 4624/4778/4779 but `rdp-eventlogs` adds the pre-auth and session-lifecycle channels this entry doesn't cover.",
+  "anti_forensic_notes": "This account-usage view is narrower than the full RDP session-lifecycle picture. It only sees what the Security log's 4624/4778/4779 triad records. For the fuller cross-channel session timeline (including the RemoteConnectionManager and LocalSessionManager Operational logs' 1149 and 21-25 events), see `rdp-eventlogs`, which is the more complete, multi-channel version of this same evidence.",
+  "interpretation": "Use this entry when the question is specifically \"which accounts used RDP and from where\" (an account-usage/audit question); use `rdp-eventlogs` when the question is \"reconstruct the full session timeline for this RDP connection\" (a session-forensics question). The two overlap on 4624/4778/4779 but `rdp-eventlogs` adds the pre-auth and session-lifecycle channels this entry doesn't cover.",
   "related_artifacts": [
     "rdp-eventlogs",
     "security-eventlog",

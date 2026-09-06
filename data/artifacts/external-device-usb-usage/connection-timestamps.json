@@ -5,15 +5,15 @@
   "subcategory": "removable-media",
   "os": "Windows",
   "os_min": "First Install/Last Connected/Last Removal properties require Windows 7+ (0064) / Windows 8+ (0066, 0067)",
-  "location": "Plug and Play log — XP: C:\\Windows\\setupapi.log ; Win7+: C:\\Windows\\inf\\setupapi.dev.log. Registry — Win7+: SYSTEM\\CurrentControlSet\\Enum\\USBSTOR\\Disk&Ven_&Prod_\\<USBSerial#>\\Properties\\{83da6326-97a6-4088-9453-a19231573b29}\\####(0064=First Install, 0066=Last Connected, 0067=Last Removal); mirrored under \\Enum\\SCSI\\... . Also Win10+: Microsoft-Windows-Partition/Diagnostic.evtx Event ID 1006 per device connect/disconnect.",
+  "location": "Plug and Play log: XP: C:\\Windows\\setupapi.log ; Win7+: C:\\Windows\\inf\\setupapi.dev.log. Registry. Win7+: SYSTEM\\CurrentControlSet\\Enum\\USBSTOR\\Disk&Ven_&Prod_\\<USBSerial#>\\Properties\\{83da6326-97a6-4088-9453-a19231573b29}\\####(0064=First Install, 0066=Last Connected, 0067=Last Removal); mirrored under \\Enum\\SCSI\\... . Also Win10+: Microsoft-Windows-Partition/Diagnostic.evtx Event ID 1006 per device connect/disconnect.",
   "purpose": "Determines the temporal usage of specific USB devices connected to a Windows machine by combining the plug-and-play log file (first-ever install) with the registry's Properties GUID subkeys (first install, last connected, last removed) and the Partition/Diagnostic event log (every connect/disconnect).",
   "key_fields": [
-    "setupapi.dev.log entries — search for the device's serial number; log timestamps are in local time zone",
-    "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0064 — First Install (Win7+)",
-    "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0066 — Last Connected (Win8+)",
-    "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0067 — Last Removal (Win8+)",
+    "setupapi.dev.log entries: search for the device's serial number; log timestamps are in local time zone",
+    "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0064: First Install (Win7+)",
+    "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0066: Last Connected (Win8+)",
+    "Properties {83da6326-97a6-4088-9453-a19231573b29}\\0067: Last Removal (Win8+)",
     "Timestamps stored in Windows 64-bit FILETIME format",
-    "Partition/Diagnostic Event ID 1006 — recorded for each device connect/disconnect (log cleared during major OS updates)"
+    "Partition/Diagnostic Event ID 1006: recorded for each device connect/disconnect (log cleared during major OS updates)"
   ],
   "normal_baseline": "Connection timestamps for known, approved removable media align with expected work usage windows and match the device inventory the user is authorized to use.",
   "anomalies": [

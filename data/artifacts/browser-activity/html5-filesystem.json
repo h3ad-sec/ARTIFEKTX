@@ -20,11 +20,11 @@
     "Recently modified File System data timestamped within a known compromise window"
   ],
   "parsing_tools": [
-    "ccl_chrome_indexeddb (CCL / obsidianforensics — includes a FileSystem API module)"
+    "ccl_chrome_indexeddb (CCL / obsidianforensics: includes a FileSystem API module)"
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "Clearing \"site data\" in browser settings removes File System storage for that origin; because it is a lesser-known storage mechanism, it is less commonly targeted for anti-forensic cleanup than history or cookies and can retain data longer as a result.",
-  "interpretation": "A LevelDB database within the File System folder maps visited URLs/origins to the numbered subfolders that actually hold the stored files. Data splits between \"t\" (temporary, browser-managed, evictable) and \"p\" (permanent, explicitly requested by the site) storage — content in permanent storage reflects a more deliberate site action and is generally more forensically interesting.",
+  "interpretation": "A LevelDB database within the File System folder maps visited URLs/origins to the numbered subfolders that actually hold the stored files. Data splits between \"t\" (temporary, browser-managed, evictable) and \"p\" (permanent, explicitly requested by the site) storage. Content in permanent storage reflects a more deliberate site action and is generally more forensically interesting.",
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "html5-web-storage"

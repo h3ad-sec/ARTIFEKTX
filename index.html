@@ -1,20 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ARTIFEKTX — Windows DFIR Artifact Reference | H3AD-SEC</title>
-<meta name="description" content="Fast, on-the-go reference for Windows forensic artifacts: registry hives, execution evidence, user activity, filesystem, and event logs. What each one records, what normal looks like, and what to flag." />
-<link rel="canonical" href="https://h3ad-sec.github.io/ARTIFEKTX/" />
-<meta property="og:title" content="ARTIFEKTX — Windows DFIR Artifact Reference" />
-<meta property="og:description" content="Registry hives, execution evidence, user activity, filesystem and event log artifacts: purpose, normal baseline, anomalies, ATT&CK mapping." />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://h3ad-sec.github.io/ARTIFEKTX/" />
-<meta name="twitter:card" content="summary" />
-<link rel="icon" href="https://h3ad-sec.github.io/fevicon.png?v=2026" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Share+Tech+Mono&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARTIFEKTX: Windows DFIR Artifact Reference</title>
+  <meta name="description" content="Searchable quick reference for 107 Windows forensic artifacts spanning registry, execution, browser, and network evidence, each with anomaly flags, parsing tools, and MITRE ATT&amp;CK mapping." />
+  <link rel="canonical" href="https://h3ad-sec.github.io/ARTIFEKTX/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="H3AD-SEC" />
+  <meta property="og:url" content="https://h3ad-sec.github.io/ARTIFEKTX/" />
+  <meta property="og:title" content="ARTIFEKTX: Windows DFIR Artifact Reference" />
+  <meta property="og:description" content="Searchable quick reference for 107 Windows forensic artifacts spanning registry, execution, browser, and network evidence, each with anomaly flags, parsing tools, and MITRE ATT&amp;CK mapping." />
+  <meta property="og:image" content="https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ARTIFEKTX: Windows DFIR Artifact Reference" />
+  <meta name="twitter:description" content="Searchable quick reference for 107 Windows forensic artifacts spanning registry, execution, browser, and network evidence, each with anomaly flags, parsing tools, and MITRE ATT&amp;CK mapping." />
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png" />
+
+  <meta name="theme-color" content="#080c14" />
+  <link rel="icon" href="https://h3ad-sec.github.io/fevicon.png?v=2026" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Share+Tech+Mono&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ARTIFEKTX",
+    "description": "Searchable quick reference for 107 Windows forensic artifacts spanning registry, execution, browser, and network evidence, each with anomaly flags, parsing tools, and MITRE ATT&CK mapping.",
+    "url": "https://h3ad-sec.github.io/ARTIFEKTX/",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "H3AD-SEC",
+      "url": "https://h3ad-sec.github.io"
+    }
+  }
+  </script>
 <style>
 :root{
   --bg:#080c14;--panel:#0d1117;--panel-alt:#111827;--surface:#18253a;
@@ -431,7 +462,7 @@ body.light .footer-credit-pill .credit-name{color:#0A6EA8;}
 
 <div class="secondary-view" id="playbooksView" hidden>
   <div class="secondary-view-inner">
-    <div class="secondary-view-intro">Guided artifact sequences for common investigation scenarios — each step links to the full artifact entry.</div>
+    <div class="secondary-view-intro">Guided artifact sequences for common investigation scenarios. Each step links to the full artifact entry.</div>
     <div class="playbook-list" id="playbookList"></div>
   </div>
 </div>
@@ -721,7 +752,7 @@ var PLAYBOOKS=[
     steps:[
       {id:'prefetch',why:'Strongest single-artifact evidence of execution: run count and up to 8 run timestamps.'},
       {id:'amcache-hve',why:'Confirms file presence/hash even if the binary was later deleted.'},
-      {id:'shimcache',why:'Corroborates file presence — but note it does not reliably prove execution alone.'},
+      {id:'shimcache',why:'Corroborates file presence, but does not reliably prove execution alone.'},
       {id:'bam-dam',why:'Per-user last-execution time, useful when Prefetch is disabled or absent.'},
       {id:'srum',why:'Ties the execution to network usage and a specific user account, hourly granularity.'},
       {id:'userassist',why:'Confirms GUI-launched execution and run count from the user\'s own registry hive.'},
@@ -738,7 +769,7 @@ var PLAYBOOKS=[
       {id:'history-and-download-history',why:'Browsing activity to personal email, file-sharing, or paste sites.'},
       {id:'browser-downloads',why:'Files pulled down through the browser around the same window.'},
       {id:'usb-device-identification',why:'Any removable media connected in the days before departure.'},
-      {id:'onedrive',why:'Cloud-sync activity that could indicate bulk upload to a personal account — check Dropbox/Google Drive/Box too.'},
+      {id:'onedrive',why:'Cloud-sync activity that could indicate bulk upload to a personal account. Check Dropbox, Google Drive, and Box too.'},
       {id:'last-login-and-password-change',why:'Confirm the account\'s own login pattern around the activity window.'}
     ]
   },
@@ -746,12 +777,12 @@ var PLAYBOOKS=[
     name:'Persistence Hunting',
     summary:'Sweep the common Windows persistence mechanisms in the order most attackers actually use them.',
     steps:[
-      {id:'run-runonce-keys',why:'Simplest, most common autostart mechanism — check first.'},
+      {id:'run-runonce-keys',why:'Simplest, most common autostart mechanism. Check first.'},
       {id:'scheduled-tasks',why:'Time/event/logon-triggered execution, a frequent modern persistence choice.'},
       {id:'services-persistence',why:'SYSTEM-level persistence via a registered service.'},
-      {id:'wmi-event-subscription',why:'Fileless persistence firing on a WMI event filter — leaves no on-disk executable if script-based.'},
+      {id:'wmi-event-subscription',why:'Fileless persistence firing on a WMI event filter, leaving no on-disk executable if script-based.'},
       {id:'ifeo-appinit',why:'Debugger-hijack persistence, often doubles as defense evasion against security tools.'},
-      {id:'startup-folders',why:'Simplest possible persistence — a dropped shortcut or executable.'},
+      {id:'startup-folders',why:'Simplest possible persistence: a dropped shortcut or executable.'},
       {id:'system-eventlog',why:'Event ID 7045 corroborates any newly installed service found above.'}
     ]
   },
@@ -762,7 +793,7 @@ var PLAYBOOKS=[
       {id:'network-history',why:'Which networks (including VPNs) this machine has joined.'},
       {id:'wifi-profiles',why:'Saved wireless profiles, useful for attributing a location or rogue-AP connection.'},
       {id:'rdp-eventlogs',why:'Full multi-channel RDP session timeline: pre-auth, session lifecycle, and logon.'},
-      {id:'remote-desktop-protocol-rdp-usage',why:'Narrower account-usage view — which accounts used RDP and from where.'},
+      {id:'remote-desktop-protocol-rdp-usage',why:'Narrower account-usage view: which accounts used RDP and from where.'},
       {id:'successful-failed-logons',why:'Check for brute-force patterns preceding a successful remote logon.'},
       {id:'logon-event-types',why:'Confirm the Logon Type (10 = RDP) matches what\'s expected for this account.'},
       {id:'authentication-events',why:'Determine whether credentials were authenticated locally or by a domain controller.'}

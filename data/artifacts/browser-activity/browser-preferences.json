@@ -27,7 +27,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "Preferences/prefs.js is a live file rewritten frequently during normal use, so it reflects only the current/recent configuration; prior settings changes are not versioned unless captured through other means (backups, Volume Shadow Copies).",
-  "interpretation": "Firefox's prefs.js exposes sync status, last sync time, and which artifact categories (history, passwords, bookmarks, etc.) are configured to sync — useful for tracing data that may have propagated to another device. Chrome's per_host_zoom_levels, media_engagement, and site_engagement values are indirect but useful proxies for how much a user actually interacted with a given site, beyond a simple visit count. Edge preferences additionally carry account_info and clear_data_on_exit/sync settings.",
+  "interpretation": "Firefox's prefs.js exposes sync status, last sync time, and which artifact categories (history, passwords, bookmarks, etc.) are configured to sync. Useful for tracing data that may have propagated to another device. Chrome's per_host_zoom_levels, media_engagement, and site_engagement values are indirect but useful proxies for how much a user actually interacted with a given site, beyond a simple visit count. Edge preferences additionally carry account_info and clear_data_on_exit/sync settings.",
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "firefox-browser-artifacts"

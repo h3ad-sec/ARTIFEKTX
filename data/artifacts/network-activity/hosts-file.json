@@ -17,7 +17,7 @@
     "Entries redirecting security-vendor, Windows Update, or telemetry domains to 0.0.0.0 or 127.0.0.1 (defense/update crippling)",
     "Entries redirecting a legitimate domain (bank, SSO/MFA provider) to an attacker-controlled IP for credential harvesting, or to localhost specifically to break MFA callback traffic",
     "File modification timestamp falling outside any known admin change window, or the file made hidden/read-only to resist casual edits",
-    "Unexpected growth into a long list of redirect entries, which can indicate either malicious blocking/redirection or a legitimate ad-blocking hosts file — intent must be judged by the specific target domains"
+    "Unexpected growth into a long list of redirect entries, which can indicate either malicious blocking/redirection or a legitimate ad-blocking hosts file. Intent must be judged by the specific target domains"
   ],
   "parsing_tools": [
     "Any text editor / PowerShell Get-Content",

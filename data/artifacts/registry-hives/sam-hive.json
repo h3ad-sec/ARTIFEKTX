@@ -6,13 +6,13 @@
   "os": "Windows",
   "os_min": "Windows 2000 (present in all NT-based Windows versions)",
   "location": "HKLM\\SAM (file: %SystemRoot%\\System32\\config\\SAM)",
-  "purpose": "Stores local user account definitions for the machine — RIDs, group memberships, and encrypted password hashes — plus per-account login metadata. It is unreadable in place even by local Administrator while Windows is running; access requires SYSTEM privileges or an offline copy.",
+  "purpose": "Stores local user account definitions for the machine. RIDs, group memberships, and encrypted password hashes. Plus per-account login metadata. It is unreadable in place even by local Administrator while Windows is running; access requires SYSTEM privileges or an offline copy.",
   "key_fields": [
-    "SAM\\Domains\\Account\\Users\\<RID in 8-digit hex> — one subkey per local account (e.g. 000001F4 = RID 500)",
-    "V value — username, full name, comment, and the encrypted LM/NT hash blob",
-    "F value — account flags and timestamps: last logon, password last set, account expires, failed-logon count",
-    "SAM\\Domains\\Account\\Users\\Names — maps account name to RID",
-    "SAM\\Domains\\Builtin\\Aliases — builtin group (e.g. Administrators, RID 544) membership"
+    "SAM\\Domains\\Account\\Users\\<RID in 8-digit hex>: one subkey per local account (e.g. 000001F4 = RID 500)",
+    "V value: username, full name, comment, and the encrypted LM/NT hash blob",
+    "F value: account flags and timestamps: last logon, password last set, account expires, failed-logon count",
+    "SAM\\Domains\\Account\\Users\\Names: maps account name to RID",
+    "SAM\\Domains\\Builtin\\Aliases: builtin group (e.g. Administrators, RID 544) membership"
   ],
   "normal_baseline": "RID 500 is the built-in Administrator (often renamed and/or disabled per hardening baselines); RID 501 is the built-in Guest (disabled by default); real user accounts start at RID 1000 and increment sequentially as created. F-value timestamps track plausibly with the account's known usage and the org's password-rotation policy.",
   "anomalies": [
