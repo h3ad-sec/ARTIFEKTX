@@ -1,3 +1,6 @@
 This OS has no artifacts yet. Add JSON files under data/artifacts/macos/{category}/
-using artifact-template.json as the schema, then regenerate data/os/macos.json.
+matching the schema used by any file under data/artifacts/windows/ (14 fields:
+id, name, type, os_min, location, purpose, key_fields, normal_baseline,
+anomalies, parsing_tools, attack_techniques, anti_forensic_notes,
+interpretation, related_artifacts), then regenerate data/os/macos.json.
 Category names are platform-specific, don't reuse the Windows category set here.
