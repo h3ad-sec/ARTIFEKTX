@@ -106,8 +106,44 @@ body.light .filter-search:focus{box-shadow:0 0 0 2px rgba(2,132,199,.12);}
 .result-count{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;white-space:nowrap;}
 .result-count span{color:var(--accent);}
 
+.view-tabs{display:flex;gap:2px;flex-shrink:0;}
+.view-tab{font-family:var(--mono);font-size:10px;letter-spacing:.08em;background:transparent;color:var(--muted);
+  border:1px solid transparent;border-radius:3px;padding:6px 12px;cursor:pointer;transition:all .14s;white-space:nowrap;}
+.view-tab:hover{color:var(--text-dim);}
+.view-tab.active{color:var(--accent);border-color:var(--border);background:rgba(0,212,255,.06);}
+body.light .view-tab.active{background:rgba(2,132,199,.08);}
+
+/* ── Secondary views (ATT&CK map, playbooks) ── */
+.secondary-view{flex:1;width:100%;max-width:1100px;margin:0 auto;padding:20px;}
+.secondary-view-intro{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;max-width:760px;}
+.attack-map-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+.attack-tech-block{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent2);
+  border-radius:6px;padding:14px;}
+.attack-tech-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.attack-tech-id{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent2);text-decoration:none;}
+.attack-tech-id:hover{opacity:1;text-decoration:underline;}
+.attack-tech-count{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.06em;}
+.attack-tech-artifacts{display:flex;flex-wrap:wrap;gap:6px;}
+
+.playbook-list{display:flex;flex-direction:column;gap:16px;}
+.playbook-card{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:6px;padding:18px 20px;}
+.playbook-name{font-family:'Exo 2',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.playbook-summary{font-size:12.5px;color:var(--text-dim);line-height:1.55;margin-bottom:14px;}
+.playbook-steps{list-style:none;counter-reset:step;display:flex;flex-direction:column;gap:10px;}
+.playbook-steps li{counter-increment:step;display:flex;align-items:baseline;gap:10px;padding-left:2px;}
+.playbook-steps li::before{content:counter(step);font-family:var(--mono);font-size:10px;color:var(--accent);
+  border:1px solid var(--border);border-radius:50%;width:18px;height:18px;flex-shrink:0;display:flex;
+  align-items:center;justify-content:center;margin-top:1px;}
+.playbook-step-body{display:flex;flex-direction:column;gap:2px;}
+.playbook-step-btn{font-family:'Exo 2',sans-serif;font-size:13px;font-weight:600;background:transparent;
+  border:none;color:var(--accent);cursor:pointer;text-align:left;padding:0;}
+.playbook-step-btn:hover{text-decoration:underline;}
+.playbook-why{font-size:11.5px;color:var(--muted);line-height:1.5;}
+
 /* ── Sidebar filter ── */
 .page-wrap{display:flex;flex:1;width:100%;max-width:1400px;margin:0 auto;}
+.page-wrap[hidden],.secondary-view[hidden]{display:none!important;}
 .vault-sidebar{width:190px;flex-shrink:0;padding:16px 0;border-right:1px solid var(--border-dim);}
 .vsb-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em;padding:0 16px 10px;}
 .vsb-nav{display:flex;flex-direction:column;gap:2px;padding:0 8px;}
@@ -220,10 +256,14 @@ body.light .detail-mono{background:#f1f5fb;border-color:var(--border);}
   border-radius:20px;padding:3px 11px;cursor:pointer;transition:all .15s;}
 .related-chip:hover{color:var(--accent);border-color:var(--accent);}
 .tool-list{font-size:13px;color:var(--text-dim);line-height:1.7;}
-.expanded-actions{margin-top:14px;padding-top:12px;border-top:1px solid var(--border-dim);display:flex;justify-content:flex-end;}
+.expanded-actions{margin-top:14px;padding-top:12px;border-top:1px solid var(--border-dim);display:flex;justify-content:flex-end;gap:8px;}
 .btn-hide{font-family:var(--mono);font-size:9px;letter-spacing:.08em;background:transparent;color:var(--muted);
   border:1px solid var(--border-dim);border-radius:2px;padding:5px 14px;cursor:pointer;transition:all .14s;}
 .btn-hide:hover{color:var(--text-dim);border-color:var(--muted-dim);}
+.btn-copy-md{font-family:var(--mono);font-size:9px;letter-spacing:.08em;background:transparent;color:var(--accent);
+  border:1px solid rgba(0,212,255,.3);border-radius:2px;padding:5px 14px;cursor:pointer;transition:all .14s;}
+.btn-copy-md:hover{background:rgba(0,212,255,.08);}
+body.light .btn-copy-md{border-color:rgba(2,132,199,.35);}
 
 /* ── States ── */
 .state-panel{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -359,13 +399,18 @@ body.light .footer-credit-pill .credit-name{color:#0A6EA8;}
   </div>
 
 <div class="vault-topbar">
-  <input class="filter-search" id="searchInput" type="text" placeholder="Search artifacts, paths, anomalies..." oninput="onSearch()" autocomplete="off" spellcheck="false" />
+  <div class="view-tabs" id="viewTabs">
+    <button class="view-tab active" data-view="artifacts" onclick="setView('artifacts')">ARTIFACTS</button>
+    <button class="view-tab" data-view="attack" onclick="setView('attack')">ATT&amp;CK MAP</button>
+    <button class="view-tab" data-view="playbooks" onclick="setView('playbooks')">PLAYBOOKS</button>
+  </div>
+  <input class="filter-search" id="searchInput" type="text" placeholder="Search artifacts, paths, anomalies... ( / )" oninput="onSearch()" autocomplete="off" spellcheck="false" />
   <div class="result-count" id="resultCount"></div>
 </div>
 
 <div class="mobile-filter" id="mobileFilter"></div>
 
-<div class="page-wrap">
+<div class="page-wrap" id="artifactsView">
   <aside class="vault-sidebar">
     <div class="vsb-label">FILTER BY</div>
     <nav class="vsb-nav" id="sidebarFilter"></nav>
@@ -375,6 +420,20 @@ body.light .footer-credit-pill .credit-name{color:#0A6EA8;}
       <div class="state-panel"><div class="state-loading-text">LOADING ARTIFACTS...</div></div>
     </div>
   </main>
+</div>
+
+<div class="secondary-view" id="attackMapView" hidden>
+  <div class="secondary-view-inner">
+    <div class="secondary-view-intro">Every ATT&amp;CK technique cited across the corpus, with the artifacts that give evidence for it. Click an artifact to jump to its full entry.</div>
+    <div class="attack-map-grid" id="attackMapGrid"></div>
+  </div>
+</div>
+
+<div class="secondary-view" id="playbooksView" hidden>
+  <div class="secondary-view-inner">
+    <div class="secondary-view-intro">Guided artifact sequences for common investigation scenarios — each step links to the full artifact entry.</div>
+    <div class="playbook-list" id="playbookList"></div>
+  </div>
 </div>
 
 <footer class="tracer-footer">
@@ -529,7 +588,7 @@ function buildCard(a){
       +'<div class="detail-row"><div class="detail-label">ANTI-FORENSIC NOTES</div><div class="detail-text">'+escapeHtml(a.anti_forensic_notes)+'</div></div>'
       +(a.interpretation?'<div class="detail-row"><div class="detail-label">INTERPRETATION</div><div class="detail-text">'+escapeHtml(a.interpretation)+'</div></div>':'')
       +(related?'<div class="detail-row"><div class="detail-label">RELATED ARTIFACTS</div><div class="chip-row">'+related+'</div></div>':'')
-      +'<div class="expanded-actions"><button class="btn-hide" onclick="event.stopPropagation();toggleCard(\''+a.id+'\')">COLLAPSE</button></div>'
+      +'<div class="expanded-actions"><button class="btn-hide" onclick="event.stopPropagation();toggleCard(\''+a.id+'\')">COLLAPSE</button><button class="btn-copy-md" id="copy-'+a.id+'" onclick="event.stopPropagation();copyMarkdown(\''+a.id+'\')">COPY MD</button></div>'
     +'</div>'
   +'</div>';
 }
@@ -547,6 +606,7 @@ function toggleCard(id){
 function jumpTo(id){
   var target=allArtifacts.filter(function(a){return a.id===id;})[0];
   if(!target)return;
+  setView('artifacts');
   activeGroup='all';
   searchTerm='';
   document.getElementById('searchInput').value='';
@@ -590,9 +650,212 @@ function loadManifest(){
       renderFilterNav(document.getElementById('sidebarFilter'),false);
       renderFilterNav(document.getElementById('mobileFilter'),true);
       renderGrid();
+      renderAttackMap();
+      renderPlaybooks();
     })
     .catch(showError);
 }
+
+/* ── View switching ── */
+function setView(v){
+  ['artifacts','attack','playbooks'].forEach(function(name){
+    document.getElementById(name==='artifacts'?'artifactsView':name==='attack'?'attackMapView':'playbooksView').hidden = (name!==v);
+  });
+  document.querySelectorAll('.view-tab').forEach(function(t){t.classList.toggle('active', t.dataset.view===v);});
+  var topbarSearchWrap=document.querySelector('.vault-topbar');
+  var mobileFilter=document.getElementById('mobileFilter');
+  if(mobileFilter) mobileFilter.style.display = (v==='artifacts') ? '' : 'none';
+}
+
+/* ── ATT&CK cross-reference view ── */
+function renderAttackMap(){
+  var container=document.getElementById('attackMapGrid');
+  if(!container) return;
+  var byTech={};
+  allArtifacts.forEach(function(a){
+    (a.attack_techniques||[]).forEach(function(t){
+      if(!byTech[t]) byTech[t]=[];
+      byTech[t].push(a);
+    });
+  });
+  var techIds=Object.keys(byTech).sort(function(a,b){
+    var pa=a.match(/^T(\d+)(?:\.(\d+))?$/), pb=b.match(/^T(\d+)(?:\.(\d+))?$/);
+    if(!pa||!pb) return a.localeCompare(b);
+    var na=parseInt(pa[1],10), nb=parseInt(pb[1],10);
+    if(na!==nb) return na-nb;
+    return (parseInt(pa[2]||'0',10))-(parseInt(pb[2]||'0',10));
+  });
+  if(!techIds.length){
+    container.innerHTML='<div class="state-panel"><div class="state-desc">No ATT&amp;CK techniques indexed yet.</div></div>';
+    return;
+  }
+  container.innerHTML=techIds.map(function(t){
+    var chips=byTech[t].map(function(a){
+      return '<button class="related-chip" onclick="jumpTo(\''+a.id+'\')">'+escapeHtml(a.name)+'</button>';
+    }).join('');
+    return '<div class="attack-tech-block">'
+      +'<div class="attack-tech-header">'+attackChip(t).replace('attack-chip','attack-tech-id')+'<span class="attack-tech-count">'+byTech[t].length+' artifact'+(byTech[t].length===1?'':'s')+'</span></div>'
+      +'<div class="attack-tech-artifacts">'+chips+'</div>'
+    +'</div>';
+  }).join('');
+}
+
+/* ── Investigation playbooks ── */
+var PLAYBOOKS=[
+  {
+    name:'USB Data Exfiltration',
+    summary:'Reconstruct whether a specific USB device was connected, when, and tie file activity to it.',
+    steps:[
+      {id:'usb-device-identification',why:'Confirm the device was connected and pull its vendor/product/serial identity.'},
+      {id:'connection-timestamps',why:'Establish first-install, last-connected, and last-removed times across setupapi.dev.log and the registry.'},
+      {id:'drive-letter-and-volume-name',why:'Find the drive letter and volume name assigned when the device was last present.'},
+      {id:'volume-serial-number-vsn',why:'Get the VSN to correlate against LNK files and shell items referencing this exact volume.'},
+      {id:'shortcut-lnk-files',why:'Look for LNK files whose embedded volume serial number matches the USB device.'},
+      {id:'recent-files',why:'Check RecentDocs for files opened in the same time window as the connection.'},
+      {id:'jump-lists',why:'Cross-check application-level file access for corroboration.'}
+    ]
+  },
+  {
+    name:'Malware Execution Timeline',
+    summary:'Build a defensible execution timeline for a suspected malicious binary using overlapping, independent sources.',
+    steps:[
+      {id:'prefetch',why:'Strongest single-artifact evidence of execution: run count and up to 8 run timestamps.'},
+      {id:'amcache-hve',why:'Confirms file presence/hash even if the binary was later deleted.'},
+      {id:'shimcache',why:'Corroborates file presence — but note it does not reliably prove execution alone.'},
+      {id:'bam-dam',why:'Per-user last-execution time, useful when Prefetch is disabled or absent.'},
+      {id:'srum',why:'Ties the execution to network usage and a specific user account, hourly granularity.'},
+      {id:'userassist',why:'Confirms GUI-launched execution and run count from the user\'s own registry hive.'},
+      {id:'sysmon',why:'If deployed, gives the full command line, parent process, and hashes for Event ID 1.'},
+      {id:'security-eventlog',why:'4688 process creation (with command-line auditing enabled) for corroboration.'}
+    ]
+  },
+  {
+    name:'Insider Threat / Departing Employee',
+    summary:'Identify what an account accessed, copied, or uploaded before an employee\'s departure.',
+    steps:[
+      {id:'recent-files',why:'Recently opened documents, especially unusual file types shortly before departure.'},
+      {id:'shell-bags',why:'Folder access history, including removable/network paths no longer present on the system.'},
+      {id:'history-and-download-history',why:'Browsing activity to personal email, file-sharing, or paste sites.'},
+      {id:'browser-downloads',why:'Files pulled down through the browser around the same window.'},
+      {id:'usb-device-identification',why:'Any removable media connected in the days before departure.'},
+      {id:'onedrive',why:'Cloud-sync activity that could indicate bulk upload to a personal account — check Dropbox/Google Drive/Box too.'},
+      {id:'last-login-and-password-change',why:'Confirm the account\'s own login pattern around the activity window.'}
+    ]
+  },
+  {
+    name:'Persistence Hunting',
+    summary:'Sweep the common Windows persistence mechanisms in the order most attackers actually use them.',
+    steps:[
+      {id:'run-runonce-keys',why:'Simplest, most common autostart mechanism — check first.'},
+      {id:'scheduled-tasks',why:'Time/event/logon-triggered execution, a frequent modern persistence choice.'},
+      {id:'services-persistence',why:'SYSTEM-level persistence via a registered service.'},
+      {id:'wmi-event-subscription',why:'Fileless persistence firing on a WMI event filter — leaves no on-disk executable if script-based.'},
+      {id:'ifeo-appinit',why:'Debugger-hijack persistence, often doubles as defense evasion against security tools.'},
+      {id:'startup-folders',why:'Simplest possible persistence — a dropped shortcut or executable.'},
+      {id:'system-eventlog',why:'Event ID 7045 corroborates any newly installed service found above.'}
+    ]
+  },
+  {
+    name:'Remote Access Investigation',
+    summary:'Establish which accounts used remote access, from where, and whether the pattern is legitimate.',
+    steps:[
+      {id:'network-history',why:'Which networks (including VPNs) this machine has joined.'},
+      {id:'wifi-profiles',why:'Saved wireless profiles, useful for attributing a location or rogue-AP connection.'},
+      {id:'rdp-eventlogs',why:'Full multi-channel RDP session timeline: pre-auth, session lifecycle, and logon.'},
+      {id:'remote-desktop-protocol-rdp-usage',why:'Narrower account-usage view — which accounts used RDP and from where.'},
+      {id:'successful-failed-logons',why:'Check for brute-force patterns preceding a successful remote logon.'},
+      {id:'logon-event-types',why:'Confirm the Logon Type (10 = RDP) matches what\'s expected for this account.'},
+      {id:'authentication-events',why:'Determine whether credentials were authenticated locally or by a domain controller.'}
+    ]
+  }
+];
+function renderPlaybooks(){
+  var container=document.getElementById('playbookList');
+  if(!container) return;
+  var byId={};
+  allArtifacts.forEach(function(a){byId[a.id]=a;});
+  container.innerHTML=PLAYBOOKS.map(function(pb){
+    var steps=pb.steps.map(function(s){
+      var a=byId[s.id];
+      var label=a?a.name:s.id;
+      return '<li><div class="playbook-step-body"><button class="playbook-step-btn" onclick="jumpTo(\''+s.id+'\')">'+escapeHtml(label)+'</button>'
+        +'<div class="playbook-why">'+escapeHtml(s.why)+'</div></div></li>';
+    }).join('');
+    return '<div class="playbook-card"><div class="playbook-name">'+escapeHtml(pb.name)+'</div>'
+      +'<div class="playbook-summary">'+escapeHtml(pb.summary)+'</div>'
+      +'<ol class="playbook-steps">'+steps+'</ol></div>';
+  }).join('');
+}
+
+/* ── Copy as Markdown ── */
+function copyMarkdown(id){
+  var a=allArtifacts.filter(function(x){return x.id===id;})[0];
+  if(!a) return;
+  var lines=[];
+  lines.push('## '+a.name);
+  lines.push('');
+  lines.push('**Type:** '+a.category+'  |  **Subcategory:** '+a.subcategory+'  |  **OS:** '+(a.os_min||a.os||''));
+  lines.push('');
+  lines.push('**Location:** `'+a.location+'`');
+  lines.push('');
+  lines.push('**Purpose:** '+a.purpose);
+  lines.push('');
+  if((a.key_fields||[]).length){
+    lines.push('**Key Fields:**');
+    a.key_fields.forEach(function(f){lines.push('- '+f);});
+    lines.push('');
+  }
+  lines.push('**Normal Baseline:** '+a.normal_baseline);
+  lines.push('');
+  if((a.anomalies||[]).length){
+    lines.push('**Anomalies to Flag:**');
+    a.anomalies.forEach(function(f){lines.push('- '+f);});
+    lines.push('');
+  }
+  if((a.parsing_tools||[]).length){
+    lines.push('**Parsing Tools:** '+a.parsing_tools.join(', '));
+    lines.push('');
+  }
+  if((a.attack_techniques||[]).length){
+    lines.push('**ATT&CK Techniques:** '+a.attack_techniques.join(', '));
+    lines.push('');
+  }
+  lines.push('**Anti-Forensic Notes:** '+a.anti_forensic_notes);
+  if(a.interpretation){
+    lines.push('');
+    lines.push('**Interpretation:** '+a.interpretation);
+  }
+  if((a.related_artifacts||[]).length){
+    lines.push('');
+    lines.push('**Related Artifacts:** '+a.related_artifacts.join(', '));
+  }
+  var md=lines.join('\n');
+  var btn=document.getElementById('copy-'+id);
+  function feedback(){
+    if(btn){var orig=btn.textContent;btn.textContent='COPIED ✓';setTimeout(function(){btn.textContent=orig;},1600);}
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(md).then(feedback).catch(function(){feedback();});
+  } else {
+    feedback();
+  }
+}
+
+/* ── Keyboard shortcuts ── */
+document.addEventListener('keydown',function(e){
+  var tag=(document.activeElement||{}).tagName;
+  var typing=(tag==='INPUT'||tag==='TEXTAREA');
+  if(e.key==='/' && !typing){
+    e.preventDefault();
+    var input=document.getElementById('searchInput');
+    if(input) input.focus();
+  } else if(e.key==='Escape'){
+    if(openCardId){ toggleCard(openCardId); }
+    var input2=document.getElementById('searchInput');
+    if(input2 && document.activeElement===input2) input2.blur();
+  }
+});
+
 loadManifest();
 </script>
 </body>
