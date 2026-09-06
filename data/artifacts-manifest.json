@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-06T06:27:43.550380+00:00",
+  "generated": "2026-09-06T06:38:03.924885+00:00",
   "count": 107,
   "artifacts": [
     {
@@ -411,7 +411,8 @@
       "key_fields": [
         "Target file path",
         "AppID (identifies the application)",
-        "Access/pin count and recency (DestList MRU)"
+        "Access/pin count and recency (DestList MRU)",
+        "Up to ~2,000 recently/frequently accessed items tracked per application, per user account"
       ],
       "normal_baseline": "Entries correspond to files the user is known to have opened with the associated application.",
       "anomalies": [
@@ -419,12 +420,14 @@
         "Target file path pointing to a staging or exfiltration directory"
       ],
       "parsing_tools": [
-        "JLECmd (Eric Zimmerman)",
-        "JumpList Explorer (Eric Zimmerman)"
+        "JLECmd (Eric Zimmerman) — e.g. JLECmd.exe -d AutomaticDestinations --csv output-folder --csvf JumpLists.csv",
+        "JumpList Explorer (Eric Zimmerman)",
+        "TZWorks jmp",
+        "Velociraptor (windows.forensics.jumplists artifact)"
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "The referenced file does not need to still exist for the Jump List entry to remain, aiding recovery after deletion; can be individually pruned via 'Remove from this list'.",
-      "interpretation": "",
+      "interpretation": "A Jump List entry is created the first time an application is used by that user account — it does NOT record whether an application is currently pinned to the taskbar, so it cannot be used to determine pinned-app status. Best used in combination with Prefetch, LNK files, RecentDocs, and Shellbags to strengthen an activity timeline rather than relied on alone.",
       "related_artifacts": [
         "usrclass-dat-hive",
         "shortcut-lnk-files"
@@ -485,7 +488,7 @@
         "List of files and directories referenced during the executable's startup phase",
         "Prefetch file format version number (17 = XP/2003, 23 = Vista/7/2008/2012, 26 = Windows 8/8.1, 30 = Windows 10) — identifies which decompression/parsing logic applies (Windows 10 .pf files are compressed and require Windows 8+ APIs to decompress)"
       ],
-      "normal_baseline": "One .pf file per distinct executable path that has been run, up to a Microsoft-documented cap of 128 retained files in the Prefetch folder (oldest purged once the cap is reached); run counts and run-time clusters that line up with normal user/application behavior (e.g. daily logon scripts, frequently used applications).",
+      "normal_baseline": "One .pf file per distinct executable path that has been run, up to a Microsoft-documented cap of 128 retained files on Windows XP/7 (oldest purged once the cap is reached) or up to 1,024 files on Windows 8 and later; run counts and run-time clusters that line up with normal user/application behavior (e.g. daily logon scripts, frequently used applications).",
       "anomalies": [
         "A .pf file for an executable run from a Temp, Downloads, or other user-writable/unusual path, especially with a low run count consistent with a one-off tool execution",
         "A high run count concentrated in a very short time window, consistent with automated/scripted repeated execution rather than normal interactive use",
@@ -494,14 +497,16 @@
         "Complete absence of expected Prefetch activity on a system that should have it enabled — always confirm EnablePrefetcher's registry value and whether the boot volume is an SSD (which disables prefetching by default) before treating an empty/sparse Prefetch folder as suspicious"
       ],
       "parsing_tools": [
-        "PECmd (Eric Zimmerman)",
-        "WinPrefetchView (Nirsoft)"
+        "PECmd (Eric Zimmerman) — e.g. PECmd.exe -d \"C:\\Windows\\Prefetch\" --csv output-folder --csvf prefetch.csv",
+        "WinPrefetchView (Nirsoft)",
+        "TZWorks Windows Prefetch Parser (pf)",
+        "Velociraptor (windows.forensics.prefetch artifact)"
       ],
       "attack_techniques": [
         "T1070.004"
       ],
       "anti_forensic_notes": "Prefetch files are ordinary files on disk (not registry-embedded), so they can be deleted individually or in bulk with simple filesystem operations — a documented anti-forensic technique corresponding to ATT&CK T1070.004 (Indicator Removal: File Deletion). Deletion of .pf files does not remove all trace, however: the NTFS Master File Table ($MFT) retains a record of the deleted file's name, size, and timestamps, and the $UsnJrnl records the deletion event itself. Because prefetching is off by default on SSD-booted systems and can be disabled entirely via EnablePrefetcher, a sparse or empty Prefetch folder is not inherently suspicious and must be evaluated against the system's actual configuration before being treated as evidence of tampering.",
-      "interpretation": "",
+      "interpretation": "Combine Prefetch with SRUM, BAM/DAM, and UserAssist for a fuller execution story — each has different retention limits and blind spots, so the overlap is what makes the finding solid. The first-run time is only an approximation: it's derived from the .pf file's own creation time minus up to ~10 seconds, not a directly recorded field.",
       "related_artifacts": [
         "amcache-hve",
         "shimcache",
@@ -561,7 +566,8 @@
         "ApplicationName (full path)",
         "Timestamp",
         "BytesSent/BytesRecvd",
-        "UserSID"
+        "UserSID",
+        "Table name/identifier mappings stored in SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SRUM\\Extensions — needed to correlate SRUDB.dat's internal table GUIDs back to what they actually represent"
       ],
       "normal_baseline": "Reflects normal application and network usage; retention commonly cited as 30-60 days depending on configuration.",
       "anomalies": [
@@ -569,12 +575,14 @@
         "Execution record for an application with no matching Prefetch/Amcache entry"
       ],
       "parsing_tools": [
-        "SRUM-DUMP (Mark Baggett)",
-        "KAPE + SRUM module"
+        "SRUM-DUMP (Mark Baggett) — e.g. srum_dump.exe -i SRUDB.dat -o output-folder -r SOFTWARE -f xls",
+        "SRUMECmd (Eric Zimmerman) — e.g. SrumECmd.exe -f SRUDB.dat -r SOFTWARE --csv output-folder",
+        "KAPE + SRUM module",
+        "Velociraptor (windows.forensics.srum artifact)"
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "SRUDB.dat can be deleted directly and Windows will recreate an empty one at next write, so a suspiciously short-lived SRUM history around an incident is itself a signal.",
-      "interpretation": "",
+      "interpretation": "Entries are written into the database in periodic (roughly hourly) blocks rather than at the moment activity occurs, so the exact time an action happened cannot be pinned down from SRUM alone — treat its timestamps as approximate. SRUDB.dat is also not guaranteed to be flushed to disk on every shutdown, so the most recent activity before a crash or abrupt power-off may be missing entirely. Parsing the SOFTWARE hive alongside SRUDB.dat (most tools accept both together) is required to resolve the raw table GUIDs into human-readable field names.",
       "related_artifacts": [
         "prefetch"
       ],
@@ -918,7 +926,7 @@
         "T1204.002"
       ],
       "anti_forensic_notes": "Because this key is populated by the shared Windows common-dialog control rather than by individual applications, clearing it removes evidence of file interaction across many programs at once rather than just one - a single deletion event with broad evidentiary impact. Entries survive deletion of the underlying file, making this a durable record of files that once existed even after they and any Recycle Bin trace are gone.",
-      "interpretation": "The \"*\" key is a cross-extension MRU capturing only the single most recent files regardless of type, while the per-extension .??? subkeys retain a longer, type-specific history that can still hold an entry the \"*\" list has since rolled off. Reviewing both levels together, rather than just the \"*\" key, is necessary to recover the full file-interaction history for a specific extension of interest.",
+      "interpretation": "The \"*\" key is a cross-extension MRU capturing only the single most recent files regardless of type, while the per-extension .??? subkeys retain a longer, type-specific history that can still hold an entry the \"*\" list has since rolled off. Reviewing both levels together, rather than just the \"*\" key, is necessary to recover the full file-interaction history for a specific extension of interest. Capacity: the \"*\" key holds the 20 most recently accessed files of any extension, and each per-extension subkey separately holds its own 20 most recent entries for that extension.",
       "related_artifacts": [
         "last-visited-mru",
         "recent-files",
@@ -953,13 +961,15 @@
       ],
       "parsing_tools": [
         "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
-        "RegRipper (recentdocs.pl plugin)"
+        "RegRipper (recentdocs.pl plugin)",
+        "KAPE — e.g. kape.exe --msource source-volume --mdest output-folder --module RECmd_UserActivity --mef csv",
+        "Velociraptor (windows.registry.recentdocs artifact)"
       ],
       "attack_techniques": [
         "T1083"
       ],
       "anti_forensic_notes": "Entries persist after the referenced file is deleted, so RecentDocs commonly outlives the evidence it points to and is a good source for reconstructing what files existed even after cleanup. The key's LastWrite time only reflects the most recent addition across the whole key structure, so establishing a precise timeline for older entries requires the MRUListEx ordering rather than timestamps alone.",
-      "interpretation": "",
+      "interpretation": "Capacity: the root RecentDocs key retains the 150 most recently opened files/folders overall; each per-extension subkey retains its own 20 most recent entries (30 for the Folder subkey, or files without an extension). A file can still show up in its extension subkey after it has aged out of the root 150-item list, so check both levels rather than the root alone.",
       "related_artifacts": [
         "shell-bags",
         "userassist"
@@ -1020,7 +1030,8 @@
         "Target full path",
         "Volume serial number",
         "TrackerDataBlock (machine ID / MAC address)",
-        "Target MAC timestamps embedded at creation"
+        "Target MAC timestamps embedded at creation",
+        "Explorer's Recent folder UI shows roughly the ~149 most recent LNK files to the user, though many more may actually exist in the folder and are accessible via the command line or forensic tools"
       ],
       "normal_baseline": "Shortcuts correspond to documents/programs the user has opened, consistent with normal work patterns.",
       "anomalies": [
@@ -1028,11 +1039,13 @@
         "LNK referencing a file staged in a temp/exfil directory"
       ],
       "parsing_tools": [
-        "LECmd (Eric Zimmerman)"
+        "LECmd (Eric Zimmerman) — e.g. LECmd.exe -d \"%AppData%\\Microsoft\\Windows\\Recent\" --csv output-folder --csvf LNK.csv",
+        "TZWorks lp",
+        "Velociraptor (windows.forensics.lnk artifact)"
       ],
       "attack_techniques": [],
       "anti_forensic_notes": "Persists after the target file is deleted, preserving path and volume evidence; the TrackerDataBlock MAC address can help attribute the originating machine when a file was moved across systems.",
-      "interpretation": "",
+      "interpretation": "A LNK file is created whenever a file or folder is created or opened, and Windows also creates LNK files for the parent and grandparent folders in the same operation — so the mere existence of a LNK file does not by itself prove the target file was actually opened, nor whether its contents were modified. Always interpret alongside other artifacts (Jump Lists, MRU keys) rather than in isolation.",
       "related_artifacts": [
         "jump-lists",
         "usrclass-dat-hive"
