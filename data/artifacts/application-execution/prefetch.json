@@ -15,7 +15,7 @@
     "List of files and directories referenced during the executable's startup phase",
     "Prefetch file format version number (17 = XP/2003, 23 = Vista/7/2008/2012, 26 = Windows 8/8.1, 30 = Windows 10) — identifies which decompression/parsing logic applies (Windows 10 .pf files are compressed and require Windows 8+ APIs to decompress)"
   ],
-  "normal_baseline": "One .pf file per distinct executable path that has been run, up to a Microsoft-documented cap of 128 retained files on Windows XP/7 (oldest purged once the cap is reached) or up to 1,024 files on Windows 8 and later; run counts and run-time clusters that line up with normal user/application behavior (e.g. daily logon scripts, frequently used applications).",
+  "normal_baseline": "One .pf file per distinct executable path that has been run, up to a Microsoft-documented cap of 128 retained files in the Prefetch folder (oldest purged once the cap is reached); run counts and run-time clusters that line up with normal user/application behavior (e.g. daily logon scripts, frequently used applications).",
   "anomalies": [
     "A .pf file for an executable run from a Temp, Downloads, or other user-writable/unusual path, especially with a low run count consistent with a one-off tool execution",
     "A high run count concentrated in a very short time window, consistent with automated/scripted repeated execution rather than normal interactive use",
@@ -24,16 +24,14 @@
     "Complete absence of expected Prefetch activity on a system that should have it enabled — always confirm EnablePrefetcher's registry value and whether the boot volume is an SSD (which disables prefetching by default) before treating an empty/sparse Prefetch folder as suspicious"
   ],
   "parsing_tools": [
-    "PECmd (Eric Zimmerman) — e.g. PECmd.exe -d \"C:\\Windows\\Prefetch\" --csv output-folder --csvf prefetch.csv",
-    "WinPrefetchView (Nirsoft)",
-    "TZWorks Windows Prefetch Parser (pf)",
-    "Velociraptor (windows.forensics.prefetch artifact)"
+    "PECmd (Eric Zimmerman)",
+    "WinPrefetchView (Nirsoft)"
   ],
   "attack_techniques": [
     "T1070.004"
   ],
   "anti_forensic_notes": "Prefetch files are ordinary files on disk (not registry-embedded), so they can be deleted individually or in bulk with simple filesystem operations — a documented anti-forensic technique corresponding to ATT&CK T1070.004 (Indicator Removal: File Deletion). Deletion of .pf files does not remove all trace, however: the NTFS Master File Table ($MFT) retains a record of the deleted file's name, size, and timestamps, and the $UsnJrnl records the deletion event itself. Because prefetching is off by default on SSD-booted systems and can be disabled entirely via EnablePrefetcher, a sparse or empty Prefetch folder is not inherently suspicious and must be evaluated against the system's actual configuration before being treated as evidence of tampering.",
-  "interpretation": "Combine Prefetch with SRUM, BAM/DAM, and UserAssist for a fuller execution story — each has different retention limits and blind spots, so the overlap is what makes the finding solid. The first-run time is only an approximation: it's derived from the .pf file's own creation time minus up to ~10 seconds, not a directly recorded field.",
+  "interpretation": "",
   "related_artifacts": [
     "amcache-hve",
     "shimcache",

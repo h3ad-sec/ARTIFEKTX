@@ -28,7 +28,7 @@
     "T1204.002"
   ],
   "anti_forensic_notes": "Because this key is populated by the shared Windows common-dialog control rather than by individual applications, clearing it removes evidence of file interaction across many programs at once rather than just one - a single deletion event with broad evidentiary impact. Entries survive deletion of the underlying file, making this a durable record of files that once existed even after they and any Recycle Bin trace are gone.",
-  "interpretation": "The \"*\" key is a cross-extension MRU capturing only the single most recent files regardless of type, while the per-extension .??? subkeys retain a longer, type-specific history that can still hold an entry the \"*\" list has since rolled off. Reviewing both levels together, rather than just the \"*\" key, is necessary to recover the full file-interaction history for a specific extension of interest. Capacity: the \"*\" key holds the 20 most recently accessed files of any extension, and each per-extension subkey separately holds its own 20 most recent entries for that extension.",
+  "interpretation": "The \"*\" key is a cross-extension MRU capturing only the single most recent files regardless of type, while the per-extension .??? subkeys retain a longer, type-specific history that can still hold an entry the \"*\" list has since rolled off. Reviewing both levels together, rather than just the \"*\" key, is necessary to recover the full file-interaction history for a specific extension of interest.",
   "related_artifacts": [
     "last-visited-mru",
     "recent-files",
