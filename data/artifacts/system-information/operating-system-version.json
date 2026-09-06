@@ -1,7 +1,7 @@
 {
   "id": "operating-system-version",
   "name": "Operating System Version",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "system-identification",
   "os": "Windows",
   "os_min": "Windows XP (Source OS historical-update subkeys present on Windows 10+)",
@@ -31,6 +31,9 @@
   ],
   "anti_forensic_notes": "InstallTime reflects the installation time of the CURRENT build only - it is refreshed by feature updates - and does not represent the system's original installation date; the Source OS subkeys must be reviewed together to reconstruct the true build lineage. Timestamps embedded in the Source OS subkey names themselves are extraneous and should not be relied on.",
   "interpretation": "CurrentVersion stores ProductName/EditionID (OS type), DisplayVersion/ReleaseId/CurrentBuildNumber (version info), and InstallTime (installation time of the current build, not the original installation). Source OS subkeys are created for each historical OS update and store the same style of information for each prior build. InstallTime is 64-bit FILETIME format (Windows 10+); InstallDate is 32-bit Unix epoch format - both should represent the same moment and can be cross-checked against each other.",
+  "category": [
+    "System Information"
+  ],
   "related_artifacts": [
     "computer-name",
     "system-last-shutdown-time",

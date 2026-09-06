@@ -1,7 +1,7 @@
 {
   "id": "run-runonce-keys",
   "name": "Run / RunOnce Registry Keys",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "persistence",
   "os": "Windows",
   "os_min": "Windows NT 4.0",
@@ -26,6 +26,9 @@
   ],
   "anti_forensic_notes": "Trivially removed by deleting the value; correlate against SOFTWARE/NTUSER.DAT hive backups (RegBack) to detect since-deleted entries.",
   "interpretation": "",
+  "category": [
+    "Persistence"
+  ],
   "related_artifacts": [
     "software-hive",
     "ntuser-dat-hive",

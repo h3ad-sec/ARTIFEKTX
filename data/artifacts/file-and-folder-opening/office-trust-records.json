@@ -1,7 +1,7 @@
 {
   "id": "office-trust-records",
   "name": "Office Trust Records",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "document-access",
   "os": "Windows",
   "os_min": "Windows XP SP3 (Office 2010+)",
@@ -28,6 +28,9 @@
   ],
   "anti_forensic_notes": "A TrustRecords entry is only created after the user actively grants trust - a document opened and then closed without enabling content (or blocked by Protected View and never trusted) leaves no entry here even though it may appear elsewhere (File MRU, Reading Locations). Because trust is granted per full file path, renaming or moving a previously-trusted malicious document forces a fresh trust decision and therefore a fresh, checkable record.",
   "interpretation": "This key exists specifically to avoid re-prompting the user, so its presence is direct evidence of an affirmative user action to bypass a security warning, not merely that the file was opened. The stored data includes both the time trust was granted and which specific permission was extended, which for a macro-enabled document is typically the single most important pivot point in reconstructing a phishing-to-execution chain.",
+  "category": [
+    "File and Folder Opening"
+  ],
   "related_artifacts": [
     "office-recent-files",
     "ms-word-reading-locations",

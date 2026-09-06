@@ -1,7 +1,7 @@
 {
   "id": "dropbox",
   "name": "Dropbox",
-  "category": "file",
+  "type": "file",
   "subcategory": "cloud-storage",
   "os": "Windows",
   "os_min": "Windows 8",
@@ -33,6 +33,9 @@
   ],
   "anti_forensic_notes": "Older Dropbox client versions encrypt filecache.dbx and config.dbx with Windows DPAPI, which is tied to the user account and host - without that context, this metadata cannot be decrypted, effectively limiting recovery to whatever the newer plaintext databases retain. .dropbox.cache only retains up to three days of cached data, so transient evidence there is short-lived. Consumer Dropbox exposes only a limited \"Events\" activity page rather than full audit logging, constraining what can be corroborated outside local artifacts.",
   "interpretation": "Because encryption scope changed across Dropbox client versions, always identify the installed version before assuming metadata is readable - recent clients (nucleus.sqlite3, sync_history.db, aggregation.dbx) are far more forensically useful than older DPAPI-encrypted ones. Metadata can be recovered for local, cloud, and deleted files alike. Deleted files may exist in both local and online recycle bins; online recycle bin retention is 30 days for Personal accounts and 120 days for Business. Dropbox Business \"Advanced\" tier provides detailed audit logging, while consumer Dropbox is limited to the basic Events page.",
+  "category": [
+    "Cloud Storage"
+  ],
   "related_artifacts": [
     "onedrive",
     "google-drive-desktop",

@@ -1,7 +1,7 @@
 {
   "id": "office-recent-files",
   "name": "Office Recent Files",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "document-access",
   "os": "Windows",
   "os_min": "Windows XP (Office XP/2002+)",
@@ -26,6 +26,9 @@
   "attack_techniques": [],
   "anti_forensic_notes": "Because full path and a last-opened time are recorded directly in the value data (unlike the OS RecentDocs key, which requires MRUListEx ordering to establish sequence), this list is comparatively easy to read but just as easy to clear wholesale by deleting the File MRU subkey - removing the entire per-application history at once rather than one entry at a time.",
   "interpretation": "Unlike the general RecentDocs registry key, each Office application's File MRU stores the complete file path and an explicit last-opened time per entry rather than relying on binary MRUListEx ordering, making it a more directly readable and often more precise source for reconstructing when a specific document was opened in a specific Office application. On Microsoft 365 installs, checking the correct account-specific subkey (LiveId_#### vs AD_####) matters, since separate signed-in identities keep independent lists.",
+  "category": [
+    "File and Folder Opening"
+  ],
   "related_artifacts": [
     "recent-files",
     "ms-word-reading-locations",

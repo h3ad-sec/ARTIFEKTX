@@ -1,7 +1,7 @@
 {
   "id": "jump-lists",
   "name": "Jump Lists",
-  "category": "file",
+  "type": "file",
   "subcategory": "file-folder-access",
   "os": "Windows",
   "os_min": "Windows 7",
@@ -27,6 +27,10 @@
   "attack_techniques": [],
   "anti_forensic_notes": "The referenced file does not need to still exist for the Jump List entry to remain, aiding recovery after deletion; can be individually pruned via 'Remove from this list'.",
   "interpretation": "A Jump List entry is created the first time an application is used by that user account — it does NOT record whether an application is currently pinned to the taskbar, so it cannot be used to determine pinned-app status. Best used in combination with Prefetch, LNK files, RecentDocs, and Shellbags to strengthen an activity timeline rather than relied on alone.",
+  "category": [
+    "Application Execution",
+    "File and Folder Opening"
+  ],
   "related_artifacts": [
     "usrclass-dat-hive",
     "shortcut-lnk-files"

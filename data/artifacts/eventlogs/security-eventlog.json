@@ -1,7 +1,7 @@
 {
   "id": "security-eventlog",
   "name": "Security Event Log",
-  "category": "file",
+  "type": "file",
   "subcategory": "authentication",
   "os": "Windows",
   "os_min": "Windows 2000 (the event IDs and field names below reflect Windows Vista / Server 2008 and later)",
@@ -52,6 +52,9 @@
   ],
   "anti_forensic_notes": "Clearing the Security log (via Event Viewer, `wevtutil cl Security`, or PowerShell) itself generates Event ID 1102 recording the account that performed the clear - an attacker cannot suppress this event without disabling the EventLog service or tampering with the .evtx file directly, both of which leave their own trace. Command-line auditing on 4688 is off by default and must be explicitly enabled via the 'Include command line in process creation events' GPO; its absence on an otherwise well-audited host silently blinds process-creation forensics to attacker command lines and is worth flagging on its own.",
   "interpretation": "",
+  "category": [
+    "Event Logs"
+  ],
   "related_artifacts": [
     "sam-hive",
     "security-hive",

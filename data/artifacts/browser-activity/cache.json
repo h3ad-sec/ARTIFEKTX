@@ -1,7 +1,7 @@
 {
   "id": "cache",
   "name": "Cache",
-  "category": "file",
+  "type": "file",
   "subcategory": "browser-artifact",
   "os": "Windows",
   "os_min": "N/A (application-level)",
@@ -27,6 +27,9 @@
   "attack_techniques": [],
   "anti_forensic_notes": "Cache is typically cleared separately from History in browser \"clear data\" dialogs unless a user explicitly selects it, so an emptied History with an intact Cache (or vice versa) is common — each should be checked independently.",
   "interpretation": "Cache provides a genuine snapshot in time of what a user was looking at, including the literal files rendered (images, scripts) rather than just a URL reference — useful for confirming exactly what content a page displayed at a given moment. It is tied to the specific local user account whose profile holds it, and its two timestamps (first-saved vs. last-viewed) can separate a one-time visit from repeated return visits.",
+  "category": [
+    "Browser Activity"
+  ],
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "firefox-browser-artifacts",

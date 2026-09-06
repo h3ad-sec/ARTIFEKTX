@@ -1,7 +1,7 @@
 {
   "id": "drive-letter-and-volume-name",
   "name": "Drive Letter and Volume Name",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "removable-media",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -30,6 +30,9 @@
   ],
   "anti_forensic_notes": "These keys are overwritten on each new mount, so only the LAST drive-letter/volume-name mapping for a device is recoverable here - deleting or editing the relevant MountedDevices value removes that mapping with no lower-level history retained in these locations; connection history itself must come from usb-device-history's registry timestamps or setupapi-devlog.",
   "interpretation": "Only the last USB device mapped to a specific drive letter can be identified from these keys - historical drive-letter assignments over time are not retained here. Cross-reference the recovered volume name and letter against shell-item data in LNK files and shellbags to place the device in a broader activity timeline.",
+  "category": [
+    "External Device/USB Usage"
+  ],
   "related_artifacts": [
     "usb-device-identification",
     "setupapi-devlog",

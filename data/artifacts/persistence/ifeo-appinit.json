@@ -1,7 +1,7 @@
 {
   "id": "ifeo-appinit",
   "name": "Image File Execution Options / AppInit_DLLs",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "persistence",
   "os": "Windows",
   "os_min": "Windows Vista (IFEO Debugger abuse formalized); AppInit_DLLs from Windows NT",
@@ -26,6 +26,9 @@
   ],
   "anti_forensic_notes": "IFEO abuse can double as defense evasion by attaching an invalid or crashing debugger to security tools, silently disabling them.",
   "interpretation": "",
+  "category": [
+    "Persistence"
+  ],
   "related_artifacts": [
     "software-hive",
     "system-boot-and-autostart-programs"

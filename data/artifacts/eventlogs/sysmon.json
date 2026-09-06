@@ -1,7 +1,7 @@
 {
   "id": "sysmon",
   "name": "Sysmon (System Monitor)",
-  "category": "file",
+  "type": "file",
   "subcategory": "process-execution",
   "os": "Windows",
   "os_min": "Windows 7 / Server 2008 R2 and later (Sysmon is a Sysinternals tool, not a default Windows component, and must be separately installed and configured)",
@@ -41,6 +41,9 @@
   ],
   "anti_forensic_notes": "Sysmon explicitly does not attempt to hide itself or its driver from attackers, and its own documentation notes it provides no self-protection beyond running as a protected process; an attacker with sufficient privileges can uninstall it (sysmon -u), stop its service, or tamper with the 'Start'/'Enable' values under its EventLog-Microsoft-Windows-Sysmon-Operational Autologger registry key to silently suppress future logging without necessarily generating an obvious Sysmon-specific alert. Because Sysmon coverage and event volume depend entirely on the deployed configuration file, a gap in expected event types (e.g., no Event ID 3 network connections at all) may simply mean that event type was never enabled, not that it was tampered with - the configuration in place must be checked before drawing conclusions from absence.",
   "interpretation": "",
+  "category": [
+    "Event Logs"
+  ],
   "related_artifacts": [
     "security-eventlog",
     "powershell-operational",

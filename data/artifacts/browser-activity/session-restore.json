@@ -1,7 +1,7 @@
 {
   "id": "session-restore",
   "name": "Session Restore",
-  "category": "file",
+  "type": "file",
   "subcategory": "browser-artifact",
   "os": "Windows",
   "os_min": "N/A (application-level)",
@@ -29,6 +29,9 @@
   "attack_techniques": [],
   "anti_forensic_notes": "Because these files exist specifically to survive crashes, even a normal, clean browser shutdown can leave the prior session's data in \"Last Session\"/backup files; fully suppressing this evidence requires clearing both the live session files and profile-level backups (e.g., sessionstore-backups\\).",
   "interpretation": "Session restore can retain far more than URLs: the actual HTML/JavaScript/XML/form data present on a page, the referring site, transition type (typed, link, reload), window size, and which tabs were pinned — a richer point-in-time capture of browsing state than history alone, useful for reconstructing exactly what was on-screen at shutdown or crash time.",
+  "category": [
+    "Browser Activity"
+  ],
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "firefox-browser-artifacts",

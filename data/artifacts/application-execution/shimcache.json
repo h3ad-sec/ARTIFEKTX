@@ -1,7 +1,7 @@
 {
   "id": "shimcache",
   "name": "Shimcache",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "execution-evidence",
   "os": "Windows",
   "os_min": "Windows 2000 / XP",
@@ -28,6 +28,9 @@
   "attack_techniques": [],
   "anti_forensic_notes": "Critical version-dependent caveat: Shimcache reliability as proof of execution has changed across Windows releases. On Windows XP/2003 there is no execution flag at all, so presence alone was historically treated as a rough proxy for execution. On Windows Vista, 7, Server 2008, and Server 2012 a Process Execution Flag was added that distinguishes actual execution (TRUE) from mere presence, e.g. directory browsing (FALSE) — though Mandiant notes the flag's true internal semantics were never officially documented by Microsoft. On Windows 8 and later the execution-flag behavior changed again and is widely reported as unreliable/removed, meaning an entry can exist for a file that was never executed. Because of this, Shimcache should never be used alone to prove execution on modern Windows — always corroborate with Prefetch, Amcache, or BAM/DAM. The cache itself lives in memory and is only flushed to the registry hive periodically (typically at shutdown), so a hard power-off can lose recent updates, and clearing/rebuilding it requires kernel-level access rather than a simple deletion.",
   "interpretation": "",
+  "category": [
+    "Application Execution"
+  ],
   "related_artifacts": [
     "amcache-hve",
     "prefetch",

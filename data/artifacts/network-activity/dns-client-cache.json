@@ -1,7 +1,7 @@
 {
   "id": "dns-client-cache",
   "name": "DNS Client (Resolver) Cache",
-  "category": "file",
+  "type": "file",
   "subcategory": "network-activity",
   "os": "Windows",
   "os_min": "Windows 2000 (DNS Client / Dnscache service); Get-DnsClientCache cmdlet requires Windows 8 / Server 2012+",
@@ -32,6 +32,9 @@
   ],
   "anti_forensic_notes": "Entirely volatile, like the ARP cache: it lives only in the Dnscache service's memory and is wiped on reboot or by ipconfig /flushdns / Clear-DnsClientCache, so it must be collected during live response. A cache that is suspiciously empty on a system clearly used for recent browsing is itself a possible indicator that it was deliberately flushed.",
   "interpretation": "",
+  "category": [
+    "Network Activity and Physical Location"
+  ],
   "related_artifacts": [
     "hosts-file",
     "arp-cache",

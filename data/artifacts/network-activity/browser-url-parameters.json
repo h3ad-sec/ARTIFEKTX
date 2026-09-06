@@ -1,7 +1,7 @@
 {
   "id": "browser-url-parameters",
   "name": "Browser URL Parameters",
-  "category": "file",
+  "type": "file",
   "subcategory": "browser-artifact",
   "os": "Windows",
   "os_min": "N/A (application-level)",
@@ -26,6 +26,9 @@
   ],
   "anti_forensic_notes": "This is not a dedicated artifact store - it is a byproduct signal inside otherwise-normal browsing history. Clearing browser history removes it identically to any other history entry (see chrome-edge-browser-artifacts / firefox-browser-artifacts anti-forensic notes), and there is no separate registry- or log-based backup of these URL parameters.",
   "interpretation": "Treat this as a byproduct signal inside otherwise-normal browsing history, not a dedicated artifact store of its own - review URL query strings within existing browser history data (mapping services, captive-portal redirects, etc.) for geolocation and network-identification clues rather than expecting a purpose-built artifact location.",
+  "category": [
+    "Network Activity and Physical Location"
+  ],
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "firefox-browser-artifacts",

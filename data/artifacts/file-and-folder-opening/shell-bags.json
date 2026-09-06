@@ -1,7 +1,7 @@
 {
   "id": "shell-bags",
   "name": "Shell Bags",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "file-folder-access",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -30,6 +30,9 @@
   ],
   "anti_forensic_notes": "Shellbags are not commonly targeted by mainstream privacy-cleaner tools, so they frequently retain folder-access history well after the corresponding files, folders, or removable/network volumes are gone-making them one of the more resilient sources of historical folder-browsing evidence. They exist in two hive locations (NTUSER.DAT and UsrClass.dat on Vista+), so an incomplete acquisition that only captures one hive will miss part of the picture.",
   "interpretation": "",
+  "category": [
+    "File and Folder Opening"
+  ],
   "related_artifacts": [
     "user-typed-paths",
     "recent-files",

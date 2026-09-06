@@ -1,7 +1,7 @@
 {
   "id": "auto-complete-data",
   "name": "Auto-Complete Data",
-  "category": "file",
+  "type": "file",
   "subcategory": "browser-artifact",
   "os": "Windows",
   "os_min": "N/A (application-level)",
@@ -30,6 +30,9 @@
   ],
   "anti_forensic_notes": "Typed-data evidence is spread across five-plus independent databases, so clearing one (e.g., autofill) often leaves corroborating entries in another (e.g., Network Action Predictor or Shortcuts), making full suppression of typed history difficult without wiping the entire profile.",
   "interpretation": "Includes both the typed-in data itself and metadata about the data type (search term vs. form field vs. URL vs. credential). Cross-referencing the separate tables connects typed content to a timeline and, combined with profile ownership, ties the typing activity to a specific user account rather than just \"the browser.\"",
+  "category": [
+    "Browser Activity"
+  ],
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "firefox-browser-artifacts",

@@ -1,7 +1,7 @@
 {
   "id": "logfile",
   "name": "$LogFile (NTFS Transaction Log)",
-  "category": "file",
+  "type": "file",
   "subcategory": "filesystem-metadata",
   "os": "Windows",
   "os_min": "Windows NT 3.1 (any NTFS volume)",
@@ -31,6 +31,9 @@
   ],
   "anti_forensic_notes": "$LogFile is a small, actively recycled ring buffer, so its window of coverage is short and normal system activity naturally overwrites older transactions - the absence of an expected transaction is not by itself proof of tampering. Because it records transactions independently of the MFT and USN Journal, it can corroborate or contradict those artifacts after they have been altered, but only if the volume is imaged quickly, before routine churn recycles the relevant log pages.",
   "interpretation": "",
+  "category": [
+    "Filesystem Artifacts"
+  ],
   "related_artifacts": [
     "mft",
     "usn-journal"

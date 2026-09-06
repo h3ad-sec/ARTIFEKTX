@@ -1,7 +1,7 @@
 {
   "id": "onedrive",
   "name": "OneDrive",
-  "category": "file",
+  "type": "file",
   "subcategory": "cloud-storage",
   "os": "Windows",
   "os_min": "Windows 8",
@@ -30,6 +30,9 @@
   ],
   "anti_forensic_notes": "Metadata files (logs, settings) only exist if OneDrive was actually enabled by user sign-in - a system with OneDrive installed but never authenticated will show no metadata trail at all, which can mask prior use if an account is later removed and logs are cleared. Some files are cloud-only and never touch local disk, so the local folder and its metadata are not a complete record of what the user stored in the tenant. Deleted items land in an online recycle bin (30 days Personal, 93 days Business) - past that window, recovery depends entirely on Microsoft 365 retention/audit rather than local artifacts.",
   "interpretation": "Always confirm the local sync folder location via the registry rather than assuming the default path - it can be relocated by the user or by policy. SyncDiagnostics.log is a diagnostics log, not a guaranteed metadata source, but can incidentally contain file-level detail worth checking. Because cloud-only files never sync to disk, local artifacts alone cannot prove the full contents of a user's OneDrive at a point in time. For OneDrive for Business, Microsoft 365 Unified Audit Logs supply up to 90 days of user activity (uploads, downloads, sharing) that should be cross-referenced against local sync evidence.",
+  "category": [
+    "Cloud Storage"
+  ],
   "related_artifacts": [
     "google-drive-desktop",
     "box-drive",

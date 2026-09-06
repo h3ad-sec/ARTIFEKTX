@@ -1,7 +1,7 @@
 {
   "id": "cloud-account-details",
   "name": "Cloud Account Details",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "user-accounts",
   "os": "Windows",
   "os_min": "Windows 8 (Microsoft account login support)",
@@ -25,6 +25,9 @@
   ],
   "anti_forensic_notes": "The value only exists if the account was ever configured to sign in with a Microsoft cloud account; a purely local account will simply have no InternetUserName value, which is not itself suspicious. Converting a cloud-linked account back to local removes this value going forward, but historical evidence may still be recoverable from registry hive backups (RegBack) or Volume Shadow Copies.",
   "interpretation": "The presence of this value is what distinguishes a Microsoft cloud account from a purely local one at the SAM level — check it whenever you need to know whether a given local username actually authenticates against a Microsoft identity rather than a locally-stored password. Cross-reference the email domain against known-good corporate domains to catch personal-account usage on managed hardware.",
+  "category": [
+    "Account Usage"
+  ],
   "related_artifacts": [
     "sam-hive",
     "user-accounts",

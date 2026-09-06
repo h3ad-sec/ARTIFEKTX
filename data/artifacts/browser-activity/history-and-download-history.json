@@ -1,7 +1,7 @@
 {
   "id": "history-and-download-history",
   "name": "History and Download History",
-  "category": "file",
+  "type": "file",
   "subcategory": "browser-artifact",
   "os": "Windows",
   "os_min": "N/A (application-level)",
@@ -27,6 +27,9 @@
   "attack_techniques": [],
   "anti_forensic_notes": "Web browser artifacts are stored per local user account, so history for one account tells you nothing about another; clearing history removes rows from the SQLite tables but does not necessarily overwrite the underlying database pages, so carving deleted records can sometimes recover cleared history.",
   "interpretation": "Always check for multiple profiles in Chromium-based browsers before concluding history is complete — a single \"History\" file query against the wrong profile folder silently misses activity in another profile. This is the general browsing-history counterpart to the more specific `browser-downloads` (download manager metadata) and `media-history` (audio/video playback) entries.",
+  "category": [
+    "Browser Activity"
+  ],
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "firefox-browser-artifacts",

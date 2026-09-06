@@ -1,7 +1,7 @@
 {
   "id": "prefetch",
   "name": "Prefetch",
-  "category": "file",
+  "type": "file",
   "subcategory": "execution-evidence",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -34,6 +34,9 @@
   ],
   "anti_forensic_notes": "Prefetch files are ordinary files on disk (not registry-embedded), so they can be deleted individually or in bulk with simple filesystem operations — a documented anti-forensic technique corresponding to ATT&CK T1070.004 (Indicator Removal: File Deletion). Deletion of .pf files does not remove all trace, however: the NTFS Master File Table ($MFT) retains a record of the deleted file's name, size, and timestamps, and the $UsnJrnl records the deletion event itself. Because prefetching is off by default on SSD-booted systems and can be disabled entirely via EnablePrefetcher, a sparse or empty Prefetch folder is not inherently suspicious and must be evaluated against the system's actual configuration before being treated as evidence of tampering.",
   "interpretation": "Combine Prefetch with SRUM, BAM/DAM, and UserAssist for a fuller execution story — each has different retention limits and blind spots, so the overlap is what makes the finding solid. The first-run time is only an approximation: it's derived from the .pf file's own creation time minus up to ~10 seconds, not a directly recorded field.",
+  "category": [
+    "Application Execution"
+  ],
   "related_artifacts": [
     "amcache-hve",
     "shimcache",

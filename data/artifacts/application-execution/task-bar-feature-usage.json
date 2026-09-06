@@ -1,7 +1,7 @@
 {
   "id": "task-bar-feature-usage",
   "name": "Task Bar Feature Usage",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "execution-evidence",
   "os": "Windows",
   "os_min": "Windows 10 1903+",
@@ -29,6 +29,9 @@
   ],
   "anti_forensic_notes": "FeatureUsage stores only cumulative counters with no timestamps, so on its own it cannot place activity in time - it must be correlated with UserAssist, Prefetch, or event logs to build a timeline. Clearing the key removes historical counts entirely with no partial-deletion trace, and because it is a rarely-examined key, wholesale deletion is easy to miss unless explicitly checked for.",
   "interpretation": "AppLaunch and AppSwitched measure different things. AppLaunch only increments for applications the user has pinned to the taskbar, so it demonstrates the user's prior knowledge of and intent toward that application - the counter also persists after the app is later unpinned, so historical pinning survives removal from the visible taskbar. AppSwitched increments on any change of taskbar focus regardless of whether the app is pinned, reflecting general interaction/attention rather than deliberate pinning. Neither value carries a timestamp, so this artifact answers 'did the user know about and use this application' rather than 'when'.",
+  "category": [
+    "Application Execution"
+  ],
   "related_artifacts": [
     "userassist",
     "bam-dam",

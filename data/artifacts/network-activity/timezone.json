@@ -1,7 +1,7 @@
 {
   "id": "timezone",
   "name": "Timezone",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "time-configuration",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -31,6 +31,9 @@
   ],
   "anti_forensic_notes": "TimeZoneInformation reflects only the currently configured time zone, not a history of prior changes - that history, when it exists, comes solely from System.evtx Event ID 6013 entries, which are subject to the same log-retention and clearing limits as any other event log.",
   "interpretation": "Some log files and artifact timestamps can only be correctly interpreted by knowing the system's time zone. Event ID 6013 in System.evtx can provide additional information on historical time zone settings, supplementing the single current-state value stored in the registry.",
+  "category": [
+    "Network Activity and Physical Location"
+  ],
   "related_artifacts": [
     "system-eventlog",
     "network-history",

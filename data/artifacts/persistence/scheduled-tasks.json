@@ -1,7 +1,7 @@
 {
   "id": "scheduled-tasks",
   "name": "Scheduled Tasks",
-  "category": "file",
+  "type": "file",
   "subcategory": "persistence",
   "os": "Windows",
   "os_min": "Windows Vista (XML tasks); legacy .job on XP",
@@ -28,6 +28,9 @@
   ],
   "anti_forensic_notes": "TaskCache registry entries can persist under \\Tasks\\{GUID} even after the XML file is deleted, useful for timeline reconstruction. Event IDs 4698/4699 require Object Access auditing to be enabled, which many environments lack by default.",
   "interpretation": "",
+  "category": [
+    "Persistence"
+  ],
   "related_artifacts": [
     "security-eventlog"
   ]

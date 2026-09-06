@@ -1,7 +1,7 @@
 {
   "id": "system-hive",
   "name": "SYSTEM Hive",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "system-configuration",
   "os": "Windows",
   "os_min": "Windows 2000 (present in all NT-based Windows versions)",
@@ -35,6 +35,9 @@
   ],
   "anti_forensic_notes": "Deleting a malicious service key removes it from the active ControlSet's live view, but a non-active ControlSet, registry transaction logs, or unallocated hive slack space can still retain remnants until the hive is compacted. USBSTOR entries are not automatically cleared when a device is removed and persist indefinitely — their absence for a device an organization or witness says was used is itself suspicious and suggests deliberate key deletion.",
   "interpretation": "",
+  "category": [
+    "Registry Hives"
+  ],
   "related_artifacts": [
     "software-hive",
     "sam-hive"

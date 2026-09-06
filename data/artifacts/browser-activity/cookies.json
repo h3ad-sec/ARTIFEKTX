@@ -1,7 +1,7 @@
 {
   "id": "cookies",
   "name": "Cookies",
-  "category": "file",
+  "type": "file",
   "subcategory": "browser-artifact",
   "os": "Windows",
   "os_min": "N/A (application-level)",
@@ -33,6 +33,9 @@
   ],
   "anti_forensic_notes": "Clearing cookies through browser settings removes the underlying SQLite rows, but a stolen/exported session cookie used elsewhere (pass-the-cookie) leaves no trace in the victim's own cookie store, so local absence does not rule out prior capture and reuse.",
   "interpretation": "Cookies establish that a site was visited and, via their secure/httponly flags and expiration, how the site intended the cookie to be used (session-only vs. persistent, script-accessible vs. not) along with origin site and last-access time. Session/authentication cookies are the direct target of session-hijacking attacks — an adversary holding a valid, unexpired session cookie can access an account without ever touching the stored password.",
+  "category": [
+    "Browser Activity"
+  ],
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "firefox-browser-artifacts",

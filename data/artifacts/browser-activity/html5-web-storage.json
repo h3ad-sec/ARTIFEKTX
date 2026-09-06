@@ -1,7 +1,7 @@
 {
   "id": "html5-web-storage",
   "name": "HTML5 Web Storage",
-  "category": "file",
+  "type": "file",
   "subcategory": "browser-artifact",
   "os": "Windows",
   "os_min": "N/A (application-level)",
@@ -26,6 +26,9 @@
   "attack_techniques": [],
   "anti_forensic_notes": "Web Storage is cleared only when a user clears \"site data\" (not just cookies/history) or removes the profile, so it survives many routine cleanup actions and is less commonly targeted precisely because it is less well known than cookies.",
   "interpretation": "Chrome and Edge store Local Storage as LevelDB databases — a binary key-value store requiring a LevelDB-aware parser rather than a text editor, since keys can remain in unflushed .log files. Firefox uses SQLite (webappstore.sqlite). Legacy IE/EdgeHTML stored the equivalent data in XML files.",
+  "category": [
+    "Browser Activity"
+  ],
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "firefox-browser-artifacts",

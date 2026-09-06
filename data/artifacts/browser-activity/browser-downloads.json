@@ -1,7 +1,7 @@
 {
   "id": "browser-downloads",
   "name": "Browser Downloads",
-  "category": "file",
+  "type": "file",
   "subcategory": "browser-artifact",
   "os": "Windows",
   "os_min": "N/A (application-level)",
@@ -26,6 +26,9 @@
   "attack_techniques": [],
   "anti_forensic_notes": "Downloads table entries can be cleared alongside general history clearing; the downloaded file itself, if kept, will separately carry Zone.Identifier MOTW evidence of its origin.",
   "interpretation": "This entry is downloads specifically; the browser's separate crash-recovery tab/window state is its own dedicated `session-restore` artifact, not part of this one — the two used to be combined here but were split to match the poster's own separate boxes.",
+  "category": [
+    "Browser Activity"
+  ],
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "motw-zone-identifier",

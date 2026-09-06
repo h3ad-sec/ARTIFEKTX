@@ -1,7 +1,7 @@
 {
   "id": "memory-commandline-history",
   "name": "Command-Line History via Process-Creation Auditing (4688 / Sysmon EID 1)",
-  "category": "file",
+  "type": "file",
   "subcategory": "memory-forensics",
   "os": "Windows",
   "os_min": "N/A - Event ID 4688 command-line logging requires Windows Vista/Server 2008 or later plus the specific audit policy below enabled; Sysmon requires separate installation on any supported Windows version.",
@@ -37,6 +37,9 @@
   ],
   "anti_forensic_notes": "An attacker who disables or stops the EventLog service, clears the Security log (which itself generates a 4688-independent 1102 event), or reconfigures/uninstalls Sysmon removes future command-line visibility going forward, but cannot retroactively populate command lines that were never captured because the audit policy addendum was off in the first place - the absence of command-line data on a host is therefore ambiguous between 'never configured' and 'deliberately tampered with' and must be checked against the actual policy/registry state and against whether other event types from the same source continued logging normally.",
   "interpretation": "",
+  "category": [
+    "Memory Forensics"
+  ],
   "related_artifacts": [
     "security-eventlog",
     "sysmon",

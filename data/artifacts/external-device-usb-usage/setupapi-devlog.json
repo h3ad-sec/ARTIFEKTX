@@ -1,7 +1,7 @@
 {
   "id": "setupapi-devlog",
   "name": "SetupAPI Device Install Log (setupapi.dev.log)",
-  "category": "file",
+  "type": "file",
   "subcategory": "removable-media",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -34,6 +34,9 @@
   ],
   "anti_forensic_notes": "setupapi.dev.log only records the FIRST installation of a given device/driver combination system-wide - it does not log every subsequent reconnect, so later connect/disconnect timing must still come from registry property timestamps (USBSTOR Properties 0x0066/0x0067) or MountPoints2. Because it is a plain-text, non-protected file under %SystemRoot%\\inf, it is straightforward to delete or edit and is explicitly called out in anti-forensic guidance as a file to remove to obscure USB history; deletion removes the earliest-connection evidence but does not affect the registry-based artifacts, so the two sources should always be checked together. A Windows Feature Update/in-place upgrade can also effectively reset this log, though a setupapi.upgrade.log may retain some historical migration records for devices that existed before the upgrade.",
   "interpretation": "",
+  "category": [
+    "External Device/USB Usage"
+  ],
   "related_artifacts": [
     "usb-device-identification",
     "connection-timestamps"

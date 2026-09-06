@@ -1,7 +1,7 @@
 {
   "id": "google-drive-desktop",
   "name": "Google Drive for Desktop",
-  "category": "file",
+  "type": "file",
   "subcategory": "cloud-storage",
   "os": "Windows",
   "os_min": "Windows 8",
@@ -28,6 +28,9 @@
   ],
   "anti_forensic_notes": "The \"My Drive\" volume only exists while the user is authenticated - it is not persistent storage, so a live-response or memory-only view of mounted drives will miss it once the session ends and Drive is signed out. Uninstalling Google Drive for Desktop does not necessarily remove the AppData\\Local\\Google\\DriveFS cache directory, so metadata and cached content can outlive the visible application.",
   "interpretation": "The assigned virtual drive letter recorded under NTUSER\\Software\\Google\\DriveFS\\Share\\ is the key pivot for tying other artifacts (LNK files, jump lists, shellbags, recent-docs) that reference that drive letter back to Google Drive activity. metadata_sqlite_db stores many fields in protobuf format rather than readable text/columns, so raw SQLite inspection alone will not surface everything - protobuf-aware parsing is needed for full field recovery. Google Workspace Admin Reports provide up to 180 days of user activity logging and should be cross-checked against local cache evidence.",
+  "category": [
+    "Cloud Storage"
+  ],
   "related_artifacts": [
     "onedrive",
     "box-drive",

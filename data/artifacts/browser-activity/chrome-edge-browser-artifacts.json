@@ -1,7 +1,7 @@
 {
   "id": "chrome-edge-browser-artifacts",
   "name": "Chrome / Edge (Chromium) Browser Artifacts",
-  "category": "file",
+  "type": "file",
   "subcategory": "browser-artifact",
   "os": "Windows",
   "os_min": "N/A (application-level)",
@@ -27,6 +27,9 @@
   "attack_techniques": [],
   "anti_forensic_notes": "Clearing browsing history removes rows from the SQLite tables but does not necessarily overwrite the underlying file pages, so carving deleted SQLite records can sometimes recover cleared history.",
   "interpretation": "",
+  "category": [
+    "Browser Activity"
+  ],
   "related_artifacts": [
     "firefox-browser-artifacts",
     "history-and-download-history"

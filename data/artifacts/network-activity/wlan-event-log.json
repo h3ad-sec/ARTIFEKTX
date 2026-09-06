@@ -1,7 +1,7 @@
 {
   "id": "wlan-event-log",
   "name": "WLAN Event Log",
-  "category": "file",
+  "type": "file",
   "subcategory": "network-configuration",
   "os": "Windows",
   "os_min": "Windows 7",
@@ -30,6 +30,9 @@
   ],
   "anti_forensic_notes": "This is a separate, event-log-based record from the wifi-profiles XML files and NetworkList registry keys - deleting a saved Wi-Fi profile or a NetworkList entry does not retroactively remove the association/connect events already written here, making this log a durable cross-check even after profile-level cleanup. Conversely, clearing this operational log removes the association timeline while leaving the current-state profile artifacts intact.",
   "interpretation": "Provides a historical record of wireless network connections. The SSID recorded here can be used to correlate against and retrieve additional network information from the Network History registry keys.",
+  "category": [
+    "Network Activity and Physical Location"
+  ],
   "related_artifacts": [
     "wifi-profiles",
     "network-history",

@@ -1,7 +1,7 @@
 {
   "id": "thumbs-db",
   "name": "Thumbs.db",
-  "category": "file",
+  "type": "file",
   "subcategory": "file-folder-access",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -29,6 +29,9 @@
   ],
   "anti_forensic_notes": "Thumbs.db is not commonly targeted by mainstream privacy cleaners, so it often survives well after the pictures it catalogs are deleted. Since Windows Vista, thumbnail caching moved by default to the centralized per-user Thumbcache database, so the absence of Thumbs.db on a modern system is expected and not itself suspicious-but its presence there (e.g., via a UNC-accessed folder) is worth explaining.",
   "interpretation": "Thumbs.db is most relevant to Windows XP investigations, where each viewed folder gets its own file carrying the original filename and last-modified timestamp alongside the thumbnail image. On Vista and later, Windows shifted to the centralized Thumbcache database (see thumbcache), so a lone Thumbs.db on a modern OS usually indicates the folder was viewed through an unusual path, such as a UNC network share, rather than ordinary local thumbnail caching.",
+  "category": [
+    "Deleted Items and File Existence"
+  ],
   "related_artifacts": [
     "thumbcache",
     "windows-search-database",

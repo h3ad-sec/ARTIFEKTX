@@ -1,7 +1,7 @@
 {
   "id": "volume-serial-number-vsn",
   "name": "Volume Serial Number (VSN)",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "removable-media",
   "os": "Windows",
   "os_min": "Windows 7 (EMDMgmt); Windows 10 (Partition/Diagnostic.evtx VBR-embedded VSN)",
@@ -30,6 +30,9 @@
   ],
   "anti_forensic_notes": "EMDMgmt is frequently absent entirely on modern systems and SSD-based removable media, so its absence alone carries little weight; the Partition/Diagnostic.evtx channel is cleared during major Windows feature updates, meaning a VSN capture opportunity from that source can be lost across an OS-upgrade boundary independent of any deliberate anti-forensic action.",
   "interpretation": "The VSN is not the USB Unique Serial Number hardcoded into the device's firmware, nor any printed external label serial - it belongs to the file-system partition and changes if the device is reformatted. The VSN together with the device's Volume Name is what allows correlation of a specific USB device to files it touched elsewhere on the system, via shell items embedded in LNK files and other registry locations such as shellbags.",
+  "category": [
+    "External Device/USB Usage"
+  ],
   "related_artifacts": [
     "usb-device-identification",
     "drive-letter-and-volume-name",

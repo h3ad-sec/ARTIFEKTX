@@ -1,7 +1,7 @@
 {
   "id": "usb-user-information",
   "name": "User Information",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "removable-media",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -29,6 +29,9 @@
   ],
   "anti_forensic_notes": "MountPoints2 lives inside each individual user's NTUSER.DAT, so this attribution path disappears entirely if that user's hive is not collected/loaded, or if the specific MountPoints2 subkey is deleted - deletion removes only that user's linkage without affecting the system-wide MountedDevices record, so a GUID with no MountPoints2 match anywhere is itself worth flagging rather than dismissing.",
   "interpretation": "A Volume GUID match between MountedDevices and a user's MountPoints2 key indicates that user's profile was logged on (loaded) while that specific device was present on the system - it establishes presence/opportunity, not proof that the user actively interacted with the device's file contents.",
+  "category": [
+    "External Device/USB Usage"
+  ],
   "related_artifacts": [
     "usb-device-identification",
     "drive-letter-and-volume-name",

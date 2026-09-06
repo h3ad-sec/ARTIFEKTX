@@ -1,7 +1,7 @@
 {
   "id": "bam-dam",
   "name": "BAM/DAM",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "execution-evidence",
   "os": "Windows",
   "os_min": "Windows 10 version 1709 (Fall Creators Update)",
@@ -26,6 +26,9 @@
   "attack_techniques": [],
   "anti_forensic_notes": "BAM/DAM entries are automatically purged roughly 7 days after the recorded activity, and an entry is removed once its associated executable no longer exists at its original location, and again on the next reboot — so this artifact has a naturally short retention window even with no attacker interference. It only records executables launched from local storage; programs run from removable media or network shares are not captured. Because the data lives in the live SYSTEM hive rather than a separate log, wiping it requires direct registry-key deletion (an unusual, detectable action) rather than simple file deletion.",
   "interpretation": "",
+  "category": [
+    "Application Execution"
+  ],
   "related_artifacts": [
     "amcache-hve",
     "shimcache",

@@ -1,7 +1,7 @@
 {
   "id": "usb-device-identification",
   "name": "USB Device Identification",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "removable-media",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -36,6 +36,9 @@
   ],
   "anti_forensic_notes": "The commonly cited rule that a serial number with '&' as its second character is always system-generated (i.e., the device itself has no hardware serial) has been shown to be unreliable in practice-Windows-reported values can be inconsistent across enclosures/adapters even for the same physical drive, so serial numbers should be treated as identifiers to correlate rather than as trustworthy hardware fingerprints. setupapi.dev.log only records the first installation of a given device/driver combination system-wide (not per subsequent reconnect), so later connect/disconnect timing must come from the registry property timestamps or MountPoints2, and deleting or rolling back that log removes the earliest-connection evidence.",
   "interpretation": "",
+  "category": [
+    "External Device/USB Usage"
+  ],
   "related_artifacts": [
     "shell-bags",
     "connection-timestamps"

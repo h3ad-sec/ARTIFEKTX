@@ -1,8 +1,8 @@
 {
-  "_comment": "Copy this file to data/artifacts/{folder}/{id}.json. Folders are organizational (now mostly named after the SANS FOR500 poster's own 'Evidence of...' categories, e.g. external-device-usb-usage); the `category` field below is the literal artifact type (registry | file), independent of which folder it lives in. Locked schema, 16 fields exactly — see feedback_artifektx_schema memory. Artifact `name` fields should match the poster's/source's literal title where the artifact came from one, not a paraphrase.",
+  "_comment": "Copy this file to data/artifacts/{folder}/{id}.json. `type` is the literal artifact storage type (registry | file). `category` is an ARRAY of one or more section titles this artifact belongs to, written as the LITERAL poster section title (e.g. \"External Device/USB Usage\", \"Application Execution\") — not a slug. Most artifacts have exactly one, but a few genuinely belong under two sections (matching the SANS FOR500 poster's own cross-listing, e.g. Jump Lists appears under both \"Application Execution\" and \"File and Folder Opening\") and should list both. Valid values are the 15 titles used across the corpus — check data/artifacts-manifest.json for the current canonical list before inventing a new one. The physical folder an artifact file lives in is just a kebab-case slug of its first category and is not itself meaningful data. Locked schema, 16 fields exactly — see feedback_artifektx_schema memory.",
   "id": "your-artifact-id",
   "name": "Human-readable artifact name",
-  "category": "registry",
+  "type": "registry",
   "subcategory": "short-tag, e.g. execution-evidence, user-accounts, persistence",
   "os": "Windows",
   "os_min": "Earliest OS version this artifact applies to, e.g. Windows 8",
@@ -18,5 +18,6 @@
   "attack_techniques": ["T1204"],
   "anti_forensic_notes": "How this artifact is commonly cleared, evaded, or is inherently unreliable — and what that absence itself signals",
   "interpretation": "Analyst decoding guidance that doesn't fit the fields above: sub-key/value meanings, format quirks, capacity limits, what this artifact proves vs doesn't prove. Leave as empty string if there's nothing beyond what purpose/key_fields/anomalies already cover.",
+  "category": ["Application Execution"],
   "related_artifacts": ["other-artifact-id"]
 }

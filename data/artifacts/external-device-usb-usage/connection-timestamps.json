@@ -1,7 +1,7 @@
 {
   "id": "connection-timestamps",
   "name": "Connection Timestamps",
-  "category": "file",
+  "type": "file",
   "subcategory": "removable-media",
   "os": "Windows",
   "os_min": "First Install/Last Connected/Last Removal properties require Windows 7+ (0064) / Windows 8+ (0066, 0067)",
@@ -33,6 +33,9 @@
   ],
   "anti_forensic_notes": "The Partition/Diagnostic event log is cleared during major Windows OS updates, so its coverage window can be shorter than the registry Properties subkeys, which persist across updates unless the device is fully removed from the registry.",
   "interpretation": "This is the correlation layer across three separate data sources: the plug-and-play log gives the very first time a device's driver was ever installed, the Properties GUID subkeys refine that into first/last-connected/last-removed, and Partition/Diagnostic gives a per-event connect/disconnect timeline (when not yet rolled off by an OS update). Use all three together rather than relying on one, since each has a different retention/coverage limitation. See `usb-device-identification` for the broader device-identity fields and `setupapi-devlog` for the log file format itself.",
+  "category": [
+    "External Device/USB Usage"
+  ],
   "related_artifacts": [
     "usb-device-identification",
     "setupapi-devlog",

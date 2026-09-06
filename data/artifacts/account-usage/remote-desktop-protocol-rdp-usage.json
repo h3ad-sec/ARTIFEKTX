@@ -1,7 +1,7 @@
 {
   "id": "remote-desktop-protocol-rdp-usage",
   "name": "Remote Desktop Protocol (RDP) Usage",
-  "category": "file",
+  "type": "file",
   "subcategory": "authentication",
   "os": "Windows",
   "os_min": "Windows 7 / Server 2008 R2",
@@ -28,6 +28,9 @@
   ],
   "anti_forensic_notes": "This account-usage view is narrower than the full RDP session-lifecycle picture — it only sees what the Security log's 4624/4778/4779 triad records. For the fuller cross-channel session timeline (including the RemoteConnectionManager and LocalSessionManager Operational logs' 1149 and 21-25 events), see `rdp-eventlogs`, which is the more complete, multi-channel version of this same evidence.",
   "interpretation": "Use this entry when the question is specifically \"which accounts used RDP and from where\" (an account-usage/audit question); use `rdp-eventlogs` when the question is \"reconstruct the full session timeline for this RDP connection\" (a session-forensics question) — the two overlap on 4624/4778/4779 but `rdp-eventlogs` adds the pre-auth and session-lifecycle channels this entry doesn't cover.",
+  "category": [
+    "Account Usage"
+  ],
   "related_artifacts": [
     "rdp-eventlogs",
     "security-eventlog",

@@ -1,7 +1,7 @@
 {
   "id": "recycle-bin",
   "name": "Recycle Bin",
-  "category": "file",
+  "type": "file",
   "subcategory": "user-activity",
   "os": "Windows",
   "os_min": "Windows Vista ($Recycle.Bin / $I / $R format; the earlier centralized INFO2 format is used on Windows 2000/XP/Server 2003 at C:\\RECYCLER\\<SID>\\INFO2)",
@@ -30,6 +30,9 @@
   ],
   "anti_forensic_notes": "Deleting a file directly (Shift+Delete, `del` from a command shell, or most malware self-deletion routines) bypasses the Recycle Bin entirely and leaves no $I/$R pair - the absence of an expected Recycle Bin entry for a known deletion is itself a signal that a non-Explorer deletion path was used. An attacker can also delete just the $R content file while leaving the $I metadata behind, or clear the whole $Recycle.Bin folder, so a lone surviving $I record should still be treated as valuable evidence of the deletion event even without recoverable content.",
   "interpretation": "",
+  "category": [
+    "Deleted Items and File Existence"
+  ],
   "related_artifacts": [
     "mft",
     "usn-journal",
