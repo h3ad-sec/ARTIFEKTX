@@ -1,0 +1,37 @@
+{
+  "id": "wifi-profiles",
+  "name": "WiFi (WLAN) Profiles",
+  "category": "file",
+  "subcategory": "network-configuration",
+  "os_min": "Windows Vista (Native Wifi / WLAN AutoConfig service and WLAN_profile XML schema)",
+  "location": "XML files under %ALLUSERSPROFILE%\\Microsoft\\Wlansvc\\Profiles\\Interfaces\\{interface-GUID}\\{profile-GUID}.xml, one file per saved network per wireless adapter; also queryable live via `netsh wlan show profiles` and `netsh wlan show profile name=\"SSID\" key=clear`.",
+  "purpose": "Stores every wireless network (SSID) a machine has been configured to connect to, including its authentication/encryption settings and, unless cleared, its pre-shared key. Providing SSID connection history and potential credential recovery.",
+  "key_fields": [
+    "name (SSID / profile name)",
+    "connectionMode (auto / manual)",
+    "authEncryption (authentication and encryption type)",
+    "sharedKey/keyMaterial (the passphrase/key)",
+    "sharedKey/protected (true = keyMaterial is DPAPI-encrypted hex; false = keyMaterial is stored as cleartext, as seen in some GPO-deployed profiles)"
+  ],
+  "normal_baseline": "One profile per network the user has genuinely joined (home, workplace, known public hotspots); sharedKey/protected is normally \"true\", meaning keyMaterial is DPAPI-encrypted and unreadable outside the machine/user context that saved it.",
+  "anomalies": [
+    "A profile for an SSID the user denies ever connecting to (rogue AP / evil-twin association, or a profile silently added by a script or malware)",
+    "sharedKey/protected set to \"false\" with the passphrase stored in cleartext, outside of an expected GPO-managed wireless deployment",
+    "A burst of new profile files created in a short time window, consistent with a Wi-Fi credential-harvesting tool run rather than normal user connection behavior",
+    "Execution of `netsh wlan show profile ... key=clear` or a wireless key-recovery tool shortly before data staging/exfiltration"
+  ],
+  "parsing_tools": [
+    "netsh wlan show profiles / netsh wlan show profile name=X key=clear (built-in)",
+    "WirelessKeyView (NirSoft)",
+    "Direct XML review of the Wlansvc\\Profiles\\Interfaces path"
+  ],
+  "attack_techniques": [
+    "T1016.002"
+  ],
+  "anti_forensic_notes": "keyMaterial is DPAPI-protected by default (protected=\"true\"), tying decryption to the machine/user context that saved it, which is why recovery is normally done through `netsh ... key=clear` (or an equivalent DPAPI unwrap) run in that same context rather than by reading the XML key material directly. Deleting a saved network removes its XML profile file, and with it the SSID history, leaving only whatever MFT/file-deletion metadata the filesystem retains.",
+  "interpretation": "",
+  "related_artifacts": [
+    "arp-cache",
+    "dns-client-cache"
+  ]
+}

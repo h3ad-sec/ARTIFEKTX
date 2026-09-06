@@ -1,0 +1,37 @@
+{
+  "id": "capabilityaccessmanager",
+  "name": "CapabilityAccessManager",
+  "category": "registry",
+  "subcategory": "device-capability-access",
+  "os_min": "Windows 10 1903+",
+  "location": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore (machine-wide) ; NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore (per-user)",
+  "purpose": "Records which applications accessed sensitive device capabilities, such as the microphone and camera, and when.",
+  "key_fields": [
+    "Capability subkey name - e.g. microphone, webcam, location - identifies which sensitive capability was accessed",
+    "Application subkey - per-app entry named by package family name (Microsoft Store apps) or executable path",
+    "LastUsedTimeStart - FILETIME marking the beginning of the most recent access session",
+    "LastUsedTimeStop - FILETIME marking the end of the most recent access session",
+    "NonPackaged subkey - groups entries for traditional (non-Microsoft-Store) desktop applications separately from packaged UWP apps"
+  ],
+  "normal_baseline": "Microphone/camera entries limited to applications the user knowingly uses for calls or recording (Teams, Zoom, Skype, browser-based meeting tools), with LastUsedTimeStart/Stop windows matching known meeting or call times.",
+  "anomalies": [
+    "A NonPackaged entry for an unfamiliar or unsigned executable with microphone or webcam LastUsedTimeStart/Stop activity, especially outside any known call or meeting",
+    "LastUsedTimeStart with no corresponding LastUsedTimeStop, suggesting the process terminated abnormally (e.g. killed) while still holding the device open",
+    "Access sessions for camera or microphone occurring while the user reports being away or the workstation was locked",
+    "An application capability entry appearing for the first time immediately following a phishing or execution event elsewhere in the timeline"
+  ],
+  "parsing_tools": [
+    "Registry Explorer (Eric Zimmerman)",
+    "RegRipper"
+  ],
+  "attack_techniques": [
+    "T1123",
+    "T1125"
+  ],
+  "anti_forensic_notes": "ConsentStore only records that a capability was accessed and for how long - it does not capture the actual audio or video content, so it can corroborate but not prove data was captured or exfiltrated. An attacker with registry access can delete the specific application subkey to remove evidence of a single tool's access without disturbing entries for other applications, so a suspiciously sparse capability history on an otherwise active system is worth investigating.",
+  "interpretation": "LastUsedTimeStart and LastUsedTimeStop bound only the most recent single access session for that application/capability pair - earlier sessions are overwritten and not retained as history, so this key reflects the latest use, not a full access log. The NonPackaged subkey is the one to check for conventional Win32 desktop malware, since packaged Microsoft Store apps are instead tracked directly under the capability subkey by package family name.",
+  "related_artifacts": [
+    "software-hive",
+    "ntuser-dat-hive"
+  ]
+}

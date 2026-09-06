@@ -53,14 +53,8 @@
   --accent:#00d4ff;--primary:#00d4ff;--accent2:#58a6ff;
   --border:#1e2d3d;--border-dim:#121e30;
   --status-live:#00d4ff;--status-partial:#f59e0b;--status-soon:#2d3748;
-  --nav-h:48px;
+  --nav-h:48px;--os-bar-h:37px;
   --mono:'Share Tech Mono',monospace;--ui:'IBM Plex Sans',sans-serif;--fs-xs:11px;
-  --grp-registry-hives:#58a6ff;--grp-application-execution:#00d4ff;--grp-file-and-folder-opening:#a855f7;
-  --grp-deleted-items-and-file-existence:#eab308;--grp-browser-activity:#ec4899;
-  --grp-cloud-storage:#0ea5e9;--grp-external-device-usb-usage:#f59e0b;
-  --grp-system-information:#a3a3a3;--grp-account-usage:#be185d;--grp-network-activity:#ea580c;
-  --grp-eventlogs:#06b6d4;--grp-persistence:#6366f1;--grp-memory:#64748b;
-  --grp-communication:#78350f;--grp-filesystem:#8b5cf6;
 }
 body.light{
   --bg:#eef2f8;--panel:#ffffff;--panel-alt:#e4ecf6;--surface:#ccd8ec;
@@ -127,8 +121,8 @@ body.nav-compact .hamburger{display:flex;}
 @media(max-width:640px){.nav-links{display:none;}.hamburger{display:flex;}}
 
 /* ── Topbar / search ── */
-.vault-topbar{margin-top:var(--nav-h);padding:12px 20px;border-bottom:1px solid var(--border);background:var(--panel);
-  display:flex;align-items:center;gap:16px;flex-shrink:0;position:sticky;top:var(--nav-h);z-index:50;}
+.vault-topbar{padding:12px 20px;border-bottom:1px solid var(--border);background:var(--panel);
+  display:flex;align-items:center;gap:16px;flex-shrink:0;position:sticky;top:calc(var(--nav-h) + var(--os-bar-h));z-index:50;}
 .filter-search{font-family:var(--mono);font-size:12px;background:var(--bg);color:var(--text);border:1px solid var(--border);
   border-radius:3px;padding:8px 14px;outline:none;flex:1;transition:border-color .15s,box-shadow .15s;letter-spacing:.03em;}
 .filter-search::placeholder{color:var(--muted-dim);}
@@ -143,6 +137,16 @@ body.light .filter-search:focus{box-shadow:0 0 0 2px rgba(2,132,199,.12);}
 .view-tab:hover{color:var(--text-dim);}
 .view-tab.active{color:var(--accent);border-color:var(--border);background:rgba(0,212,255,.06);}
 body.light .view-tab.active{background:rgba(2,132,199,.08);}
+
+.os-bar{margin-top:var(--nav-h);padding:8px 20px;border-bottom:1px solid var(--border-dim);background:var(--panel-alt);
+  display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:var(--nav-h);z-index:52;min-height:var(--os-bar-h);}
+.os-bar-label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--muted);flex-shrink:0;}
+.os-tabs{display:flex;gap:2px;}
+.os-tab{font-family:var(--mono);font-size:10px;letter-spacing:.1em;background:transparent;color:var(--muted-dim);
+  border:1px solid transparent;border-radius:3px;padding:5px 14px;cursor:pointer;transition:all .14s;white-space:nowrap;}
+.os-tab:hover{color:var(--text-dim);}
+.os-tab.active{color:var(--accent2);border-color:var(--border);background:rgba(88,166,255,.08);}
+body.light .os-tab.active{background:rgba(14,165,233,.1);}
 
 /* ── Secondary views (ATT&CK map, playbooks) ── */
 .secondary-view{flex:1;width:100%;max-width:1100px;margin:0 auto;padding:20px;}
@@ -183,21 +187,6 @@ body.light .view-tab.active{background:rgba(2,132,199,.08);}
   cursor:pointer;transition:all .14s;text-align:left;white-space:nowrap;}
 .vsb-nav .filter-pill:hover{color:var(--text-dim);background:rgba(255,255,255,.03);}
 .filter-pill.active{color:var(--text);background:rgba(255,255,255,.05);border-color:var(--border);}
-.filter-pill[data-group="registry-hives"].active{color:var(--grp-registry-hives);border-color:color-mix(in srgb, var(--grp-registry-hives) 30%, transparent);background:color-mix(in srgb, var(--grp-registry-hives) 8%, transparent);}
-.filter-pill[data-group="application-execution"].active{color:var(--grp-application-execution);border-color:color-mix(in srgb, var(--grp-application-execution) 30%, transparent);background:color-mix(in srgb, var(--grp-application-execution) 8%, transparent);}
-.filter-pill[data-group="file-and-folder-opening"].active{color:var(--grp-file-and-folder-opening);border-color:color-mix(in srgb, var(--grp-file-and-folder-opening) 30%, transparent);background:color-mix(in srgb, var(--grp-file-and-folder-opening) 8%, transparent);}
-.filter-pill[data-group="deleted-items-and-file-existence"].active{color:var(--grp-deleted-items-and-file-existence);border-color:color-mix(in srgb, var(--grp-deleted-items-and-file-existence) 30%, transparent);background:color-mix(in srgb, var(--grp-deleted-items-and-file-existence) 8%, transparent);}
-.filter-pill[data-group="browser-activity"].active{color:var(--grp-browser-activity);border-color:color-mix(in srgb, var(--grp-browser-activity) 30%, transparent);background:color-mix(in srgb, var(--grp-browser-activity) 8%, transparent);}
-.filter-pill[data-group="cloud-storage"].active{color:var(--grp-cloud-storage);border-color:color-mix(in srgb, var(--grp-cloud-storage) 30%, transparent);background:color-mix(in srgb, var(--grp-cloud-storage) 8%, transparent);}
-.filter-pill[data-group="external-device-usb-usage"].active{color:var(--grp-external-device-usb-usage);border-color:color-mix(in srgb, var(--grp-external-device-usb-usage) 30%, transparent);background:color-mix(in srgb, var(--grp-external-device-usb-usage) 8%, transparent);}
-.filter-pill[data-group="system-information"].active{color:var(--grp-system-information);border-color:color-mix(in srgb, var(--grp-system-information) 30%, transparent);background:color-mix(in srgb, var(--grp-system-information) 8%, transparent);}
-.filter-pill[data-group="account-usage"].active{color:var(--grp-account-usage);border-color:color-mix(in srgb, var(--grp-account-usage) 30%, transparent);background:color-mix(in srgb, var(--grp-account-usage) 8%, transparent);}
-.filter-pill[data-group="network-activity"].active{color:var(--grp-network-activity);border-color:color-mix(in srgb, var(--grp-network-activity) 30%, transparent);background:color-mix(in srgb, var(--grp-network-activity) 8%, transparent);}
-.filter-pill[data-group="eventlogs"].active{color:var(--grp-eventlogs);border-color:color-mix(in srgb, var(--grp-eventlogs) 30%, transparent);background:color-mix(in srgb, var(--grp-eventlogs) 8%, transparent);}
-.filter-pill[data-group="persistence"].active{color:var(--grp-persistence);border-color:color-mix(in srgb, var(--grp-persistence) 30%, transparent);background:color-mix(in srgb, var(--grp-persistence) 8%, transparent);}
-.filter-pill[data-group="memory"].active{color:var(--grp-memory);border-color:color-mix(in srgb, var(--grp-memory) 30%, transparent);background:color-mix(in srgb, var(--grp-memory) 8%, transparent);}
-.filter-pill[data-group="communication"].active{color:var(--grp-communication);border-color:color-mix(in srgb, var(--grp-communication) 30%, transparent);background:color-mix(in srgb, var(--grp-communication) 8%, transparent);}
-.filter-pill[data-group="filesystem"].active{color:var(--grp-filesystem);border-color:color-mix(in srgb, var(--grp-filesystem) 30%, transparent);background:color-mix(in srgb, var(--grp-filesystem) 8%, transparent);}
 .fp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 .fp-name{flex:1;}
 .fp-count{font-size:9px;color:var(--muted-dim);}
@@ -206,27 +195,12 @@ body.light .view-tab.active{background:rgba(2,132,199,.08);}
 @media(max-width:900px){
   .vault-sidebar{display:none;}
   .mobile-filter{display:flex;overflow-x:auto;scrollbar-width:none;background:var(--panel);border-bottom:1px solid var(--border);
-    padding:0 14px;height:44px;align-items:stretch;gap:0;flex-shrink:0;position:sticky;top:calc(var(--nav-h) + 53px);z-index:49;}
+    padding:0 14px;height:44px;align-items:stretch;gap:0;flex-shrink:0;position:sticky;top:calc(var(--nav-h) + var(--os-bar-h) + 53px);z-index:49;}
   .mobile-filter::-webkit-scrollbar{display:none;}
   .mobile-filter .filter-pill{font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:0 14px;height:100%;
     background:transparent;color:var(--muted);border:none;border-bottom:2px solid transparent;cursor:pointer;
     transition:color .15s,border-color .15s;white-space:nowrap;flex-shrink:0;margin-bottom:-1px;}
   .mobile-filter .filter-pill.active{color:var(--accent);border-bottom-color:var(--accent);}
-  .mobile-filter .filter-pill[data-group="registry-hives"].active{color:var(--grp-registry-hives);border-bottom-color:var(--grp-registry-hives);}
-  .mobile-filter .filter-pill[data-group="application-execution"].active{color:var(--grp-application-execution);border-bottom-color:var(--grp-application-execution);}
-  .mobile-filter .filter-pill[data-group="file-and-folder-opening"].active{color:var(--grp-file-and-folder-opening);border-bottom-color:var(--grp-file-and-folder-opening);}
-  .mobile-filter .filter-pill[data-group="deleted-items-and-file-existence"].active{color:var(--grp-deleted-items-and-file-existence);border-bottom-color:var(--grp-deleted-items-and-file-existence);}
-  .mobile-filter .filter-pill[data-group="browser-activity"].active{color:var(--grp-browser-activity);border-bottom-color:var(--grp-browser-activity);}
-  .mobile-filter .filter-pill[data-group="cloud-storage"].active{color:var(--grp-cloud-storage);border-bottom-color:var(--grp-cloud-storage);}
-  .mobile-filter .filter-pill[data-group="external-device-usb-usage"].active{color:var(--grp-external-device-usb-usage);border-bottom-color:var(--grp-external-device-usb-usage);}
-  .mobile-filter .filter-pill[data-group="system-information"].active{color:var(--grp-system-information);border-bottom-color:var(--grp-system-information);}
-  .mobile-filter .filter-pill[data-group="account-usage"].active{color:var(--grp-account-usage);border-bottom-color:var(--grp-account-usage);}
-  .mobile-filter .filter-pill[data-group="network-activity"].active{color:var(--grp-network-activity);border-bottom-color:var(--grp-network-activity);}
-  .mobile-filter .filter-pill[data-group="eventlogs"].active{color:var(--grp-eventlogs);border-bottom-color:var(--grp-eventlogs);}
-  .mobile-filter .filter-pill[data-group="persistence"].active{color:var(--grp-persistence);border-bottom-color:var(--grp-persistence);}
-  .mobile-filter .filter-pill[data-group="memory"].active{color:var(--grp-memory);border-bottom-color:var(--grp-memory);}
-  .mobile-filter .filter-pill[data-group="communication"].active{color:var(--grp-communication);border-bottom-color:var(--grp-communication);}
-  .mobile-filter .filter-pill[data-group="filesystem"].active{color:var(--grp-filesystem);border-bottom-color:var(--grp-filesystem);}
 }
 
 /* ── Grid + cards ── */
@@ -429,6 +403,16 @@ body.light .footer-credit-pill .credit-name{color:#0A6EA8;}
     <a href="mailto:h3adsec@gmail.com" onclick="closeDrawer()">CONTACT</a>
   </div>
 
+<div class="os-bar" id="osBar">
+  <span class="os-bar-label">OS</span>
+  <div class="os-tabs" id="osTabs">
+    <button class="os-tab active" data-os="windows" onclick="setOs('windows')">WINDOWS</button>
+    <button class="os-tab" data-os="linux" onclick="setOs('linux')">LINUX</button>
+    <button class="os-tab" data-os="macos" onclick="setOs('macos')">MACOS</button>
+    <button class="os-tab" data-os="mobile" onclick="setOs('mobile')">MOBILE</button>
+  </div>
+</div>
+
 <div class="vault-topbar">
   <div class="view-tabs" id="viewTabs">
     <button class="view-tab active" data-view="artifacts" onclick="setView('artifacts')">ARTIFACTS</button>
@@ -519,24 +503,27 @@ function toggleTheme(){
 })();
 
 /* ── Data + filtering ── */
-var GROUPS=[
-  {id:'all',label:'ALL ARTIFACTS'},
-  {id:'registry-hives',label:'REGISTRY HIVES',color:'var(--grp-registry-hives)'},
-  {id:'application-execution',label:'APPLICATION EXECUTION',color:'var(--grp-application-execution)'},
-  {id:'file-and-folder-opening',label:'FILE AND FOLDER OPENING',color:'var(--grp-file-and-folder-opening)'},
-  {id:'deleted-items-and-file-existence',label:'DELETED ITEMS & FILE EXISTENCE',color:'var(--grp-deleted-items-and-file-existence)'},
-  {id:'browser-activity',label:'BROWSER ACTIVITY',color:'var(--grp-browser-activity)'},
-  {id:'cloud-storage',label:'CLOUD STORAGE',color:'var(--grp-cloud-storage)'},
-  {id:'external-device-usb-usage',label:'EXTERNAL DEVICE/USB USAGE',color:'var(--grp-external-device-usb-usage)'},
-  {id:'system-information',label:'SYSTEM INFORMATION',color:'var(--grp-system-information)'},
-  {id:'account-usage',label:'ACCOUNT USAGE',color:'var(--grp-account-usage)'},
-  {id:'network-activity',label:'NETWORK ACTIVITY & PHYSICAL LOCATION',color:'var(--grp-network-activity)'},
-  {id:'eventlogs',label:'EVENT LOGS',color:'var(--grp-eventlogs)'},
-  {id:'persistence',label:'PERSISTENCE',color:'var(--grp-persistence)'},
-  {id:'memory',label:'MEMORY FORENSICS',color:'var(--grp-memory)'},
-  {id:'communication',label:'COMMUNICATION',color:'var(--grp-communication)'},
-  {id:'filesystem',label:'FILESYSTEM ARTIFACTS',color:'var(--grp-filesystem)'}
-];
+/* Windows keeps its hand-picked, colorblind-safe palette exactly as before.
+   Linux/macOS/Mobile categories are unknown ahead of time, so they fall back
+   to a deterministic hash-based pick from a second safe palette below. */
+var CATEGORY_COLOR_OVERRIDES={
+  'Registry Hives':'#58a6ff','Application Execution':'#00d4ff','File and Folder Opening':'#a855f7',
+  'Deleted Items and File Existence':'#eab308','Browser Activity':'#ec4899','Cloud Storage':'#0ea5e9',
+  'External Device/USB Usage':'#f59e0b','System Information':'#a3a3a3','Account Usage':'#be185d',
+  'Network Activity and Physical Location':'#ea580c','Event Logs':'#06b6d4','Persistence':'#6366f1',
+  'Memory Forensics':'#64748b','Communication':'#78350f','Filesystem Artifacts':'#8b5cf6'
+};
+var FALLBACK_PALETTE=['#0891b2','#7c3aed','#c026d3','#0369a1','#92400e','#4338ca','#a16207','#be123c','#0d9488','#4f46e5'];
+function colorForCategory(title){
+  if(CATEGORY_COLOR_OVERRIDES[title]) return CATEGORY_COLOR_OVERRIDES[title];
+  var hash=0;
+  for(var i=0;i<title.length;i++){ hash=(hash*31+title.charCodeAt(i))>>>0; }
+  return FALLBACK_PALETTE[hash % FALLBACK_PALETTE.length];
+}
+
+var CURRENT_OS='windows';
+var OS_DATA={};        // cache: osId -> {os, count, categories}
+var CATEGORIES=[];     // dynamic, rebuilt on every OS load: [{id:'all',label:...}, {id:'<Category Title>', label, color}, ...]
 var allArtifacts=[];
 var activeGroup='all';
 var searchTerm='';
@@ -546,19 +533,30 @@ function escapeHtml(s){
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function buildCategoriesFromData(catsObj){
+  var titles=Object.keys(catsObj||{}).sort();
+  return [{id:'all',label:'ALL ARTIFACTS'}].concat(titles.map(function(t){
+    return {id:t,label:t.toUpperCase(),color:colorForCategory(t)};
+  }));
+}
+
 function renderFilterNav(container,isMobile){
-  container.innerHTML=GROUPS.map(function(g){
+  if(!container) return;
+  container.innerHTML=CATEGORIES.map(function(g){
     var count=g.id==='all'?allArtifacts.length:allArtifacts.filter(function(a){return a.group===g.id;}).length;
+    var isActive=activeGroup===g.id;
     var dot=g.id==='all'?'':'<span class="fp-dot" style="background:'+g.color+'"></span>';
     var countHtml=isMobile?'':'<span class="fp-count">'+count+'</span>';
-    return '<button class="filter-pill'+(activeGroup===g.id?' active':'')+'" data-group="'+g.id+'" onclick="setGroup(\''+g.id+'\')">'
-      +dot+'<span class="fp-name">'+g.label+'</span>'+countHtml+'</button>';
+    var activeStyle=(isActive&&g.color)?' style="color:'+g.color+';border-color:'+g.color+';background:color-mix(in srgb, '+g.color+' 10%, transparent);"':'';
+    return '<button class="filter-pill'+(isActive?' active':'')+'" data-group="'+escapeHtml(g.id)+'"'+activeStyle+' onclick="setGroup(this.dataset.group)">'
+      +dot+'<span class="fp-name">'+escapeHtml(g.label)+'</span>'+countHtml+'</button>';
   }).join('');
 }
 
 function setGroup(g){
   activeGroup=g;
-  document.querySelectorAll('.filter-pill').forEach(function(p){p.classList.toggle('active',p.dataset.group===g);});
+  renderFilterNav(document.getElementById('sidebarFilter'),false);
+  renderFilterNav(document.getElementById('mobileFilter'),true);
   renderGrid();
 }
 function onSearch(){
@@ -575,8 +573,7 @@ function getFiltered(){
 }
 
 function groupColor(g){
-  var found=GROUPS.filter(function(x){return x.id===g;})[0];
-  return found?found.color:'var(--muted)';
+  return g?colorForCategory(g):'var(--muted)';
 }
 
 function attackChip(id){
@@ -634,28 +631,46 @@ function toggleCard(id){
     });
   }
 }
+/* ATT&CK Map and Playbooks are Windows-only for now, so a jump from either
+   forces the OS tabs back to Windows before opening the target card. */
 function jumpTo(id){
-  var target=allArtifacts.filter(function(a){return a.id===id;})[0];
-  if(!target)return;
   setView('artifacts');
-  activeGroup='all';
-  searchTerm='';
-  document.getElementById('searchInput').value='';
-  openCardId=id;
-  renderFilterNav(document.getElementById('sidebarFilter'),false);
-  renderFilterNav(document.getElementById('mobileFilter'),true);
-  renderGrid();
-  requestAnimationFrame(function(){
-    var el=document.getElementById('card-'+id);
-    if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
-  });
+  function openIt(){
+    var target=allArtifacts.filter(function(a){return a.id===id;})[0];
+    if(!target)return;
+    activeGroup='all';
+    searchTerm='';
+    var si=document.getElementById('searchInput'); if(si) si.value='';
+    openCardId=id;
+    renderFilterNav(document.getElementById('sidebarFilter'),false);
+    renderFilterNav(document.getElementById('mobileFilter'),true);
+    renderGrid();
+    requestAnimationFrame(function(){
+      var el=document.getElementById('card-'+id);
+      if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  }
+  if(CURRENT_OS!=='windows'){
+    setOsUI('windows');
+    loadOs('windows').then(openIt);
+  } else {
+    openIt();
+  }
 }
 
 function renderGrid(){
   var grid=document.getElementById('artifactGrid');
   var count=document.getElementById('resultCount');
-  var filtered=getFiltered();
 
+  if(!allArtifacts.length){
+    var osLabel=(OS_DATA[CURRENT_OS]&&OS_DATA[CURRENT_OS].os)||CURRENT_OS;
+    grid.innerHTML='<div class="state-panel"><div class="state-title">NO '+escapeHtml(osLabel.toUpperCase())+' ARTIFACTS YET</div>'
+      +'<div class="state-desc">This OS has no entries yet. Windows is fully covered; check back as coverage expands.</div></div>';
+    count.innerHTML='';
+    return;
+  }
+
+  var filtered=getFiltered();
   if(!filtered.length){
     grid.innerHTML='<div class="state-panel"><div class="state-title">NO ARTIFACTS MATCH</div><div class="state-desc">Adjust filters or search term.</div></div>';
     count.innerHTML='';
@@ -669,22 +684,60 @@ function showError(){
   document.getElementById('artifactGrid').innerHTML=
     '<div class="state-panel"><div class="state-title">FAILED TO LOAD</div>'
     +'<div class="state-desc">Could not load artifact data. Check your connection or try again.</div>'
-    +'<button class="btn-retry" onclick="loadManifest()">RETRY</button></div>';
+    +'<button class="btn-retry" onclick="loadOs(CURRENT_OS)">RETRY</button></div>';
 }
 
-function loadManifest(){
-  document.getElementById('artifactGrid').innerHTML='<div class="state-panel"><div class="state-loading-text">LOADING ARTIFACTS...</div></div>';
-  fetch('data/artifacts-manifest.json')
+/* ── OS-aware data loading ── */
+var WINDOWS_ARTIFACTS=[]; // fixed snapshot for ATT&CK Map / Playbooks, independent of the OS tab selection
+
+function flattenCategories(catsObj){
+  var flat=[];
+  Object.keys(catsObj||{}).forEach(function(title){
+    (catsObj[title]||[]).forEach(function(a){ a.group=title; flat.push(a); });
+  });
+  return flat.sort(function(a,b){return a.name.localeCompare(b.name);});
+}
+
+function loadOs(osId){
+  document.getElementById('artifactGrid').innerHTML='<div class="state-panel"><div class="state-loading-text">LOADING '+escapeHtml(osId.toUpperCase())+' ARTIFACTS...</div></div>';
+  return fetch('data/os/'+osId+'.json')
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(data){
-      allArtifacts=(data.artifacts||[]).sort(function(a,b){return a.name.localeCompare(b.name);});
+      OS_DATA[osId]=data;
+      CURRENT_OS=osId;
+      allArtifacts=flattenCategories(data.categories);
+      CATEGORIES=buildCategoriesFromData(data.categories);
+      activeGroup='all';
       renderFilterNav(document.getElementById('sidebarFilter'),false);
       renderFilterNav(document.getElementById('mobileFilter'),true);
       renderGrid();
+      return data;
+    })
+    .catch(function(err){ showError(); throw err; });
+}
+
+function setOsUI(osId){
+  document.querySelectorAll('.os-tab').forEach(function(t){t.classList.toggle('active', t.dataset.os===osId);});
+}
+function setOs(osId){
+  if(osId===CURRENT_OS) return;
+  setOsUI(osId);
+  searchTerm='';
+  var si=document.getElementById('searchInput'); if(si) si.value='';
+  openCardId=null;
+  loadOs(osId);
+}
+
+function bootstrap(){
+  fetch('data/os/windows.json')
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(data){
+      WINDOWS_ARTIFACTS=flattenCategories(JSON.parse(JSON.stringify(data.categories)));
       renderAttackMap();
       renderPlaybooks();
     })
-    .catch(showError);
+    .catch(function(){ /* ATT&CK Map / Playbooks just stay empty if this fails; main grid load is independent */ });
+  loadOs('windows');
 }
 
 /* ── View switching ── */
@@ -693,9 +746,10 @@ function setView(v){
     document.getElementById(name==='artifacts'?'artifactsView':name==='attack'?'attackMapView':'playbooksView').hidden = (name!==v);
   });
   document.querySelectorAll('.view-tab').forEach(function(t){t.classList.toggle('active', t.dataset.view===v);});
-  var topbarSearchWrap=document.querySelector('.vault-topbar');
   var mobileFilter=document.getElementById('mobileFilter');
   if(mobileFilter) mobileFilter.style.display = (v==='artifacts') ? '' : 'none';
+  var osBar=document.getElementById('osBar');
+  if(osBar) osBar.style.display = (v==='artifacts') ? '' : 'none';
 }
 
 /* ── ATT&CK cross-reference view ── */
@@ -703,7 +757,7 @@ function renderAttackMap(){
   var container=document.getElementById('attackMapGrid');
   if(!container) return;
   var byTech={};
-  allArtifacts.forEach(function(a){
+  WINDOWS_ARTIFACTS.forEach(function(a){
     (a.attack_techniques||[]).forEach(function(t){
       if(!byTech[t]) byTech[t]=[];
       byTech[t].push(a);
@@ -804,7 +858,7 @@ function renderPlaybooks(){
   var container=document.getElementById('playbookList');
   if(!container) return;
   var byId={};
-  allArtifacts.forEach(function(a){byId[a.id]=a;});
+  WINDOWS_ARTIFACTS.forEach(function(a){byId[a.id]=a;});
   container.innerHTML=PLAYBOOKS.map(function(pb){
     var steps=pb.steps.map(function(s){
       var a=byId[s.id];
@@ -825,7 +879,7 @@ function copyMarkdown(id){
   var lines=[];
   lines.push('## '+a.name);
   lines.push('');
-  lines.push('**Type:** '+a.category+'  |  **Subcategory:** '+a.subcategory+'  |  **OS:** '+(a.os_min||a.os||''));
+  lines.push('**Type:** '+a.category+'  |  **Subcategory:** '+a.subcategory+'  |  **OS Min:** '+(a.os_min||''));
   lines.push('');
   lines.push('**Location:** `'+a.location+'`');
   lines.push('');
@@ -887,7 +941,7 @@ document.addEventListener('keydown',function(e){
   }
 });
 
-loadManifest();
+bootstrap();
 </script>
 </body>
 </html>

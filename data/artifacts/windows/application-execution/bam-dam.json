@@ -1,0 +1,33 @@
+{
+  "id": "bam-dam",
+  "name": "BAM/DAM",
+  "category": "registry",
+  "subcategory": "execution-evidence",
+  "os_min": "Windows 10 version 1709 (Fall Creators Update)",
+  "location": "Pre-Windows 10 1809: HKLM\\SYSTEM\\CurrentControlSet\\Services\\bam\\UserSettings\\{SID} and HKLM\\SYSTEM\\CurrentControlSet\\Services\\dam\\UserSettings\\{SID}. Windows 10 1809 and later: HKLM\\SYSTEM\\CurrentControlSet\\Services\\bam\\State\\UserSettings\\{SID} and \\dam\\State\\UserSettings\\{SID} (a 'State' subkey was inserted into the path).",
+  "purpose": "BAM is a Windows service that throttles background application activity to conserve battery/resources; as a side effect it records, per user SID, the full path of each executable that ran and the timestamp of its last execution. DAM is the equivalent mechanism for devices supporting Connected Standby (primarily mobile/tablet hardware). Both key their entries under the executing user's SID, giving analysts direct user attribution for a launched binary even though the data lives in the machine-wide SYSTEM hive.",
+  "key_fields": [
+    "Value name: full path of the executable that was run",
+    "Value data: an 8-byte little-endian FILETIME embedded in the REG_BINARY value, representing the last execution time of that executable for that user",
+    "SID subkey: identifies which user account ran the executable"
+  ],
+  "normal_baseline": "Under each active user's SID subkey, a list of paths to applications that user has run recently (within roughly the last 7 days), covering normal OS components, shell integrations, and everyday applications launched from local disk.",
+  "anomalies": [
+    "Executable path under Temp, Downloads, or another user-writable/unusual directory attributed to a SID for a user who wouldn't normally run such tools",
+    "A BAM/DAM entry for an executable whose file no longer exists on disk (deleted after execution). Corroborate against Amcache/Prefetch/Shimcache for the same binary",
+    "Execution attributed to a SID inconsistent with the expected interactive user (e.g. a service account or a rarely-used local account) at an unusual time of day",
+    "Entries missing entirely for a period where other execution artifacts (Prefetch, Shimcache) show activity, since BAM/DAM only covers roughly the trailing 7 days and purges on reboot, absence does not by itself prove non-execution and must be time-correlated"
+  ],
+  "parsing_tools": [
+    "Registry Explorer (Eric Zimmerman)",
+    "RegRipper (bam.pl plugin)"
+  ],
+  "attack_techniques": [],
+  "anti_forensic_notes": "BAM/DAM entries are automatically purged roughly 7 days after the recorded activity, and an entry is removed once its associated executable no longer exists at its original location, and again on the next reboot, so this artifact has a naturally short retention window even with no attacker interference. It only records executables launched from local storage; programs run from removable media or network shares are not captured. Because the data lives in the live SYSTEM hive rather than a separate log, wiping it requires direct registry-key deletion (an unusual, detectable action) rather than simple file deletion.",
+  "interpretation": "",
+  "related_artifacts": [
+    "amcache-hve",
+    "shimcache",
+    "prefetch"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "usb-event-logs",
+  "name": "Event Logs (Removable Device)",
+  "category": "file",
+  "subcategory": "removable-media",
+  "os_min": "Windows 7 (Security.evtx / System.evtx events); Windows 10 (Partition/Diagnostic.evtx Event ID 1006)",
+  "location": "System.evtx - Event IDs 20001, 20003 (Plug and Play driver install attempted). Security.evtx - Event IDs 4663 (attempt to access a removable storage object), 4656 (failure to access a removable storage object), 6416 (a new external device was recognized by the system) - these depend on system audit-policy settings. Windows 10+: Microsoft-Windows-Partition/Diagnostic.evtx - Event ID 1006, recorded for each device connect/disconnect.",
+  "purpose": "Removable device connect/disconnect and access activity audited across multiple Windows event logs, giving an independent, timestamped, log-based record of USB activity that complements the registry-based USB artifacts.",
+  "key_fields": [
+    "System.evtx Event ID 20001 - Plug and Play driver install attempted for a device",
+    "System.evtx Event ID 20003 - Plug and Play driver install attempted (companion event)",
+    "Security.evtx Event ID 4663 - an attempt was made to access a removable storage object",
+    "Security.evtx Event ID 4656 - a failure to access a removable storage object",
+    "Security.evtx Event ID 6416 - a new external device was recognized by the system",
+    "Microsoft-Windows-Partition/Diagnostic.evtx Event ID 1006 (Windows 10+) - recorded for each device connect and disconnect"
+  ],
+  "normal_baseline": "20001/20003 and 6416 events limited to a small, known set of recurring storage devices, with no 4656 access failures outside expected permission changes; 1006 connect/disconnect pairs on Windows 10+ align with the registry-based first/last-connect timestamps for the same device.",
+  "anomalies": [
+    "6416/20001 events for a device with no corresponding record in usb-device-history or setupapi-devlog, or vice versa - the sources should agree on when a device first appeared",
+    "A cluster of 4656 access-failure events against removable storage objects, suggesting a blocked exfiltration attempt or a device-control policy being tested/probed",
+    "1006 connect/disconnect pairs occurring in rapid repeated succession for the same device, consistent with scripted/automated enumeration rather than normal human use",
+    "A gap in expected 20001/6416 events during a period other evidence shows a device was physically connected, suggesting audit settings were disabled or the log was cleared for that window",
+    "4663/4656 activity present with no matching audit-policy change history, when the org's baseline has removable-storage object-access auditing disabled by default"
+  ],
+  "parsing_tools": [
+    "Event Viewer",
+    "EvtxECmd (Eric Zimmerman)"
+  ],
+  "attack_techniques": [
+    "T1091",
+    "T1052.001"
+  ],
+  "anti_forensic_notes": "Security.evtx events (4663, 4656, 6416) are only generated if Object Access auditing for removable storage has been explicitly enabled via audit policy/GPO - their absence proves nothing about whether removable-device activity occurred, only that this auditing was not turned on. System.evtx PnP events (20001/20003) and the Windows 10+ Partition/Diagnostic 1006 event do not depend on that audit setting, making them a more reliable fallback when Security auditing is off; as with any .evtx, wholesale log clearing generates its own Security-log Event ID 1102 record.",
+  "interpretation": "Security log events for removable storage are dependent on system audit settings being enabled - treat a lack of 4663/4656/6416 entries as inconclusive rather than as proof no device access occurred, and cross-check against the audit-independent System.evtx and Partition/Diagnostic.evtx channels.",
+  "related_artifacts": [
+    "usb-device-identification",
+    "setupapi-devlog",
+    "drive-letter-and-volume-name",
+    "usb-user-information",
+    "volume-serial-number-vsn",
+    "security-eventlog",
+    "system-eventlog"
+  ]
+}

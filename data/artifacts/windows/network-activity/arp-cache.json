@@ -1,0 +1,36 @@
+{
+  "id": "arp-cache",
+  "name": "ARP Cache",
+  "category": "file",
+  "subcategory": "network-activity",
+  "os_min": "Windows XP (caching mechanism changed significantly starting Windows Vista)",
+  "location": "In-memory neighbor/ARP table maintained by the TCP/IP stack; not written to a file or registry hive. Viewed live via `arp -a` or PowerShell `Get-NetNeighbor` / `netsh interface ipv4 show neighbors`.",
+  "purpose": "Maps IPv4 addresses on the local subnet to their resolved MAC (link-layer) addresses so the host doesn't re-broadcast an ARP request for every packet; shows which local hosts a machine has actually exchanged Layer 2 traffic with recently.",
+  "key_fields": [
+    "Internet Address (IPv4)",
+    "Physical Address (MAC)",
+    "Type (dynamic / static / invalid)"
+  ],
+  "normal_baseline": "A short list of entries for the default gateway, local DNS/DHCP server, and any recently-contacted LAN hosts. Under Vista-and-later's RFC 4861-based Neighbor Discovery, entries cycle between Reachable and Stale states rather than aging on a fixed timer.",
+  "anomalies": [
+    "The default gateway's IP resolving to an unexpected MAC address (classic ARP spoofing / on-path attacker indicator)",
+    "Unexplained static (permanent) entries added via arp -s that don't correspond to known network hardware",
+    "One MAC address mapped to multiple IPs at once, or duplicate/conflicting entries for the same IP",
+    "Entries for hosts the asset owner denies contacting, captured during live triage of a suspected lateral-movement incident"
+  ],
+  "parsing_tools": [
+    "arp -a (built-in)",
+    "Get-NetNeighbor (PowerShell NetTCPIP module)",
+    "netsh interface ipv4 show neighbors"
+  ],
+  "attack_techniques": [
+    "T1557.002"
+  ],
+  "anti_forensic_notes": "Purely volatile: the whole table is lost on reboot, and Windows Vista and later moves an unused entry from Reachable to Stale after roughly 15-45 seconds (BaseReachableTime defaults to 30000 ms, randomized per RFC 4861) unless it is re-referenced, so it must be captured live per the RFC 3227 order-of-volatility guidance or the evidence is gone. Windows XP/Server 2003 exposed ArpCacheLife and ArpCacheMinReferencedLife registry values to tune this timing, but Microsoft documents that these values no longer apply from Windows Vista onward, which instead uses Neighbor Unreachability Detection tunable via netsh interface ipv4 set interface ... basereachable=.",
+  "interpretation": "",
+  "related_artifacts": [
+    "dns-client-cache",
+    "windows-firewall-log",
+    "sysmon"
+  ]
+}

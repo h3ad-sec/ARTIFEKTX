@@ -1,0 +1,33 @@
+{
+  "id": "browser-url-parameters",
+  "name": "Browser URL Parameters",
+  "category": "file",
+  "subcategory": "browser-artifact",
+  "os_min": "N/A (application-level)",
+  "location": "Embedded within ordinary browser history URL records (see chrome-edge-browser-artifacts / firefox-browser-artifacts) - not a dedicated artifact store of its own.",
+  "purpose": "Captures geolocation and network-identification clues leaked within otherwise-ordinary browser history URL parameters - for example, captive-portal sign-in redirects or a Google Maps URL containing geocode/daddr parameters revealing a searched address - that can identify connected networks and approximate physical locations.",
+  "key_fields": [
+    "Mapping-service URL query parameters such as geocode=, daddr=, saddr=, ll=, q= found in History.urls-equivalent tables",
+    "Captive-portal redirect URLs recorded in ordinary browsing history, sometimes referencing an AP/SSID identifier"
+  ],
+  "normal_baseline": "Mapping/navigation URLs reflecting the user's genuine, expected routine locations (home, office, known travel); captive-portal redirects only for networks the user is expected to have used.",
+  "anomalies": [
+    "Mapping-service URL parameters resolving to a location inconsistent with the user's claimed whereabouts at the relevant time",
+    "A captive-portal redirect URL referencing a network inconsistent with the organization's or user's known network history",
+    "Geolocation-revealing URLs clustering around a time window relevant to an investigation, such as immediately before or after a suspected physical security incident"
+  ],
+  "parsing_tools": [
+    "DB Browser for SQLite",
+    "Hindsight"
+  ],
+  "attack_techniques": [
+    "T1614"
+  ],
+  "anti_forensic_notes": "This is not a dedicated artifact store - it is a byproduct signal inside otherwise-normal browsing history. Clearing browser history removes it identically to any other history entry (see chrome-edge-browser-artifacts / firefox-browser-artifacts anti-forensic notes), and there is no separate registry- or log-based backup of these URL parameters.",
+  "interpretation": "Treat this as a byproduct signal inside otherwise-normal browsing history, not a dedicated artifact store of its own - review URL query strings within existing browser history data (mapping services, captive-portal redirects, etc.) for geolocation and network-identification clues rather than expecting a purpose-built artifact location.",
+  "related_artifacts": [
+    "chrome-edge-browser-artifacts",
+    "firefox-browser-artifacts",
+    "network-history"
+  ]
+}

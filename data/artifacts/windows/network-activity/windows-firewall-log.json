@@ -1,0 +1,39 @@
+{
+  "id": "windows-firewall-log",
+  "name": "Windows Firewall Log",
+  "category": "file",
+  "subcategory": "network-activity",
+  "os_min": "Windows XP (legacy pfirewall.log); Windows Vista+ for the Windows Firewall with Advanced Security event log channel",
+  "location": "Legacy text log, must be manually enabled and is off by default: %windir%\\System32\\LogFiles\\Firewall\\pfirewall.log. Rule-change/administrative history: Applications and Services Logs\\Microsoft-Windows-Windows Firewall With Advanced Security\\Firewall (.evtx).",
+  "purpose": "Records network traffic Windows Firewall evaluated (dropped and/or allowed connections, once logging is enabled) and, separately in the WFAS event channel, administrative changes to firewall rules and profile state. Used to reconstruct blocked/allowed connection attempts and to detect firewall tampering.",
+  "key_fields": [
+    "date, time",
+    "action (ALLOW / DROP)",
+    "protocol, src-ip, dst-ip, src-port, dst-port, size",
+    "tcpflags, tcpsyn, tcpack, tcpwin, icmptype, icmpcode, info, path (W3C extended log fields in pfirewall.log)",
+    "Event ID 2004 (rule added) / 2005 (rule modified) / 2006 (rule deleted) in the WFAS Firewall event channel"
+  ],
+  "normal_baseline": "On a default installation pfirewall.log does not exist at all, because both dropped-packet and successful-connection logging are disabled by default on every profile (Domain/Private/Public). When enabled, entries reflect routine blocked broadcast/scan noise from the local segment plus a low, steady trickle of rule-change events tied to application installs.",
+  "anomalies": [
+    "pfirewall.log present with DROP entries for outbound traffic to known-bad IPs/ports, or unexplained inbound ALLOW entries",
+    "A burst of Event ID 2004/2005/2006 entries around the time of an intrusion, especially rules opening high ports or allowing a specific unsigned binary",
+    "Firewall log file missing or truncated on a system where logging was known (via GPO) to be enabled, suggesting tampering",
+    "Log rolling off at its default 4096 KB cap during a long-dwell intrusion, losing early entries"
+  ],
+  "parsing_tools": [
+    "PowerShell Import-Csv / text viewer against pfirewall.log",
+    "Get-WinEvent -LogName 'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'",
+    "Event Viewer",
+    "SIEM ingestion (e.g. Microsoft Sentinel Windows Firewall connector)"
+  ],
+  "attack_techniques": [
+    "T1562.004"
+  ],
+  "anti_forensic_notes": "Legacy pfirewall.log logging is off by default for both dropped and successful connections and must be explicitly enabled per network profile; an adversary with admin rights can disable logging, delete the file, or add/remove rules via netsh advfirewall, and the log itself is capped at a small rolling size (default 4096 KB / max 32767 KB, oldest entries deleted first), so its absence proves nothing about whether logging was ever on. The WFAS event log channel records rule-change events (2004/2005/2006) independently of whether text logging is enabled, though clearing that event log is itself recorded as a log-cleared event.",
+  "interpretation": "",
+  "related_artifacts": [
+    "defender-eventlog",
+    "security-eventlog",
+    "arp-cache"
+  ]
+}

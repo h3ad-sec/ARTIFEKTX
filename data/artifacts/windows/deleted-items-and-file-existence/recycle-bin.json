@@ -1,0 +1,37 @@
+{
+  "id": "recycle-bin",
+  "name": "Recycle Bin",
+  "category": "file",
+  "subcategory": "user-activity",
+  "os_min": "Windows Vista ($Recycle.Bin / $I / $R format; the earlier centralized INFO2 format is used on Windows 2000/XP/Server 2003 at C:\\RECYCLER\\<SID>\\INFO2)",
+  "location": "C:\\$Recycle.Bin\\<user SID>\\ containing paired $I<random>.<ext> (metadata) and $R<random>.<ext> (content) files for each deleted item",
+  "purpose": "Records files a user deleted through Explorer or another Recycle-Bin-aware path, preserving both the deleted content and metadata about the item's original path, size, and deletion time - allowing recovery of the file and reconstruction of what was deleted, when, and by which account.",
+  "key_fields": [
+    "$I file - header with version, original file size, deletion timestamp (FILETIME), and the original full path of the deleted item",
+    "$R file - the deleted item's actual bytes (a renamed copy of the original file, or a full copy of a deleted folder's contents)",
+    "Shared random identifier - the 6-character suffix common to an $I/$R pair, linking metadata to content",
+    "Per-user SID subdirectory under $Recycle.Bin - attributes the deletion to a specific local or domain account"
+  ],
+  "normal_baseline": "A small, rotating set of recently user-deleted files whose original paths, sizes, and deletion times match plausible user activity, such as deleting items from Downloads, Desktop, or Documents.",
+  "anomalies": [
+    "An $I file present with no matching $R file (or vice versa) - the content was permanently removed after being sent to the Recycle Bin (e.g., 'Empty Recycle Bin' or direct deletion of the $R file), while the metadata trace survives",
+    "The original path recorded in an $I file points to a security-relevant location (an EDR/AV install directory, a Startup folder, System32) - consistent with an attacker deleting evidence or disabling defenses",
+    "A burst of deletions across many $I/$R pairs in a short window, consistent with an attacker or wiper clearing a staging directory",
+    "The deletion timestamp in an $I file falls outside the SID subdirectory owner's known logon sessions, suggesting the deletion was performed under someone else's profile/context",
+    "The entire $Recycle.Bin\\<SID> folder emptied of $I/$R pairs immediately following other evidence of malicious activity, inconsistent with routine user cleanup"
+  ],
+  "parsing_tools": [
+    "RBCmd (Eric Zimmerman)",
+    "Autopsy"
+  ],
+  "attack_techniques": [
+    "T1070.004"
+  ],
+  "anti_forensic_notes": "Deleting a file directly (Shift+Delete, `del` from a command shell, or most malware self-deletion routines) bypasses the Recycle Bin entirely and leaves no $I/$R pair - the absence of an expected Recycle Bin entry for a known deletion is itself a signal that a non-Explorer deletion path was used. An attacker can also delete just the $R content file while leaving the $I metadata behind, or clear the whole $Recycle.Bin folder, so a lone surviving $I record should still be treated as valuable evidence of the deletion event even without recoverable content.",
+  "interpretation": "",
+  "related_artifacts": [
+    "mft",
+    "usn-journal",
+    "shell-bags"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "id": "recent-files",
+  "name": "Recent Files",
+  "category": "registry",
+  "subcategory": "file-folder-access",
+  "os_min": "Windows XP",
+  "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RecentDocs",
+  "purpose": "Records documents and folders recently opened through File Explorer / common Open-Save dialogs, organized both as one flat MRU list and as per-file-extension subkeys, plus a dedicated Folder subkey for recently opened folders.",
+  "key_fields": [
+    "RecentDocs (root) - numbered binary values holding the filename plus associated .lnk shortcut data, ordered by the root MRUListEx",
+    "RecentDocs\\.<ext> subkeys - one per file extension (e.g. .docx, .pdf, .xlsx) with their own numbered values and MRUListEx, recording only files of that extension",
+    "RecentDocs\\Folder subkey - recently opened folders, with its own MRUListEx",
+    "MRUListEx - binary DWORD-array value giving access order (most recent first) at each level",
+    "Key LastWrite time - approximates when the most recently listed item was opened"
+  ],
+  "normal_baseline": "Extension subkeys matching the applications the user regularly works with (Office documents, PDFs, images), with entries for files stored in expected user-profile locations.",
+  "anomalies": [
+    "Extension subkeys appearing for file types the user does not normally work with (e.g. .zip, .rar, .7z, .ps1, .vbs, .hta) around the time of an incident",
+    "Entries referencing files in Temp, Downloads, or AppData paths rather than typical document locations",
+    "Filenames referencing sensitive data categories (finance, HR, credentials) opened by an account with no business reason to access them",
+    "RecentDocs entries with no corresponding file present in the file system and no plausible legitimate deletion, especially paired with other exfiltration-staging evidence",
+    "The root RecentDocs MRUListEx/order inconsistent with the per-extension subkeys' order, suggesting one was edited without the other"
+  ],
+  "parsing_tools": [
+    "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
+    "RegRipper (recentdocs.pl plugin)",
+    "KAPE: e.g. kape.exe --msource source-volume --mdest output-folder --module RECmd_UserActivity --mef csv",
+    "Velociraptor (windows.registry.recentdocs artifact)"
+  ],
+  "attack_techniques": [
+    "T1083"
+  ],
+  "anti_forensic_notes": "Entries persist after the referenced file is deleted, so RecentDocs commonly outlives the evidence it points to and is a good source for reconstructing what files existed even after cleanup. The key's LastWrite time only reflects the most recent addition across the whole key structure, so establishing a precise timeline for older entries requires the MRUListEx ordering rather than timestamps alone.",
+  "interpretation": "Capacity: the root RecentDocs key retains the 150 most recently opened files/folders overall; each per-extension subkey retains its own 20 most recent entries (30 for the Folder subkey, or files without an extension). A file can still show up in its extension subkey after it has aged out of the root 150-item list, so check both levels rather than the root alone.",
+  "related_artifacts": [
+    "shell-bags",
+    "userassist"
+  ]
+}

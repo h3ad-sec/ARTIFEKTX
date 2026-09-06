@@ -1,0 +1,32 @@
+{
+  "id": "ifeo-appinit",
+  "name": "Image File Execution Options / AppInit_DLLs",
+  "category": "registry",
+  "subcategory": "persistence",
+  "os_min": "Windows Vista (IFEO Debugger abuse formalized); AppInit_DLLs from Windows NT",
+  "location": "HKLM\\SOFTWARE{\\Wow6432Node}\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\<executable>\\Debugger; AppInit_DLLs at HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows",
+  "purpose": "IFEO Debugger value causes a specified debugger/program to launch in place of (or before) the target executable; AppInit_DLLs forces a DLL to load into every process that loads user32.dll.",
+  "key_fields": [
+    "Debugger value under an executable's IFEO key",
+    "SilentProcessExit\\MonitorProcess value",
+    "AppInit_DLLs value list"
+  ],
+  "normal_baseline": "IFEO keys typically empty or used only by legitimate debugging/compatibility tooling; AppInit_DLLs typically empty on modern systems (deprecated with secure boot).",
+  "anomalies": [
+    "Debugger value attached to an accessibility or security-tool binary (e.g. utilman.exe, taskmgr.exe)",
+    "AppInit_DLLs pointing to an unsigned DLL in a user-writable path"
+  ],
+  "parsing_tools": [
+    "Autoruns (Sysinternals)",
+    "Registry Explorer (Eric Zimmerman)"
+  ],
+  "attack_techniques": [
+    "T1546.012"
+  ],
+  "anti_forensic_notes": "IFEO abuse can double as defense evasion by attaching an invalid or crashing debugger to security tools, silently disabling them.",
+  "interpretation": "",
+  "related_artifacts": [
+    "software-hive",
+    "system-boot-and-autostart-programs"
+  ]
+}

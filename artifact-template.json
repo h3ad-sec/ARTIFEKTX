@@ -1,10 +1,9 @@
 {
-  "_comment": "Copy this file to data/artifacts/{folder}/{id}.json. Folders are organizational (now mostly named after the SANS FOR500 poster's own 'Evidence of...' categories, e.g. external-device-usb-usage); the `category` field below is the literal artifact type (registry | file), independent of which folder it lives in. Locked schema, 16 fields exactly — see feedback_artifektx_schema memory. Artifact `name` fields should match the poster's/source's literal title where the artifact came from one, not a paraphrase.",
+  "_comment": "Copy this file to data/artifacts/{os}/{category}/{id}.json, where {os} is windows | linux | macos | mobile. Each OS defines its own category set (see generate-manifest.js's CATEGORY_TITLES map); Windows uses the SANS FOR500 poster's own section titles plus a few of this project's own. The `category` field below is the literal artifact type (registry | file), independent of which folder it lives in. The OS itself is not stored per-artifact since it's already implied by which data/os/{os}.json file the artifact ships in. Locked schema, 15 fields exactly, see feedback_artifektx_schema memory. Artifact `name` fields should match the source's literal title where the artifact came from one, not a paraphrase.",
   "id": "your-artifact-id",
   "name": "Human-readable artifact name",
   "category": "registry",
   "subcategory": "short-tag, e.g. execution-evidence, user-accounts, persistence",
-  "os": "Windows",
   "os_min": "Earliest OS version this artifact applies to, e.g. Windows 8",
   "location": "Exact file or registry path",
   "purpose": "One to two sentences: what this artifact records and why it exists",
@@ -16,7 +15,7 @@
   ],
   "parsing_tools": ["Tool name (author/vendor)"],
   "attack_techniques": ["T1204"],
-  "anti_forensic_notes": "How this artifact is commonly cleared, evaded, or is inherently unreliable — and what that absence itself signals",
+  "anti_forensic_notes": "How this artifact is commonly cleared, evaded, or is inherently unreliable, and what that absence itself signals",
   "interpretation": "Analyst decoding guidance that doesn't fit the fields above: sub-key/value meanings, format quirks, capacity limits, what this artifact proves vs doesn't prove. Leave as empty string if there's nothing beyond what purpose/key_fields/anomalies already cover.",
   "related_artifacts": ["other-artifact-id"]
 }

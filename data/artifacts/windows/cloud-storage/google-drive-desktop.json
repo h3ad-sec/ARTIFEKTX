@@ -1,0 +1,36 @@
+{
+  "id": "google-drive-desktop",
+  "name": "Google Drive for Desktop",
+  "category": "file",
+  "subcategory": "cloud-storage",
+  "os_min": "Windows 8",
+  "location": "Local drive letter and account ID: NTUSER\\Software\\Google\\DriveFS\\Share\\. Default local file cache: %USERPROFILE%\\AppData\\Local\\Google\\DriveFS\\<account identifier>\\content_cache. File metadata: %USERPROFILE%\\AppData\\Local\\Google\\DriveFS\\<account identifier>\\metadata_sqlite_db.",
+  "purpose": "Google Drive for Desktop is the merged successor to Google Backup and Sync and Drive File Stream; it presents a virtual FAT32 volume named \"My Drive\" that is only mounted and accessible while the associated Google account is logged in.",
+  "key_fields": [
+    "metadata_sqlite_db - SQLite database of file/folder metadata, with many important fields stored in protobuf format rather than plain columns",
+    "content_cache - local cache of file content under the per-account folder",
+    "NTUSER\\Software\\Google\\DriveFS\\Share\\ - records the assigned virtual drive letter and account identifier tying the mount to a specific Google account"
+  ],
+  "normal_baseline": "One virtual drive letter mounted per active Google account session, consistently assigned across logins, with metadata_sqlite_db growth and content_cache activity tracking the user's routine file access during normal working hours.",
+  "anomalies": [
+    "A second, unexpected account identifier appearing under DriveFS with its own content_cache and virtual drive letter, indicating a personal or unauthorized Google account mounted alongside (or instead of) the corporate one",
+    "Large or rapid growth in content_cache volume immediately preceding a resignation or termination date, consistent with bulk staging of files for exfiltration via T1567.002",
+    "Virtual drive letter access recorded in shell/LNK/jump-list artifacts with no corresponding DriveFS registry entry, suggesting the mount was removed or the account switched after the activity occurred",
+    "metadata_sqlite_db present with no matching Drive process in execution artifacts, suggesting prior use that was later uninstalled without full cache cleanup"
+  ],
+  "parsing_tools": [
+    "Generic SQLite browser (e.g. DB Browser for SQLite) for metadata_sqlite_db table structure",
+    "No verified dedicated public parser for the protobuf-encoded fields inside metadata_sqlite_db - manual protobuf decoding or a purpose-built parser is typically required to fully interpret those columns"
+  ],
+  "attack_techniques": [
+    "T1567.002"
+  ],
+  "anti_forensic_notes": "The \"My Drive\" volume only exists while the user is authenticated - it is not persistent storage, so a live-response or memory-only view of mounted drives will miss it once the session ends and Drive is signed out. Uninstalling Google Drive for Desktop does not necessarily remove the AppData\\Local\\Google\\DriveFS cache directory, so metadata and cached content can outlive the visible application.",
+  "interpretation": "The assigned virtual drive letter recorded under NTUSER\\Software\\Google\\DriveFS\\Share\\ is the key pivot for tying other artifacts (LNK files, jump lists, shellbags, recent-docs) that reference that drive letter back to Google Drive activity. metadata_sqlite_db stores many fields in protobuf format rather than readable text/columns, so raw SQLite inspection alone will not surface everything - protobuf-aware parsing is needed for full field recovery. Google Workspace Admin Reports provide up to 180 days of user activity logging and should be cross-checked against local cache evidence.",
+  "related_artifacts": [
+    "onedrive",
+    "box-drive",
+    "dropbox",
+    "teams-slack-cache"
+  ]
+}

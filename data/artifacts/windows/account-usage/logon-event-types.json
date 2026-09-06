@@ -1,0 +1,45 @@
+{
+  "id": "logon-event-types",
+  "name": "Logon Event Types",
+  "category": "file",
+  "subcategory": "authentication",
+  "os_min": "Windows 7 / Server 2008 R2",
+  "location": "%SystemRoot%\\System32\\winevt\\logs\\Security.evtx: the Logon Type field within Event ID 4624",
+  "purpose": "Determines by exactly what means a logon was attempted, in addition to date, time, username, hostname, and success/failure status. The single field that separates a console logon from a network logon, RDP session, or scheduled-task logon.",
+  "key_fields": [
+    "Logon Type 2: logon via console",
+    "Logon Type 3: network logon",
+    "Logon Type 4: batch logon",
+    "Logon Type 5: Windows service logon",
+    "Logon Type 7: credentials used to unlock screen, or an RDP session reconnect",
+    "Logon Type 8: network logon sending credentials in cleartext",
+    "Logon Type 9: different credentials used than the logged-on user",
+    "Logon Type 10: remote interactive logon (RDP)",
+    "Logon Type 11: cached credentials used to logon",
+    "Logon Type 12: cached remote interactive (similar to Type 10)",
+    "Logon Type 13: cached unlock (similar to Type 7)"
+  ],
+  "normal_baseline": "Logon Type 2 for regular console users during business hours; Type 3 for expected file-share/network access; Type 10 only from known admin or remote-work sources.",
+  "anomalies": [
+    "Logon Type 10 (RDP) from an unexpected source at an odd hour",
+    "Logon Type 8 (cleartext network credentials) appearing at all on a modern, properly configured network",
+    "Logon Type 9 (different credentials than the logged-on user) on a host with no legitimate reason for credential switching, consistent with pass-the-hash or RunAs abuse",
+    "Logon Type 5 (service logon) tied to an account that isn't a known service account"
+  ],
+  "parsing_tools": [
+    "Event Viewer",
+    "EvtxECmd (Eric Zimmerman)"
+  ],
+  "attack_techniques": [
+    "T1078",
+    "T1021"
+  ],
+  "anti_forensic_notes": "The Logon Type is only as trustworthy as the 4624 event itself, if Security-log auditing is disabled or the log is cleared, this classification is lost along with the rest of the logon record.",
+  "interpretation": "Always read the Logon Type alongside the account name and source IP/workstation fields on the same 4624 event. The type alone tells you the *mechanism*, not whether the logon itself was legitimate. Use this table to disambiguate `successful-failed-logons` records and to interpret Type 10 correctly for `rdp-eventlogs` correlation.",
+  "related_artifacts": [
+    "security-eventlog",
+    "successful-failed-logons",
+    "rdp-eventlogs",
+    "remote-desktop-protocol-rdp-usage"
+  ]
+}

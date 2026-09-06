@@ -1,0 +1,39 @@
+{
+  "id": "internet-explorer-file-urls",
+  "name": "Internet Explorer file:///",
+  "category": "file",
+  "subcategory": "file-folder-access",
+  "os_min": "Windows XP",
+  "location": "IE6-7: %USERPROFILE%\\Local Settings\\History\\History.IE5; IE8-9: %USERPROFILE%\\AppData\\Local\\Microsoft\\Windows\\History\\History.IE5; IE10-11 and Windows 10+: %USERPROFILE%\\AppData\\Local\\Microsoft\\Windows\\WebCache\\WebCacheV*.dat",
+  "purpose": "Internet Explorer's history databases record local and remote (network share) file-path access per user, logged as file:/// URL entries. Because the underlying database formats persist across OS versions, some of this evidence can still be recovered even on Windows 11+ systems that no longer ship Internet Explorer.",
+  "key_fields": [
+    "file:/// URL entries (format: file:///C:/<directory>/<filename>.<ext>)",
+    "Per-user History.IE5 / WebCacheV*.dat container, isolating evidence by profile",
+    "Access timestamp associated with each history entry",
+    "Container/partition table inside WebCacheV*.dat (IE10+) separating history, cache, and cookies within the single ESE file"
+  ],
+  "normal_baseline": "file:/// entries pointing to local documents, downloads, or mapped/UNC network shares the user has legitimately opened through Explorer or an application's 'Recent Files' list, consistent with the account's normal file-access pattern.",
+  "anomalies": [
+    "file:/// entries for sensitive network shares (finance, HR, executive) outside the user's documented job function",
+    "A burst of file:/// entries covering many distinct file paths in a short window, consistent with bulk browsing or staging ahead of exfiltration",
+    "file:/// entries referencing servers or shares the user has no legitimate business reason to access",
+    "Entries present despite Internet Explorer being uninstalled or never used on the account, indicating the access occurred through another shell component (e.g., Explorer, Office) that also writes to this database"
+  ],
+  "parsing_tools": [
+    "ESEDatabaseView (NirSoft) - for WebCacheV*.dat (ESE format)",
+    "IEHistoryView (NirSoft) - for legacy index.dat/History.IE5",
+    "BrowsingHistoryView (NirSoft)"
+  ],
+  "attack_techniques": [
+    "T1083",
+    "T1039"
+  ],
+  "anti_forensic_notes": "History.IE5/WebCacheV*.dat can be cleared through Internet Explorer's 'Clear browsing data' or a general privacy cleaner, and WebCacheV*.dat also self-purges older records as a fixed-size ESE database fills. Because file:/// entries are generated regardless of whether Internet Explorer is installed or used, a missing or unusually sparse database on a system with clear evidence of local or network file activity can itself point to targeted clearing of this artifact rather than genuine non-use.",
+  "interpretation": "Entries are recorded as file:///C:/<directory>/<filename>.<ext>. A file:/// entry does not mean the file was opened in a web browser-Explorer, Office's 'Recent Files', and other shell components generate the same records when a local or network file is accessed, so this artifact is general file-access evidence rather than proof of browser activity.",
+  "related_artifacts": [
+    "recent-files",
+    "user-typed-paths",
+    "shell-bags",
+    "windows-search-database"
+  ]
+}

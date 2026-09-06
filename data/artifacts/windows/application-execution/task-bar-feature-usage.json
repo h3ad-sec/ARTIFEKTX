@@ -1,0 +1,36 @@
+{
+  "id": "task-bar-feature-usage",
+  "name": "Task Bar Feature Usage",
+  "category": "registry",
+  "subcategory": "execution-evidence",
+  "os_min": "Windows 10 1903+",
+  "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FeatureUsage",
+  "purpose": "Logs how a signed-in user interacts with taskbar-pinned and running applications, distinguishing deliberately pinned apps from apps that merely received window focus.",
+  "key_fields": [
+    "AppLaunch subkey - per-application counters incremented when a pinned app is launched from the taskbar",
+    "AppSwitched subkey - per-application counters incremented every time an app receives taskbar focus, pinned or not",
+    "Value name - the application's AUMID (Application User Model ID) or executable identifier",
+    "Value data - a running count, with no embedded timestamp"
+  ],
+  "normal_baseline": "AppLaunch counts concentrated on a small set of apps the user has intentionally pinned (browser, mail client, Office apps); AppSwitched counts spread more broadly across whatever windows the user alt-tabs or clicks between during the day.",
+  "anomalies": [
+    "AppSwitched entry for an unfamiliar or unsigned executable receiving repeated focus, suggesting a GUI-based tool (e.g. a fake update window, RAT console) the user or attacker interacted with",
+    "AppLaunch entry for a pinned taskbar shortcut pointing at a script or LOLBin (powershell.exe, cmd.exe, mshta.exe) rather than a normal application",
+    "AppLaunch/AppSwitched counts present for an app with no corresponding Prefetch, Amcache, or UserAssist execution evidence, or vice versa - a gap worth reconciling",
+    "A sudden increment in either counter during a window when the legitimate user reports being away from the keyboard, suggesting an attacker interacting with the desktop over remote access"
+  ],
+  "parsing_tools": [
+    "Registry Explorer (Eric Zimmerman)",
+    "RegRipper"
+  ],
+  "attack_techniques": [
+    "T1204"
+  ],
+  "anti_forensic_notes": "FeatureUsage stores only cumulative counters with no timestamps, so on its own it cannot place activity in time - it must be correlated with UserAssist, Prefetch, or event logs to build a timeline. Clearing the key removes historical counts entirely with no partial-deletion trace, and because it is a rarely-examined key, wholesale deletion is easy to miss unless explicitly checked for.",
+  "interpretation": "AppLaunch and AppSwitched measure different things. AppLaunch only increments for applications the user has pinned to the taskbar, so it demonstrates the user's prior knowledge of and intent toward that application - the counter also persists after the app is later unpinned, so historical pinning survives removal from the visible taskbar. AppSwitched increments on any change of taskbar focus regardless of whether the app is pinned, reflecting general interaction/attention rather than deliberate pinning. Neither value carries a timestamp, so this artifact answers 'did the user know about and use this application' rather than 'when'.",
+  "related_artifacts": [
+    "userassist",
+    "bam-dam",
+    "prefetch"
+  ]
+}

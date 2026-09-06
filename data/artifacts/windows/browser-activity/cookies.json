@@ -1,0 +1,40 @@
+{
+  "id": "cookies",
+  "name": "Cookies",
+  "category": "file",
+  "subcategory": "browser-artifact",
+  "os_min": "N/A (application-level)",
+  "location": "Firefox: cookies.sqlite ; Chrome/Edge (newer): Network\\Cookies ; Chrome/Edge (older, pre-network-isolation): Cookies",
+  "purpose": "Site-set tokens that provide insight into what websites have been visited and, for authentication cookies, what activities might have taken place there.",
+  "key_fields": [
+    "Origin/host",
+    "Cookie name/value",
+    "Creation time",
+    "Last-accessed time",
+    "Expiration time",
+    "Secure flag",
+    "HttpOnly flag",
+    "moz_cookies table (Firefox)"
+  ],
+  "normal_baseline": "Cookies correspond to sites regularly visited by the user, with expiration/session lifetimes consistent with normal session behavior.",
+  "anomalies": [
+    "A session/authentication cookie for a sensitive application present on a host that never independently authenticated, consistent with cookie theft/replay (pass-the-cookie)",
+    "Cookie last-accessed time occurring after the associated user's account was reported compromised or after the user's last known logon",
+    "Cookies for a domain with no corresponding History entry, suggesting the cookie was set via a background/tracking request rather than a direct visit"
+  ],
+  "parsing_tools": [
+    "DB Browser for SQLite",
+    "Hindsight",
+    "NirSoft ChromeCookiesView / MZCookiesView"
+  ],
+  "attack_techniques": [
+    "T1539"
+  ],
+  "anti_forensic_notes": "Clearing cookies through browser settings removes the underlying SQLite rows, but a stolen/exported session cookie used elsewhere (pass-the-cookie) leaves no trace in the victim's own cookie store, so local absence does not rule out prior capture and reuse.",
+  "interpretation": "Cookies establish that a site was visited and, via their secure/httponly flags and expiration, how the site intended the cookie to be used (session-only vs. persistent, script-accessible vs. not) along with origin site and last-access time. Session/authentication cookies are the direct target of session-hijacking attacks. An adversary holding a valid, unexpired session cookie can access an account without ever touching the stored password.",
+  "related_artifacts": [
+    "chrome-edge-browser-artifacts",
+    "firefox-browser-artifacts",
+    "session-restore"
+  ]
+}

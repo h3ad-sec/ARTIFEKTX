@@ -1,0 +1,33 @@
+{
+  "id": "shortcut-lnk-files",
+  "name": "Shortcut (LNK) Files",
+  "category": "file",
+  "subcategory": "file-folder-access",
+  "os_min": "Windows 95",
+  "location": "%AppData%\\Microsoft\\Windows\\Recent\\ and Desktop/Start Menu locations",
+  "purpose": "Auto-created shortcuts to recently opened files/folders, encoding target path, volume serial, and MAC timestamps of the target at time of access.",
+  "key_fields": [
+    "Target full path",
+    "Volume serial number",
+    "TrackerDataBlock (machine ID / MAC address)",
+    "Target MAC timestamps embedded at creation",
+    "Explorer's Recent folder UI shows roughly the ~149 most recent LNK files to the user, though many more may actually exist in the folder and are accessible via the command line or forensic tools"
+  ],
+  "normal_baseline": "Shortcuts correspond to documents/programs the user has opened, consistent with normal work patterns.",
+  "anomalies": [
+    "LNK pointing to a target on removable media matching an unauthorized USBSTOR entry",
+    "LNK referencing a file staged in a temp/exfil directory"
+  ],
+  "parsing_tools": [
+    "LECmd (Eric Zimmerman): e.g. LECmd.exe -d \"%AppData%\\Microsoft\\Windows\\Recent\" --csv output-folder --csvf LNK.csv",
+    "TZWorks lp",
+    "Velociraptor (windows.forensics.lnk artifact)"
+  ],
+  "attack_techniques": [],
+  "anti_forensic_notes": "Persists after the target file is deleted, preserving path and volume evidence; the TrackerDataBlock MAC address can help attribute the originating machine when a file was moved across systems.",
+  "interpretation": "A LNK file is created whenever a file or folder is created or opened, and Windows also creates LNK files for the parent and grandparent folders in the same operation, so the mere existence of a LNK file does not by itself prove the target file was actually opened, nor whether its contents were modified. Always interpret alongside other artifacts (Jump Lists, MRU keys) rather than in isolation.",
+  "related_artifacts": [
+    "jump-lists",
+    "usrclass-dat-hive"
+  ]
+}

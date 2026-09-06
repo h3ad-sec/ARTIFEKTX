@@ -1,0 +1,30 @@
+{
+  "id": "firefox-browser-artifacts",
+  "name": "Firefox Browser Artifacts",
+  "category": "file",
+  "subcategory": "browser-artifact",
+  "os_min": "N/A (application-level)",
+  "location": "C:\\Users\\<user>\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\<profile>\\ ; places.sqlite (history/bookmarks), cookies.sqlite, formhistory.sqlite, logins.json + key4.db (saved passwords)",
+  "purpose": "Stores browsing history, bookmarks, cookies, form autofill history, and encrypted saved logins in per-profile SQLite/JSON files.",
+  "key_fields": [
+    "moz_places / moz_historyvisits tables (URL, visit_date, visit_count)",
+    "moz_bookmarks",
+    "logins.json encrypted credential entries"
+  ],
+  "normal_baseline": "History reflects normal work-related browsing patterns for the profile owner.",
+  "anomalies": [
+    "History entries for malicious-tool or paste-site domains",
+    "A profile folder present with no corresponding profiles.ini entry, suggesting a portable/hidden profile"
+  ],
+  "parsing_tools": [
+    "BrowsingHistoryView (Nirsoft)",
+    "DB Browser for SQLite"
+  ],
+  "attack_techniques": [],
+  "anti_forensic_notes": "Deleting the whole profile folder removes all Firefox artifacts at once; profile folder can be copied off intact even after the browser is closed, as recommended by Mozilla for backups.",
+  "interpretation": "",
+  "related_artifacts": [
+    "chrome-edge-browser-artifacts",
+    "history-and-download-history"
+  ]
+}

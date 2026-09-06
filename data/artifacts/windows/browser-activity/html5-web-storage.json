@@ -1,0 +1,33 @@
+{
+  "id": "html5-web-storage",
+  "name": "HTML5 Web Storage",
+  "category": "file",
+  "subcategory": "browser-artifact",
+  "os_min": "N/A (application-level)",
+  "location": "Firefox: %USERPROFILE%\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\<randomtext>.default\\webappstore.sqlite ; Chrome: %USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\<Profile>\\Local Storage ; Edge: %USERPROFILE%\\AppData\\Local\\Microsoft\\Edge\\User Data\\<Profile>\\Local Storage",
+  "purpose": "Per-domain, text-based persistent storage (up to 10MB per domain) that websites use for state and tracking data. Functionally a \"super cookie\" that outlives typical cookie settings.",
+  "key_fields": [
+    "Domain/origin key",
+    "Stored key-value text data",
+    "LevelDB .ldb/.log files (Chrome/Edge)",
+    "webappstore.sqlite records (Firefox)"
+  ],
+  "normal_baseline": "Storage entries correspond to sites the user actively uses (web apps, SaaS logins, e-commerce carts) with reasonable per-domain data volume.",
+  "anomalies": [
+    "Local Storage data present for a domain never visited according to browsing History, suggesting cross-site tracking, a compromised ad/tracking script, or staged payload data",
+    "A per-domain storage blob approaching the 10MB cap, well beyond typical application state",
+    "Storage entries encoding obfuscated, base64, or otherwise encoded script content rather than typical application state"
+  ],
+  "parsing_tools": [
+    "ccl_chrome_indexeddb (CCL / obsidianforensics: LevelDB Local Storage parser)",
+    "DB Browser for SQLite (Firefox webappstore.sqlite)"
+  ],
+  "attack_techniques": [],
+  "anti_forensic_notes": "Web Storage is cleared only when a user clears \"site data\" (not just cookies/history) or removes the profile, so it survives many routine cleanup actions and is less commonly targeted precisely because it is less well known than cookies.",
+  "interpretation": "Chrome and Edge store Local Storage as LevelDB databases: a binary key-value store requiring a LevelDB-aware parser rather than a text editor, since keys can remain in unflushed .log files. Firefox uses SQLite (webappstore.sqlite). Legacy IE/EdgeHTML stored the equivalent data in XML files.",
+  "related_artifacts": [
+    "chrome-edge-browser-artifacts",
+    "firefox-browser-artifacts",
+    "html5-filesystem"
+  ]
+}

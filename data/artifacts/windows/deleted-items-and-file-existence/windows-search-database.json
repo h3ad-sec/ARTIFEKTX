@@ -1,0 +1,37 @@
+{
+  "id": "windows-search-database",
+  "name": "Windows Search Database",
+  "category": "file",
+  "subcategory": "search-indexing",
+  "os_min": "Windows XP",
+  "location": "Windows XP: C:\\Documents and Settings\\All Users\\Application Data\\Microsoft\\Search\\Data\\Applications\\Windows\\Windows.edb; Windows 7+: C:\\ProgramData\\Microsoft\\Search\\Data\\Applications\\Windows\\Windows.edb, plus the GatherLogs\\SystemIndex subfolder under the same Applications\\Windows path",
+  "purpose": "Windows Search maintains an Extensible Storage Engine (ESE) database indexing metadata-and in many cases partial content-from over 900 file types, plus email, so users can search by keyword. Because it indexes a file's metadata and content independent of the file's current location, it can preserve evidence of files later moved, renamed, or deleted.",
+  "key_fields": [
+    "Indexed file/email metadata (path, filename, author, timestamps, properties)",
+    "Partial or full indexed content for supported file types",
+    "GatherLogs\\SystemIndex candidate list - files queued for indexing over a rolling 24-hour window",
+    "Record identifiers usable to cross-reference against Thumbnail Cache IDs from Thumbcache"
+  ],
+  "normal_baseline": "Index reflects ordinary documents, email, and media the user's account has created, received, or stored in indexed locations (profile folders, Outlook data files, Desktop, Documents).",
+  "anomalies": [
+    "Indexed metadata or content for sensitive files no longer present anywhere else on disk, indicating deletion after the fact",
+    "GatherLogs\\SystemIndex candidate entries referencing files in staging or archive-tool output directories shortly before a data-loss event",
+    "Indexed keyword content matching known-sensitive or exfiltrated document names/text the user's role gives no reason to possess",
+    "Index entries for files on removable or network volumes no longer connected to the system"
+  ],
+  "parsing_tools": [
+    "ESEDatabaseView (NirSoft)",
+    "libesedb / esedbexport (Joachim Metz)"
+  ],
+  "attack_techniques": [
+    "T1083"
+  ],
+  "anti_forensic_notes": "Windows.edb is a live ESE database typically locked while the Windows Search service is running, so acquisition generally requires a tool capable of reading locked files or stopping the service first. Deleting or corrupting the .edb forces Windows to rebuild the index from scratch, destroying historical entries for files no longer present on disk. Indexing can also be disabled entirely or scoped away from specific folders through Indexing Options, which would explain an unexpectedly sparse index.",
+  "interpretation": "The database is stored in Microsoft's Extensible Storage Engine (ESE) format-the same format used by WebCacheV*.dat and Exchange/AD databases-so ESE-aware tools are required to parse it. GatherLogs\\SystemIndex tracks a separate rolling 24-hour candidate list of files the indexer intends to process next, which can surface file activity slightly ahead of what has made it into the finished Windows.edb index. Because indexed content can include partial file text, this database can evidence not just that a file existed but some of what it contained.",
+  "related_artifacts": [
+    "thumbcache",
+    "thumbs-db",
+    "recent-files",
+    "outlook-ost-pst"
+  ]
+}

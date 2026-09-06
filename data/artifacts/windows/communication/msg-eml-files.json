@@ -1,0 +1,40 @@
+{
+  "id": "msg-eml-files",
+  "name": "MSG/EML File Metadata",
+  "category": "file",
+  "subcategory": "communication-artifact",
+  "os_min": "Windows XP",
+  "location": "No fixed location - individual .msg (Outlook drag-and-save, or 'Save As' from a message) and .eml (saved by most other mail clients, and by Outlook when exporting/forwarding as RFC 822) files can appear anywhere on disk: user Documents/Desktop, Downloads folder, email attachments, removable media, or extracted attachments from an OST/PST.",
+  "purpose": "Individual saved-email files that carry a full self-contained copy of one message, independent of any mailbox store. .msg is Microsoft's OLE/Compound File Binary Format (CFBF) container preserving Outlook-specific MAPI properties; .eml is a plain-text file following the RFC 822/MIME structure used by virtually every other mail client, making it the more portable but MAPI-metadata-poor of the two.",
+  "key_fields": [
+    "MSG: OLE Compound File Binary Format container - each MAPI property (subject, sender, recipients, body, flags, categories, follow-up dates) lives in its own named stream; recipients and attachments each get their own storage, extractable independent of Outlook",
+    "MSG: PR_TRANSPORT_MESSAGE_HEADERS (0x007D) property - the original raw internet headers (including the full Received chain) preserved even though the message is now stored in Outlook's proprietary format",
+    "EML: plain-text RFC 822/MIME header block at the top of the file - From, To, Cc, Subject, Date, Message-ID, and the Received header chain, human-readable without any special parser",
+    "Received headers (both formats) form a stack, each relay prepending its own line; read bottom-up to trace the hop-by-hop path from originating server to final delivery, per RFC 5321 section 4.4 timestamp/host semantics",
+    "Authentication-Results header (EML, and preserved in MSG's transport headers) - SPF/DKIM/DMARC verification outcomes, which are far harder to forge than the From/Reply-To fields themselves",
+    "MIME boundary-delimited attachment sections (EML) vs. discrete attachment storages (MSG) - both preserve original attachment filenames and content, independent of whether the parent mailbox still contains the item",
+    "Filesystem metadata of the saved file itself (created/modified/accessed timestamps) - reflects when the message was exported to disk, not when it was originally sent/received"
+  ],
+  "normal_baseline": "Saved .msg/.eml files correspond to messages the user can explain (an attachment they saved, an email exported for a ticket/case), with filesystem save-timestamps that align with a plausible reason to export that specific message, and internal headers consistent with the claimed sender.",
+  "anomalies": [
+    "A saved .msg/.eml file whose internal Date/Received headers place the original message well before the user account or mailbox existed, or whose Message-ID domain doesn't match any header's claimed sending server - suggesting a fabricated or edited file",
+    "Missing or truncated Received header chain on an EML that should have passed through multiple hops, consistent with hand-crafted phishing lures rather than genuine delivered mail",
+    "A .msg file's PR_TRANSPORT_MESSAGE_HEADERS stream absent or empty despite the message showing standard sender/recipient properties, which is atypical for genuinely-delivered mail and can indicate the item was manually constructed in Outlook rather than received",
+    "SPF/DKIM/DMARC results in Authentication-Results showing fail/none on a message purporting to be from an internal or trusted domain",
+    "Saved-file location or naming inconsistent with normal user workflow (e.g., staged in a temp directory with sequential generic names), suggesting bulk export for exfiltration rather than individual message handling",
+    "Discrepancy between the file's filesystem timestamps and the internal message Date header far exceeding what a simple save/forward would produce, suggesting the file was copied from another system or backdated"
+  ],
+  "parsing_tools": [
+    "MFCMAPI (Microsoft, open-source - browses MSG MAPI properties, converts MSG to/from EML)",
+    "extract-msg (open-source Python library for reading MSG/CFBF structure and MAPI properties)",
+    "Any text editor (EML is plain text; headers are human-readable without a parser)"
+  ],
+  "attack_techniques": [
+    "T1114.001"
+  ],
+  "anti_forensic_notes": "Because EML is plain text and MSG headers are user-editable through MAPI property editors like MFCMAPI, both formats can be hand-crafted or altered to fabricate a convincing-looking message - unlike a message still resident in a live mailbox store or mail server log, a standalone saved file has no independent chain of custody proving it was actually delivered. Cross-referencing the file's internal Received chain and Message-ID against the corresponding OST/PST store or mail server logs (where available) is the primary way to validate authenticity; absence of any corroborating server-side record for a claimed-received message is itself a red flag.",
+  "interpretation": "",
+  "related_artifacts": [
+    "outlook-ost-pst"
+  ]
+}

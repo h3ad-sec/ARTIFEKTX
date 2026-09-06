@@ -1,0 +1,3 @@
+This OS has no artifacts yet. Add JSON files under data/artifacts/macos/{category}/
+using artifact-template.json as the schema, then regenerate data/os/macos.json.
+Category names are platform-specific, don't reuse the Windows category set here.

@@ -1,0 +1,32 @@
+{
+  "id": "motw-zone-identifier",
+  "name": "Zone.Identifier ADS (Mark of the Web)",
+  "category": "file",
+  "subcategory": "provenance",
+  "os_min": "Introduced with Internet Explorer; ADS format standardized further by Windows 10",
+  "location": "Alternate Data Stream on the downloaded file: <filename>:Zone.Identifier:$DATA",
+  "purpose": "Marks files originating from the internet (or other untrusted zones) so Windows/Office apply extra security prompts (Protected View, SmartScreen).",
+  "key_fields": [
+    "ZoneId (0=Local Machine, 1=Intranet, 2=Trusted Sites, 3=Internet, 4=Untrusted)",
+    "ReferrerUrl",
+    "HostUrl",
+    "HostIpAddress (Windows 10+)"
+  ],
+  "normal_baseline": "Downloaded files carry ZoneId=3 with a HostUrl matching a known, expected source.",
+  "anomalies": [
+    "Executable or script with ZoneId=3 and a HostUrl pointing to a known malicious-tool distribution or paste site",
+    "MOTW-bearing file with the Unblock checkbox cleared shortly before execution, indicating deliberate bypass"
+  ],
+  "parsing_tools": [
+    "PowerShell Get-Item -Stream Zone.Identifier",
+    "dir /r (legacy) or forensic ADS-aware tools (FTK Imager, X-Ways)"
+  ],
+  "attack_techniques": [
+    "T1553.005"
+  ],
+  "anti_forensic_notes": "Transferring a file to/from a non-NTFS filesystem (FAT32, network transfer that doesn't preserve ADS, or extraction from certain archive formats) strips the ADS and the mark along with it, so its absence does not prove local origin.",
+  "interpretation": "",
+  "related_artifacts": [
+    "browser-downloads"
+  ]
+}
