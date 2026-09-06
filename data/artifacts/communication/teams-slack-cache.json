@@ -1,7 +1,7 @@
 {
   "id": "teams-slack-cache",
   "name": "Teams/Slack Local Cache (LevelDB)",
-  "type": "file",
+  "category": "file",
   "subcategory": "communication-artifact",
   "os": "Windows",
   "os_min": "Windows 10",
@@ -32,9 +32,6 @@
   ],
   "anti_forensic_notes": "LevelDB's append-only, log-structured design means deleted messages are not immediately purged - they persist as recoverable tombstones in .ldb files until the database runs compaction, so a user 'deleting' a message in the Teams/Slack UI does not reliably remove it from the local cache at the time of collection. Conversely, waiting too long before imaging a system, or the client running a compaction pass, can permanently remove that recoverable content - LevelDB evidence is time-sensitive in a way flat-file artifacts are not. Uninstalling the client does not delete the AppData cache directory, so absence of the parent application does not mean absence of message history.",
   "interpretation": "",
-  "category": [
-    "Communication"
-  ],
   "related_artifacts": [
     "chrome-edge-browser-artifacts"
   ]

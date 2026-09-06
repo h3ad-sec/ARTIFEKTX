@@ -1,7 +1,7 @@
 {
   "id": "search-wordwheelquery",
   "name": "Search – WordWheelQuery",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "file-folder-access",
   "os": "Windows",
   "os_min": "Windows 7",
@@ -28,9 +28,6 @@
   ],
   "anti_forensic_notes": "WordWheelQuery is not touched by mainstream browser-focused privacy cleaners, so its survival alongside cleared browser history can point an analyst toward local file-system searching that other tools missed. The key can still be cleared directly via registry edit, and its complete absence on an otherwise active profile is itself worth noting.",
   "interpretation": "Search terms are stored in Unicode and ordered purely by the MRUListEx sequence, not by embedded timestamps within each value - only the key's overall LastWrite time anchors the list in time, so establishing when an earlier (non-most-recent) search term was entered is not possible from this artifact alone.",
-  "category": [
-    "Deleted Items and File Existence"
-  ],
   "related_artifacts": [
     "user-typed-paths",
     "shell-bags"

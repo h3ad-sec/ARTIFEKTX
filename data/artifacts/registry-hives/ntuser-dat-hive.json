@@ -1,7 +1,7 @@
 {
   "id": "ntuser-dat-hive",
   "name": "NTUSER.DAT (User Registry Hive)",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "user-configuration",
   "os": "Windows",
   "os_min": "Windows 2000 (present in all NT-based Windows versions)",
@@ -29,9 +29,6 @@
   ],
   "anti_forensic_notes": "NTUSER.DAT is fully flushed to disk at logoff or periodic sync; a copy acquired live from a still-logged-on session can miss the most recent writes still held in the in-memory hive unless the .LOG1/.LOG2 transaction logs are also collected and replayed. Deleting a user profile removes NTUSER.DAT from its normal location, but Windows.old, Volume Shadow Copies, or backup/roaming-profile stores can retain earlier copies.",
   "interpretation": "",
-  "category": [
-    "Registry Hives"
-  ],
   "related_artifacts": [
     "usrclass-dat-hive",
     "software-hive"

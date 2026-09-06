@@ -1,7 +1,7 @@
 {
   "id": "windows-10-timeline",
   "name": "Windows 10 Timeline",
-  "type": "file",
+  "category": "file",
   "subcategory": "execution-evidence",
   "os": "Windows",
   "os_min": "Windows 10 1803 (Timeline feature)",
@@ -29,9 +29,6 @@
   "attack_techniques": [],
   "anti_forensic_notes": "ActivitiesCache.db is an ordinary SQLite file the current user account can delete or overwrite outright; Windows will simply recreate an empty database on next use, so a short-lived or newly-created file where a long history is expected is itself notable. Microsoft later deprecated the Timeline user interface, but the underlying ConnectedDevicesPlatform database and its population can continue running in the background on affected builds, so the absence of the visible Timeline UI does not mean the database stopped recording.",
   "interpretation": "Because the database captures full application paths, per-item content opened inside the application, and visited URLs together with start/end times, it is one of the few artifacts that ties 'what' (specific document or URL), 'how long' (session duration), and 'in what application' together in one place. Records populated by this feature persist in ActivitiesCache.db even on systems where the Timeline feature was later removed from the Windows 10 UI in a late-Win10 update, so absence of the visible feature does not mean absence of the underlying data - always check for the database file regardless of the build's UI state.",
-  "category": [
-    "Application Execution"
-  ],
   "related_artifacts": [
     "jump-lists",
     "shimcache",

@@ -1,7 +1,7 @@
 {
   "id": "memory-process-list",
   "name": "Process List, Handles & Loaded DLLs (Memory Forensics)",
-  "type": "file",
+  "category": "file",
   "subcategory": "memory-forensics",
   "os": "Windows",
   "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
@@ -37,9 +37,6 @@
   ],
   "anti_forensic_notes": "Volatility 3 does not ship a direct equivalent of Volatility 2's psxview cross-view plugin; the cross-view check that psxview automated must be performed manually by diffing the PID sets returned by windows.pslist (linked-list walk) against windows.psscan (raw pool scan) - a PID present in the latter but missing from the former is the strongest single indicator of DKOM-based process hiding. Because psscan finds EPROCESS structures by pool signature rather than by following any list, an attacker who fully unlinks a process from every kernel list Volatility can walk still cannot prevent that process's memory pool footprint from being found by psscan, short of also zeroing/overwriting the EPROCESS pool tag itself, which would typically crash the running process's scheduling.",
   "interpretation": "",
-  "category": [
-    "Memory Forensics"
-  ],
   "related_artifacts": [
     "memory-code-injection",
     "memory-network-connections",

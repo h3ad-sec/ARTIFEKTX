@@ -1,7 +1,7 @@
 {
   "id": "service-events",
   "name": "Service Events",
-  "type": "file",
+  "category": "file",
   "subcategory": "authentication",
   "os": "Windows",
   "os_min": "Event ID 7045 requires Windows Server 2008 R2+; 4697 auditing requires Windows 10+",
@@ -32,9 +32,6 @@
   ],
   "anti_forensic_notes": "A large amount of malware and worms in the wild utilize services for persistence and privilege; services started on boot illustrate persistence (desirable to malware), and services can also be intentionally crashed via attacks like process injection to disable defensive tooling. 4697 requires the Audit Other Object Access Events subcategory to be enabled, which many environments don't turn on by default, leaving 7045 as the only reliable source.",
   "interpretation": "Treat System.evtx as the baseline source for service lifecycle events (available without extra auditing) and Security.evtx's 4697 as a bonus corroborating source only where that audit policy is already enabled. Cross-reference the service name/ImagePath against the `services-persistence` artifact's registry-level view (CurrentControlSet\\Services) to confirm what the service was actually configured to run.",
-  "category": [
-    "Account Usage"
-  ],
   "related_artifacts": [
     "services-persistence",
     "system-eventlog",

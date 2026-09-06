@@ -1,7 +1,7 @@
 {
   "id": "sam-hive",
   "name": "SAM (Security Account Manager) Hive",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "user-accounts",
   "os": "Windows",
   "os_min": "Windows 2000 (present in all NT-based Windows versions)",
@@ -33,9 +33,6 @@
   ],
   "anti_forensic_notes": "Password hashes in the SAM are encrypted with a boot key derived from the paired SYSTEM hive; a SAM hive collected without its matching SYSTEM hive cannot be decrypted. Attackers with SYSTEM-level access can dump SAM via `reg save`, Volume Shadow Copies (bypassing the live file lock), or in-memory extraction (e.g. Mimikatz lsadump::sam), leaving little or no on-disk trace beyond the access itself. RID hijacking abuses the F-value structure directly, so it will not show up in standard account-enumeration output and requires binary inspection of the F value to detect.",
   "interpretation": "",
-  "category": [
-    "Registry Hives"
-  ],
   "related_artifacts": [
     "security-hive",
     "system-hive",

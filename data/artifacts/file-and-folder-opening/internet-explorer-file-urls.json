@@ -1,7 +1,7 @@
 {
   "id": "internet-explorer-file-urls",
   "name": "Internet Explorer file:///",
-  "type": "file",
+  "category": "file",
   "subcategory": "file-folder-access",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -31,10 +31,6 @@
   ],
   "anti_forensic_notes": "History.IE5/WebCacheV*.dat can be cleared through Internet Explorer's 'Clear browsing data' or a general privacy cleaner, and WebCacheV*.dat also self-purges older records as a fixed-size ESE database fills. Because file:/// entries are generated regardless of whether Internet Explorer is installed or used, a missing or unusually sparse database on a system with clear evidence of local or network file activity can itself point to targeted clearing of this artifact rather than genuine non-use.",
   "interpretation": "Entries are recorded as file:///C:/<directory>/<filename>.<ext>. A file:/// entry does not mean the file was opened in a web browser-Explorer, Office's 'Recent Files', and other shell components generate the same records when a local or network file is accessed, so this artifact is general file-access evidence rather than proof of browser activity.",
-  "category": [
-    "File and Folder Opening",
-    "Deleted Items and File Existence"
-  ],
   "related_artifacts": [
     "recent-files",
     "user-typed-paths",

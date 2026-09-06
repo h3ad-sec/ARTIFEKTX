@@ -1,7 +1,7 @@
 {
   "id": "authentication-events",
   "name": "Authentication Events",
-  "type": "file",
+  "category": "file",
   "subcategory": "authentication",
   "os": "Windows",
   "os_min": "Windows 7",
@@ -31,9 +31,6 @@
   ],
   "anti_forensic_notes": "These events are recorded only on the system that actually performed the authentication - a host showing no local 4776/4768/4769 activity for a given account has not necessarily seen no authentication, it may simply mean the authentication happened elsewhere (the domain controller for a domain account). Standard Security-log clearing and retention limits otherwise apply (see security-eventlog's Event ID 1102 note).",
   "interpretation": "Authentication events identify where authentication of credentials occurred, which is particularly useful when tracking local vs. domain account usage. They are recorded on the system that authenticated the credentials: Local Account/Workgroup authentication is recorded on the workstation itself, while Domain/Active Directory authentication is recorded on the domain controller.",
-  "category": [
-    "Account Usage"
-  ],
   "related_artifacts": [
     "security-eventlog",
     "sam-hive",

@@ -1,7 +1,7 @@
 {
   "id": "ntfs-timestamp-rules",
   "name": "NTFS $STANDARD_INFORMATION Timestamp Behavior Rules",
-  "type": "file",
+  "category": "file",
   "subcategory": "filesystem-metadata",
   "os": "Windows",
   "os_min": "Behavior documented for Windows 10 v1903 and Windows 11 v22H2 (SANS FOR500 poster testing) — varies by OS version and action combination on other builds",
@@ -34,9 +34,6 @@
   ],
   "anti_forensic_notes": "This behavior is highly version- and action-specific (the SANS poster itself documents meaningful differences between Windows 10 v1903 and Windows 11 v22H2 for the same operations), so rules here are heuristics for common actions, not guarantees — always validate against the specific OS build and exact action sequence when the finding is load-bearing for a case. Attackers who timestomp $SI but leave $FN untouched are still caught by comparing the two attributes.",
   "interpretation": "Read as: given an observed MACE pattern on a file, work backward to the most likely operation that produced it, then check whether that operation is consistent with the rest of the case timeline. Windows 11 introduces two specific quirks worth remembering: (1) Access time updates can be fully suppressed if the system volume exceeds 128 GiB, so a static-looking Access time on Win11 does not by itself prove the file was never accessed; (2) some Access-time updates on Win11 (e.g. after data modification or rename) were observed to differ from the true activity time by up to a few seconds, so treat Win11 Access times as approximate, not exact, when timing precision matters. Cross-reference the `mft` artifact for the $STANDARD_INFORMATION vs $FILE_NAME structural distinction that makes timestomp detection possible in the first place.",
-  "category": [
-    "Filesystem Artifacts"
-  ],
   "related_artifacts": [
     "mft",
     "usn-journal"

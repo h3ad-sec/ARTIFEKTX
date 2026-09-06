@@ -1,7 +1,7 @@
 {
   "id": "user-typed-paths",
   "name": "User Typed Paths",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "file-folder-access",
   "os": "Windows",
   "os_min": "Windows Vista",
@@ -29,9 +29,6 @@
   ],
   "anti_forensic_notes": "An entry is only written to the registry once the File Explorer window is closed, so a typed path used and abandoned mid-session in a still-open window will not appear in an acquired hive. TypedPaths is not cleared by mainstream privacy/cleanup tools (CCleaner, BleachBit, Windows Disk Cleanup), so its presence is comparatively reliable, but the key's LastWrite time reflects when Explorer was closed, not the moment the path was typed.",
   "interpretation": "",
-  "category": [
-    "Deleted Items and File Existence"
-  ],
   "related_artifacts": [
     "commands-executed-in-run-dialog",
     "shell-bags"

@@ -1,7 +1,7 @@
 {
   "id": "html5-filesystem",
   "name": "HTML5 FileSystem",
-  "type": "file",
+  "category": "file",
   "subcategory": "browser-artifact",
   "os": "Windows",
   "os_min": "N/A (application-level)",
@@ -25,9 +25,6 @@
   "attack_techniques": [],
   "anti_forensic_notes": "Clearing \"site data\" in browser settings removes File System storage for that origin; because it is a lesser-known storage mechanism, it is less commonly targeted for anti-forensic cleanup than history or cookies and can retain data longer as a result.",
   "interpretation": "A LevelDB database within the File System folder maps visited URLs/origins to the numbered subfolders that actually hold the stored files. Data splits between \"t\" (temporary, browser-managed, evictable) and \"p\" (permanent, explicitly requested by the site) storage — content in permanent storage reflects a more deliberate site action and is generally more forensically interesting.",
-  "category": [
-    "Browser Activity"
-  ],
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "html5-web-storage"

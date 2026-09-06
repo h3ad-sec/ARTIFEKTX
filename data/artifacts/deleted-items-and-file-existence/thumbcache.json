@@ -1,7 +1,7 @@
 {
   "id": "thumbcache",
   "name": "Thumbcache",
-  "type": "file",
+  "category": "file",
   "subcategory": "file-folder-access",
   "os": "Windows",
   "os_min": "Windows Vista",
@@ -28,9 +28,6 @@
   ],
   "anti_forensic_notes": "Thumbcache databases can be cleared through Disk Cleanup's 'Thumbnails' option or third-party privacy cleaners, but because thumbnails are generated lazily on first view rather than proactively for every file, a clean or sparse database is also the expected state on a system where thumbnail view was rarely used-so absence alone is not proof of clearing. The source picture or document does not need to still exist for its thumbnail to remain.",
   "interpretation": "Database files are named by pixel dimension (e.g., thumbcache_256.db), with each file holding thumbnails generated for that display size; a given source file's thumbnail can appear in more than one size database if it was viewed at multiple Explorer view settings. Each cached thumbnail carries a Thumbnail Cache ID that can be looked up in the Windows Search Database to recover the original filename, path, and metadata the Thumbcache database itself does not store, since it retains only the rendered image.",
-  "category": [
-    "Deleted Items and File Existence"
-  ],
   "related_artifacts": [
     "thumbs-db",
     "windows-search-database",

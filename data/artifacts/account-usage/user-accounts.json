@@ -1,7 +1,7 @@
 {
   "id": "user-accounts",
   "name": "User Accounts",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "user-accounts",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -29,9 +29,6 @@
   ],
   "anti_forensic_notes": "Deleting a local user account does not automatically remove its ProfileList subkey or profile folder, so a stale entry can remain as evidence of a since-deleted account; conversely, an attacker who manually deletes both the ProfileList subkey and the profile folder can attempt to hide that an account ever logged on locally, though this can still leave traces in the sam-hive or security-eventlog.",
   "interpretation": "ProfileList is useful for mapping a SID to its account name; each subkey is named for a user's SID and contains a ProfileImagePath value indicating that user's profile path. Well-known SID RID suffixes (e.g., -500 for the built-in Administrator) can help identify privileged accounts even after a display-name rename.",
-  "category": [
-    "Account Usage"
-  ],
   "related_artifacts": [
     "sam-hive",
     "authentication-events",

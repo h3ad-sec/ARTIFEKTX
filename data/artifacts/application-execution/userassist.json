@@ -1,7 +1,7 @@
 {
   "id": "userassist",
   "name": "UserAssist",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "program-execution",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -32,9 +32,6 @@
   ],
   "anti_forensic_notes": "Value names are ROT13-encoded, not encrypted, so this is trivially reversible and not a real obstacle to analysis. However, using 'Open file location' or similar shell actions from a search/menu can update a UserAssist entry's run count and timestamp without the target actually being executed, which can produce a false positive for execution if not corroborated with focus time/count or other execution artifacts (Prefetch, Amcache). The entire UserAssist key can be deleted or disabled by an attacker with registry access, and its absence where GUI activity is otherwise evidenced is itself a red flag.",
   "interpretation": "",
-  "category": [
-    "Application Execution"
-  ],
   "related_artifacts": [
     "shell-bags",
     "recent-files"

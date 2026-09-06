@@ -1,7 +1,7 @@
 {
   "id": "startup-folders",
   "name": "Startup Folders",
-  "type": "file",
+  "category": "file",
   "subcategory": "persistence",
   "os": "Windows",
   "os_min": "Windows NT 4.0",
@@ -26,9 +26,6 @@
   ],
   "anti_forensic_notes": "Trivially removed by deleting the file; file-system timestamps on the item itself (not just its LNK target) can help date when persistence was planted.",
   "interpretation": "",
-  "category": [
-    "Persistence"
-  ],
   "related_artifacts": [
     "shortcut-lnk-files",
     "system-boot-and-autostart-programs"

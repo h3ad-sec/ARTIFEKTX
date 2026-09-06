@@ -1,7 +1,7 @@
 {
   "id": "capabilityaccessmanager",
   "name": "CapabilityAccessManager",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "device-capability-access",
   "os": "Windows",
   "os_min": "Windows 10 1903+",
@@ -31,9 +31,6 @@
   ],
   "anti_forensic_notes": "ConsentStore only records that a capability was accessed and for how long - it does not capture the actual audio or video content, so it can corroborate but not prove data was captured or exfiltrated. An attacker with registry access can delete the specific application subkey to remove evidence of a single tool's access without disturbing entries for other applications, so a suspiciously sparse capability history on an otherwise active system is worth investigating.",
   "interpretation": "LastUsedTimeStart and LastUsedTimeStop bound only the most recent single access session for that application/capability pair - earlier sessions are overwritten and not retained as history, so this key reflects the latest use, not a full access log. The NonPackaged subkey is the one to check for conventional Win32 desktop malware, since packaged Microsoft Store apps are instead tracked directly under the capability subkey by package family name.",
-  "category": [
-    "Application Execution"
-  ],
   "related_artifacts": [
     "software-hive",
     "ntuser-dat-hive"

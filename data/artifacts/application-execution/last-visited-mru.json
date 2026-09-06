@@ -1,7 +1,7 @@
 {
   "id": "last-visited-mru",
   "name": "Last Visited MRU",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "file-folder-access",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -26,10 +26,6 @@
   "attack_techniques": [],
   "anti_forensic_notes": "Like other ComDlg32 MRU keys, entries are only written once the dialog interaction completes, so activity in a dialog left open (or a process killed before the dialog closes) may not be captured. Entries persist after the referenced folder is renamed or deleted, so the recorded path can outlive the location it names.",
   "interpretation": "This key yields two distinct pieces of evidence in one place: which applications the user actually ran through a file dialog, and the last filesystem location each application touched - not necessarily the same as where the current file resides. Because the PIDL/path often points at directories with no other UI presence, this is a common source for identifying hidden or otherwise-unadvertised directories the user (or a GUI-driven malicious application) has visited.",
-  "category": [
-    "Application Execution",
-    "File and Folder Opening"
-  ],
   "related_artifacts": [
     "open-save-mru",
     "shell-bags",

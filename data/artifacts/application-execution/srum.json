@@ -1,7 +1,7 @@
 {
   "id": "srum",
   "name": "System Resource Usage Monitor (SRUM)",
-  "type": "file",
+  "category": "file",
   "subcategory": "execution-evidence",
   "os": "Windows",
   "os_min": "Windows 8",
@@ -28,10 +28,6 @@
   "attack_techniques": [],
   "anti_forensic_notes": "SRUDB.dat can be deleted directly and Windows will recreate an empty one at next write, so a suspiciously short-lived SRUM history around an incident is itself a signal.",
   "interpretation": "Entries are written into the database in periodic (roughly hourly) blocks rather than at the moment activity occurs, so the exact time an action happened cannot be pinned down from SRUM alone — treat its timestamps as approximate. SRUDB.dat is also not guaranteed to be flushed to disk on every shutdown, so the most recent activity before a crash or abrupt power-off may be missing entirely. Parsing the SOFTWARE hive alongside SRUDB.dat (most tools accept both together) is required to resolve the raw table GUIDs into human-readable field names.",
-  "category": [
-    "Application Execution",
-    "Network Activity and Physical Location"
-  ],
   "related_artifacts": [
     "prefetch"
   ]

@@ -1,7 +1,7 @@
 {
   "id": "application-eventlog",
   "name": "Application.evtx",
-  "type": "file",
+  "category": "file",
   "subcategory": "application-activity",
   "os": "Windows",
   "os_min": "Windows XP / Server 2003",
@@ -24,9 +24,6 @@
   "attack_techniques": [],
   "anti_forensic_notes": "Lower signal-to-noise than Security/System logs for security investigations; useful mainly to corroborate AV/EDR crash-based defense evasion.",
   "interpretation": "",
-  "category": [
-    "Event Logs"
-  ],
   "related_artifacts": [
     "security-eventlog"
   ]

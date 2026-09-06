@@ -1,7 +1,7 @@
 {
   "id": "outlook-ost-pst",
   "name": "Outlook OST/PST Files",
-  "type": "file",
+  "category": "file",
   "subcategory": "communication-artifact",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -34,9 +34,6 @@
   ],
   "anti_forensic_notes": "OST files cannot be opened outside their originating Outlook profile because the encryption cookie is bound to the mailbox's unique ID validated against the profile/server - this is a legitimate access control, not tampering, but it means an examiner must either restore the original profile context or use a format-aware parser (libpff) that bypasses the MAPI layer entirely. Deleting a PST/OST removes the local copy, but for an OST this is low-impact anti-forensics since the data still exists server-side and Outlook will simply resync; deleting a PST used for local-only archiving or POP3 delivery is high-impact since no server copy exists. Registry profile remnants (Windows Messaging Subsystem\\Profiles, Outlook\\Profiles) can survive deletion of the data file itself and are useful for proving a store once existed at a specific path.",
   "interpretation": "",
-  "category": [
-    "Communication"
-  ],
   "related_artifacts": [
     "msg-eml-files",
     "ntuser-dat-hive"

@@ -1,7 +1,7 @@
 {
   "id": "extensions",
   "name": "Extensions",
-  "type": "file",
+  "category": "file",
   "subcategory": "browser-artifact",
   "os": "Windows",
   "os_min": "N/A (application-level)",
@@ -24,9 +24,6 @@
   "attack_techniques": [],
   "anti_forensic_notes": "Removing an extension deletes its folder; the Preferences JSON's extension history or sync data may retain remnants briefly after removal.",
   "interpretation": "",
-  "category": [
-    "Browser Activity"
-  ],
   "related_artifacts": [
     "chrome-edge-browser-artifacts"
   ]

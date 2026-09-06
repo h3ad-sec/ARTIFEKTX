@@ -1,7 +1,7 @@
 {
   "id": "windows-search-database",
   "name": "Windows Search Database",
-  "type": "file",
+  "category": "file",
   "subcategory": "search-indexing",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -29,9 +29,6 @@
   ],
   "anti_forensic_notes": "Windows.edb is a live ESE database typically locked while the Windows Search service is running, so acquisition generally requires a tool capable of reading locked files or stopping the service first. Deleting or corrupting the .edb forces Windows to rebuild the index from scratch, destroying historical entries for files no longer present on disk. Indexing can also be disabled entirely or scoped away from specific folders through Indexing Options, which would explain an unexpectedly sparse index.",
   "interpretation": "The database is stored in Microsoft's Extensible Storage Engine (ESE) format-the same format used by WebCacheV*.dat and Exchange/AD databases-so ESE-aware tools are required to parse it. GatherLogs\\SystemIndex tracks a separate rolling 24-hour candidate list of files the indexer intends to process next, which can surface file activity slightly ahead of what has made it into the finished Windows.edb index. Because indexed content can include partial file text, this database can evidence not just that a file existed but some of what it contained.",
-  "category": [
-    "Deleted Items and File Existence"
-  ],
   "related_artifacts": [
     "thumbcache",
     "thumbs-db",

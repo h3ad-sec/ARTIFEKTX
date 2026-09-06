@@ -1,7 +1,7 @@
 {
   "id": "memory-network-connections",
   "name": "Network Connections at Capture Time (Memory Forensics)",
-  "type": "file",
+  "category": "file",
   "subcategory": "memory-forensics",
   "os": "Windows",
   "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
@@ -35,9 +35,6 @@
   ],
   "anti_forensic_notes": "Because windows.netscan finds network objects by scanning memory for pool signatures rather than by following any kernel list, it will still surface a connection object even after the owning process exits or a rootkit unlinks the process elsewhere - making memory acquisition timing (as close as possible to the suspected activity) the main lever an analyst has, since a connection's pool allocation can eventually be overwritten/reused by later memory activity and become unrecoverable. windows.netstat, by only walking the live port-pool structures, will show nothing for a connection whose structure has already been torn down, so relying on netstat alone can silently miss activity that netscan would still catch - always run both and diff the results rather than treating either as complete on its own.",
   "interpretation": "",
-  "category": [
-    "Memory Forensics"
-  ],
   "related_artifacts": [
     "memory-process-list",
     "memory-code-injection",

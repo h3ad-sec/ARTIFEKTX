@@ -1,7 +1,7 @@
 {
   "id": "system-last-shutdown-time",
   "name": "System Last Shutdown Time",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "system-identification",
   "os": "Windows",
   "os_min": "Windows XP (ShutdownCount value is Windows XP only)",
@@ -24,9 +24,6 @@
   "attack_techniques": [],
   "anti_forensic_notes": "ShutdownTime is a single value overwritten on every shutdown, so it only ever reflects the MOST RECENT shutdown - no history of prior shutdowns is retained here. Cross-reference System.evtx (e.g., Event ID 1074/6006 style shutdown/service-stop records) for a fuller shutdown/reboot history than this single registry value can provide on its own.",
   "interpretation": "Determining the last shutdown time can help detect user behavior and system anomalies. The value is stored in 64-bit Windows FILETIME format.",
-  "category": [
-    "System Information"
-  ],
   "related_artifacts": [
     "operating-system-version",
     "computer-name",

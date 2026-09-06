@@ -1,7 +1,7 @@
 {
   "id": "ms-word-reading-locations",
   "name": "MS Word Reading Locations",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "document-access",
   "os": "Windows",
   "os_min": "Windows 7 (Word 2013+)",
@@ -26,9 +26,6 @@
   "attack_techniques": [],
   "anti_forensic_notes": "This key only tracks documents opened long or interactively enough for Word to record a reading position, so a document opened only briefly may leave no entry here even though it does elsewhere (File MRU, Trust Records). Deleting the key removes reading-position history without affecting the separate File MRU list, so the two should be checked independently rather than assumed to rise and fall together.",
   "interpretation": "Cross-referencing the Date (last-closed) value here against the last-opened time recorded in the corresponding Office File MRU entry for the same document lets an analyst calculate an approximate session duration - how long the user actually had the document open - which neither artifact provides on its own.",
-  "category": [
-    "File and Folder Opening"
-  ],
   "related_artifacts": [
     "office-recent-files",
     "office-trust-records"

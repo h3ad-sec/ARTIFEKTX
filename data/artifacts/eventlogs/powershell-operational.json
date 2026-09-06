@@ -1,7 +1,7 @@
 {
   "id": "powershell-operational",
   "name": "PowerShell Operational Log",
-  "type": "file",
+  "category": "file",
   "subcategory": "script-execution",
   "os": "Windows",
   "os_min": "Windows PowerShell 5.0 / Windows 10 (Module Logging available since PowerShell 3.0; Script Block Logging introduced with PowerShell 5.0)",
@@ -35,9 +35,6 @@
   ],
   "anti_forensic_notes": "Script Block Logging is specifically designed to defeat obfuscation: it records the fully deobfuscated script content immediately before execution regardless of how many layers of encoding, concatenation, or variable substitution were applied, so a Base64-encoded or string-split command still appears in plaintext in the 4104 event. However, both Script Block Logging and Module Logging are off by default and must be enabled via 'Turn on PowerShell Script Block Logging' / 'Turn on Module Logging' Group Policy - an attacker with sufficient privileges can also disable these settings or the EventLog service before executing, and their absence on a host expected to have them enabled is itself a signal worth investigating.",
   "interpretation": "",
-  "category": [
-    "Event Logs"
-  ],
   "related_artifacts": [
     "security-eventlog",
     "sysmon"

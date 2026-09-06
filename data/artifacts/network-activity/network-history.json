@@ -1,7 +1,7 @@
 {
   "id": "network-history",
   "name": "Network History",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "network-configuration",
   "os": "Windows",
   "os_min": "Windows Vista (NetworkList keys); Interfaces/NetworkCards present since Windows XP",
@@ -30,9 +30,6 @@
   ],
   "anti_forensic_notes": "These keys are populated by the OS only at connection time and hold no lower-level backup - deleting a Profile or Signature subkey removes that network's history entirely. A wired-only host still generates a Profiles/Signatures entry for its wired connection, so the absence of any wireless-type entries here is not by itself conclusive that Wi-Fi was never used; corroborate against wifi-profiles and the WLAN event log.",
   "interpretation": "These keys correlate with each other: Interfaces links to NetworkCards/Signatures via the DhcpDomain value, while Signatures and Profiles link to each other via the ProfileGUID value, together building a richer picture of network activity including VPN connections. The MAC address of the gateway for an SSID can assist with device geolocation. NetworkList Profile NameType values: 6 (0x06) = Wired, 23 (0x17) = VPN, 71 (0x47) = Wireless, 243 (0xF3) = Mobile Broadband.",
-  "category": [
-    "Network Activity and Physical Location"
-  ],
   "related_artifacts": [
     "network-interfaces",
     "wlan-event-log",

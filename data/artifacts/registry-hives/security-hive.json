@@ -1,7 +1,7 @@
 {
   "id": "security-hive",
   "name": "SECURITY Hive",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "credential-access",
   "os": "Windows",
   "os_min": "Windows 2000 (present in all NT-based Windows versions)",
@@ -31,9 +31,6 @@
   ],
   "anti_forensic_notes": "The SECURITY hive has no SACL configured by default, so routine access to LSA Secrets (e.g. via Mimikatz lsadump::secrets) generates no Security event log entries unless an analyst has proactively set an audit SACL on the key beforehand (which then generates Event ID 4656/4663 on access). MSCache v2 (DCC2) hashes cannot be used in pass-the-hash attacks and only yield a plaintext password via offline cracking, so their mere presence indicates exposure risk rather than confirmed compromise.",
   "interpretation": "",
-  "category": [
-    "Registry Hives"
-  ],
   "related_artifacts": [
     "sam-hive",
     "system-hive"

@@ -1,7 +1,7 @@
 {
   "id": "computer-name",
   "name": "Computer Name",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "system-identification",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -27,9 +27,6 @@
   ],
   "anti_forensic_notes": "A rename only fully takes effect after reboot; comparing ComputerName\\ComputerName (pending/current) against ComputerName\\ActiveComputerName (in effect for the current session) can reveal a rename made but not yet completed at the time of acquisition, which is otherwise easy to miss if only one of the two subkeys is checked.",
   "interpretation": "Hostname can facilitate correlation of log data and other artifacts that reference the machine by name. Because the value only changes fully after a reboot, compare ActiveComputerName (current session) against ComputerName (pending/next-boot) to detect an in-progress or recent rename.",
-  "category": [
-    "System Information"
-  ],
   "related_artifacts": [
     "operating-system-version",
     "system-last-shutdown-time",

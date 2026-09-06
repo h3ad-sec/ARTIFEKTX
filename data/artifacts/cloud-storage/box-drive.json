@@ -1,7 +1,7 @@
 {
   "id": "box-drive",
   "name": "Box Drive",
-  "type": "file",
+  "category": "file",
   "subcategory": "cloud-storage",
   "os": "Windows",
   "os_min": "Windows 8",
@@ -30,9 +30,6 @@
   ],
   "anti_forensic_notes": "Because Box Drive implements its virtual filesystem as an NTFS reparse point rather than storing full file content locally by default, a directory listing of %USERPROFILE%\\Box does not by itself prove file content was ever present on disk - streemsfs.db and sync.db must be examined to establish what was actually cached versus cloud-only. Box_Streem log retention is typically limited to a few weeks, so older activity may not be recoverable from logs alone even though the metadata databases can retain longer history.",
   "interpretation": "streemsfs.db and sync.db together cover metadata for both locally cached and cloud-only files, including SHA1 hashes useful for confirming file identity independent of filename. If the virtual filesystem folder location is not obvious from the reparse point, search Box_Streem logs for the string \"logDriveInformation\" to recover it. Detailed usage logging is available but generally only spans a few weeks, so timely collection matters more here than with some other cloud-sync clients.",
-  "category": [
-    "Cloud Storage"
-  ],
   "related_artifacts": [
     "onedrive",
     "google-drive-desktop",

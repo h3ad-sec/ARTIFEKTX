@@ -1,7 +1,7 @@
 {
   "id": "system-boot-and-autostart-programs",
   "name": "System Boot & Autostart Programs",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "persistence",
   "os": "Windows",
   "os_min": "All Windows NT-based versions",
@@ -29,9 +29,6 @@
   ],
   "anti_forensic_notes": "This is not an exhaustive list of autorun locations — dozens of other registry and file-system locations can achieve autostart (see the dedicated `run-runonce-keys`, `services-persistence`, `startup-folders`, `ifeo-appinit`, and `wmi-event-subscription` artifacts for the more specific mechanisms this overview summarizes).",
   "interpretation": "Treat this as the summary/checklist view the SANS poster uses under its 'System Information' category; for the actual per-mechanism detail (exact registry paths, anomaly patterns, and anti-forensic notes specific to each autostart technique), use the dedicated artifacts it points to rather than treating this entry as complete on its own.",
-  "category": [
-    "System Information"
-  ],
   "related_artifacts": [
     "run-runonce-keys",
     "services-persistence",

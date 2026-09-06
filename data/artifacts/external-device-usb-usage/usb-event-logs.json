@@ -1,7 +1,7 @@
 {
   "id": "usb-event-logs",
   "name": "Event Logs (Removable Device)",
-  "type": "file",
+  "category": "file",
   "subcategory": "removable-media",
   "os": "Windows",
   "os_min": "Windows 7 (Security.evtx / System.evtx events); Windows 10 (Partition/Diagnostic.evtx Event ID 1006)",
@@ -33,9 +33,6 @@
   ],
   "anti_forensic_notes": "Security.evtx events (4663, 4656, 6416) are only generated if Object Access auditing for removable storage has been explicitly enabled via audit policy/GPO - their absence proves nothing about whether removable-device activity occurred, only that this auditing was not turned on. System.evtx PnP events (20001/20003) and the Windows 10+ Partition/Diagnostic 1006 event do not depend on that audit setting, making them a more reliable fallback when Security auditing is off; as with any .evtx, wholesale log clearing generates its own Security-log Event ID 1102 record.",
   "interpretation": "Security log events for removable storage are dependent on system audit settings being enabled - treat a lack of 4663/4656/6416 entries as inconclusive rather than as proof no device access occurred, and cross-check against the audit-independent System.evtx and Partition/Diagnostic.evtx channels.",
-  "category": [
-    "External Device/USB Usage"
-  ],
   "related_artifacts": [
     "usb-device-identification",
     "setupapi-devlog",

@@ -1,7 +1,7 @@
 {
   "id": "memory-code-injection",
   "name": "Injected Code / Process Hollowing Detection (Malfind)",
-  "type": "file",
+  "category": "file",
   "subcategory": "memory-forensics",
   "os": "Windows",
   "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
@@ -33,9 +33,6 @@
   ],
   "anti_forensic_notes": "malfind's detection logic depends on a specific, known-abusable protection/tag combination; malware authors aware of this commonly allocate memory as PAGE_READWRITE, write their payload, then call VirtualProtect to flip it to PAGE_EXECUTE_READ or PAGE_EXECUTE_WRITECOPY before execution, which removes the EXECUTE+WRITE combination malfind screens for and causes a false negative - a clean malfind result therefore does not rule out injection and should be paired with manual VAD review (windows.vadinfo) and cross-process handle/thread analysis (windows.handles, windows.threads) rather than trusted alone.",
   "interpretation": "",
-  "category": [
-    "Memory Forensics"
-  ],
   "related_artifacts": [
     "memory-process-list",
     "memory-network-connections",

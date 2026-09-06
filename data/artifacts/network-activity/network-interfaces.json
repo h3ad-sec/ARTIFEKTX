@@ -1,7 +1,7 @@
 {
   "id": "network-interfaces",
   "name": "Network Interfaces",
-  "type": "registry",
+  "category": "registry",
   "subcategory": "network-configuration",
   "os": "Windows",
   "os_min": "Windows XP",
@@ -27,9 +27,6 @@
   ],
   "anti_forensic_notes": "These keys retain each interface's last-known configuration and subkeys may hold some prior DHCP-lease data depending on how the adapter has been reconfigured over time, but this is not a guaranteed complete history - a removed or re-enumerated (new GUID) adapter's earlier configuration can be lost entirely.",
   "interpretation": "The Interfaces key includes the last known IP address plus DHCP and domain information for both physical and virtual adapters, and its subkeys may hold some historical network data. The NetworkCards key provides more descriptive detail on each adapter's availability. The two keys are mapped to each other via the interface GUID value. This is unlikely to represent a fully complete view of every network the host has ever connected to.",
-  "category": [
-    "Network Activity and Physical Location"
-  ],
   "related_artifacts": [
     "network-history",
     "wlan-event-log",

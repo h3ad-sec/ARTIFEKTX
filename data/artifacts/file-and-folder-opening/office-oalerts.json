@@ -1,7 +1,7 @@
 {
   "id": "office-oalerts",
   "name": "Office OAlerts",
-  "type": "file",
+  "category": "file",
   "subcategory": "application-activity",
   "os": "Windows",
   "os_min": "Windows Vista",
@@ -26,9 +26,6 @@
   "attack_techniques": [],
   "anti_forensic_notes": "As a standard Windows Event Log, OAlerts.evtx can be cleared wholesale via wevtutil or the Event Viewer UI, which itself generates a Security log clear-event (Event ID 1102) - correlating the two logs can reveal deliberate clearing. Because every Office application shares the single Event ID 300, the dialog message text is required to distinguish alert types; the ID alone is not diagnostic.",
   "interpretation": "All Office alert types share the same generic Event ID 300, so filtering on ID alone returns every kind of Office warning - the program name and message fields must be read together to determine what specific action (unsaved close, format warning, etc.) triggered a given entry.",
-  "category": [
-    "File and Folder Opening"
-  ],
   "related_artifacts": [
     "office-recent-files",
     "application-eventlog"
