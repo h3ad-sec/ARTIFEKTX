@@ -1,0 +1,32 @@
+{
+  "id": "wmi-event-subscription",
+  "name": "WMI Permanent Event Subscription",
+  "category": "file",
+  "subcategory": "persistence",
+  "os_min": "Windows XP (WMI infrastructure); technique common from Windows 7+",
+  "location": "CIM repository: C:\\Windows\\System32\\wbem\\Repository\\OBJECTS.DATA (root\\subscription namespace: __EventFilter, __EventConsumer, __FilterToConsumerBinding)",
+  "purpose": "Lets code execute automatically when a defined WMI event occurs (e.g. process start, time, logon), providing fileless, reboot-surviving persistence.",
+  "key_fields": [
+    "__EventFilter (Query, QueryLanguage - WQL)",
+    "__EventConsumer (CommandLineTemplate or ScriptText)",
+    "__FilterToConsumerBinding (links filter to consumer)"
+  ],
+  "normal_baseline": "Subscriptions correspond to known monitoring/management software (SCCM, AV agents); a subscription is only active when filter, consumer, and binding all exist.",
+  "anomalies": [
+    "CommandLineEventConsumer or ActiveScriptEventConsumer with an unrecognized command or obfuscated script",
+    "wmic.exe or mofcomp.exe process creating filter/consumer objects"
+  ],
+  "parsing_tools": [
+    "PyWMIPersistenceFinder",
+    "python-cim / Get-WmiObject",
+    "KAPE (WMI repository collection)"
+  ],
+  "attack_techniques": [
+    "T1546.003",
+    "T1047"
+  ],
+  "anti_forensic_notes": "Leaves no on-disk executable if using a script consumer, making it a favored fileless technique; corroborate with Microsoft-Windows-WMI-Activity/Operational Event ID 5861 and Sysmon Event IDs 19/20/21 for a live-log view of when it was installed or fired.",
+  "related_artifacts": [
+    "sysmon"
+  ]
+}

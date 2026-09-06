@@ -1,6 +1,6 @@
 {
-  "generated": "2026-09-05T01:19:36.602694Z",
-  "count": 25,
+  "generated": "2026-09-06T05:28:44.470278+00:00",
+  "count": 42,
   "artifacts": [
     {
       "id": "ntuser-dat-hive",
@@ -379,6 +379,99 @@
       "file": "data/artifacts/execution/shimcache.json"
     },
     {
+      "id": "srum",
+      "name": "SRUM (System Resource Usage Monitor)",
+      "category": "file",
+      "subcategory": "execution-evidence",
+      "os_min": "Windows 8",
+      "location": "C:\\Windows\\System32\\sru\\SRUDB.dat (ESE/EDB database)",
+      "purpose": "Tracks application execution, CPU/network resource usage, and per-app network data volume over time, written hourly and at shutdown.",
+      "key_fields": [
+        "ApplicationName (full path)",
+        "Timestamp",
+        "BytesSent/BytesRecvd",
+        "UserSID"
+      ],
+      "normal_baseline": "Reflects normal application and network usage; retention commonly cited as 30-60 days depending on configuration.",
+      "anomalies": [
+        "Large BytesSent volume from an unexpected application, indicating possible exfiltration",
+        "Execution record for an application with no matching Prefetch/Amcache entry"
+      ],
+      "parsing_tools": [
+        "SRUM-DUMP (Mark Baggett)",
+        "KAPE + SRUM module"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "SRUDB.dat can be deleted directly and Windows will recreate an empty one at next write, so a suspiciously short-lived SRUM history around an incident is itself a signal.",
+      "related_artifacts": [
+        "prefetch"
+      ],
+      "group": "execution",
+      "file": "data/artifacts/execution/srum.json"
+    },
+    {
+      "id": "jump-lists",
+      "name": "Jump Lists",
+      "category": "file",
+      "subcategory": "user-activity",
+      "os_min": "Windows 7",
+      "location": "AutomaticDestinations: %AppData%\\Microsoft\\Windows\\Recent\\AutomaticDestinations\\<AppID>.automaticDestinations-ms; CustomDestinations: \\CustomDestinations\\<AppID>.customDestinations-ms",
+      "purpose": "Tracks recently/frequently accessed files per application via embedded shell-link data, providing file-access evidence even for files later deleted.",
+      "key_fields": [
+        "Target file path",
+        "AppID (identifies the application)",
+        "Access/pin count and recency (DestList MRU)"
+      ],
+      "normal_baseline": "Entries correspond to files the user is known to have opened with the associated application.",
+      "anomalies": [
+        "Entries referencing files on removable/network shares with no current device",
+        "Target file path pointing to a staging or exfiltration directory"
+      ],
+      "parsing_tools": [
+        "JLECmd (Eric Zimmerman)",
+        "JumpList Explorer (Eric Zimmerman)"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "The referenced file does not need to still exist for the Jump List entry to remain, aiding recovery after deletion; can be individually pruned via 'Remove from this list'.",
+      "related_artifacts": [
+        "usrclass-dat-hive",
+        "lnk-files"
+      ],
+      "group": "user-activity",
+      "file": "data/artifacts/user-activity/jump-lists.json"
+    },
+    {
+      "id": "lnk-files",
+      "name": "LNK (Shortcut) Files",
+      "category": "file",
+      "subcategory": "user-activity",
+      "os_min": "Windows 95",
+      "location": "%AppData%\\Microsoft\\Windows\\Recent\\ and Desktop/Start Menu locations",
+      "purpose": "Auto-created shortcuts to recently opened files/folders, encoding target path, volume serial, and MAC timestamps of the target at time of access.",
+      "key_fields": [
+        "Target full path",
+        "Volume serial number",
+        "TrackerDataBlock (machine ID / MAC address)",
+        "Target MAC timestamps embedded at creation"
+      ],
+      "normal_baseline": "Shortcuts correspond to documents/programs the user has opened, consistent with normal work patterns.",
+      "anomalies": [
+        "LNK pointing to a target on removable media matching an unauthorized USBSTOR entry",
+        "LNK referencing a file staged in a temp/exfil directory"
+      ],
+      "parsing_tools": [
+        "LECmd (Eric Zimmerman)"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "Persists after the target file is deleted, preserving path and volume evidence; the TrackerDataBlock MAC address can help attribute the originating machine when a file was moved across systems.",
+      "related_artifacts": [
+        "jump-lists",
+        "usrclass-dat-hive"
+      ],
+      "group": "user-activity",
+      "file": "data/artifacts/user-activity/lnk-files.json"
+    },
+    {
       "id": "recentdocs",
       "name": "RecentDocs",
       "category": "registry",
@@ -689,6 +782,39 @@
       "file": "data/artifacts/filesystem/mft.json"
     },
     {
+      "id": "motw-zone-identifier",
+      "name": "Zone.Identifier ADS (Mark of the Web)",
+      "category": "file",
+      "subcategory": "provenance",
+      "os_min": "Introduced with Internet Explorer; ADS format standardized further by Windows 10",
+      "location": "Alternate Data Stream on the downloaded file: <filename>:Zone.Identifier:$DATA",
+      "purpose": "Marks files originating from the internet (or other untrusted zones) so Windows/Office apply extra security prompts (Protected View, SmartScreen).",
+      "key_fields": [
+        "ZoneId (0=Local Machine, 1=Intranet, 2=Trusted Sites, 3=Internet, 4=Untrusted)",
+        "ReferrerUrl",
+        "HostUrl",
+        "HostIpAddress (Windows 10+)"
+      ],
+      "normal_baseline": "Downloaded files carry ZoneId=3 with a HostUrl matching a known, expected source.",
+      "anomalies": [
+        "Executable or script with ZoneId=3 and a HostUrl pointing to a known malicious-tool distribution or paste site",
+        "MOTW-bearing file with the Unblock checkbox cleared shortly before execution, indicating deliberate bypass"
+      ],
+      "parsing_tools": [
+        "PowerShell Get-Item -Stream Zone.Identifier",
+        "dir /r (legacy) or forensic ADS-aware tools (FTK Imager, X-Ways)"
+      ],
+      "attack_techniques": [
+        "T1553.005"
+      ],
+      "anti_forensic_notes": "Transferring a file to/from a non-NTFS filesystem (FAT32, network transfer that doesn't preserve ADS, or extraction from certain archive formats) strips the ADS and the mark along with it, so its absence does not prove local origin.",
+      "related_artifacts": [
+        "browser-downloads-session"
+      ],
+      "group": "filesystem",
+      "file": "data/artifacts/filesystem/motw-zone-identifier.json"
+    },
+    {
       "id": "recycle-bin",
       "name": "Recycle Bin ($Recycle.Bin)",
       "category": "file",
@@ -808,6 +934,67 @@
       "file": "data/artifacts/filesystem/volume-shadow-copies.json"
     },
     {
+      "id": "application-eventlog",
+      "name": "Application.evtx",
+      "category": "file",
+      "subcategory": "application-activity",
+      "os_min": "Windows XP / Server 2003",
+      "location": "%SystemRoot%\\System32\\Winevt\\Logs\\Application.evtx",
+      "purpose": "Records application-generated events including crashes, installer errors, and some AV/EDR product logging.",
+      "key_fields": [
+        "Event ID (application-specific)",
+        "Source application",
+        "Error/warning description"
+      ],
+      "normal_baseline": "Occasional application crash/error entries consistent with normal software instability.",
+      "anomalies": [
+        "Crash entries for a security product coinciding with an incident timeframe",
+        "Installer entries for unrecognized software"
+      ],
+      "parsing_tools": [
+        "Event Viewer",
+        "EvtxECmd (Eric Zimmerman)"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "Lower signal-to-noise than Security/System logs for security investigations; useful mainly to corroborate AV/EDR crash-based defense evasion.",
+      "related_artifacts": [
+        "security-eventlog"
+      ],
+      "group": "eventlogs",
+      "file": "data/artifacts/eventlogs/application-eventlog.json"
+    },
+    {
+      "id": "defender-eventlog",
+      "name": "Windows Defender Operational Log",
+      "category": "file",
+      "subcategory": "detection-evidence",
+      "os_min": "Windows 8 / Windows Defender",
+      "location": "%SystemRoot%\\System32\\Winevt\\Logs\\Microsoft-Windows-Windows Defender%4Operational.evtx",
+      "purpose": "Records Defender detections, remediation actions, and Attack Surface Reduction (ASR) rule activity.",
+      "key_fields": [
+        "Event ID 1116 (detection), 1117 (action taken)",
+        "Threat/signature name",
+        "File path",
+        "ASR rule Event IDs 1121-1134"
+      ],
+      "normal_baseline": "Occasional benign PUA detections consistent with normal software use; ASR audit events for known, tuned exceptions.",
+      "anomalies": [
+        "1116/1117 detection for a known offensive tool followed by no corresponding removal confirmation",
+        "ASR block (112x series) for a LOLBin invocation"
+      ],
+      "parsing_tools": [
+        "Event Viewer",
+        "EvtxECmd (Eric Zimmerman)"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "A detected-and-quarantined threat still generates a 1116/1117 record even if the file itself is gone, making this log valuable when malware self-deletes; excluded paths configured via GPO produce no detection at all.",
+      "related_artifacts": [
+        "application-eventlog"
+      ],
+      "group": "eventlogs",
+      "file": "data/artifacts/eventlogs/defender-eventlog.json"
+    },
+    {
       "id": "powershell-operational",
       "name": "PowerShell Operational Log",
       "category": "file",
@@ -848,6 +1035,40 @@
       ],
       "group": "eventlogs",
       "file": "data/artifacts/eventlogs/powershell-operational.json"
+    },
+    {
+      "id": "rdp-eventlogs",
+      "name": "RDP / TerminalServices Event Logs",
+      "category": "file",
+      "subcategory": "logon-activity",
+      "os_min": "Windows Vista / Server 2008 (channel structure); RDP itself much older",
+      "location": "Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx (pre-auth connection); Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx (session lifecycle); plus Security.evtx",
+      "purpose": "Records the network-connection, authentication, and session-lifecycle stages of RDP activity across three separate log channels.",
+      "key_fields": [
+        "Event ID 1149 (network authentication succeeded, RemoteConnectionManager)",
+        "Event ID 21/22/23/24/25 (session logon/shell start/disconnect/reconnect, LocalSessionManager)",
+        "Event ID 4624/4625 with Logon Type 10 or 7 (Security)"
+      ],
+      "normal_baseline": "RDP sessions correspond to known admin jump-box or remote-work sources at expected times.",
+      "anomalies": [
+        "1149 events from unfamiliar source IPs",
+        "Session Event ID 25 (reconnect) shortly after an unexplained disconnect",
+        "4625 failures preceding a successful 4624/1149 pair (possible brute force then success)"
+      ],
+      "parsing_tools": [
+        "Event Viewer",
+        "EvtxECmd (Eric Zimmerman)",
+        "PowerShell Get-WinEvent -FilterHashtable"
+      ],
+      "attack_techniques": [
+        "T1021.001"
+      ],
+      "anti_forensic_notes": "1149's description ('User authentication succeeded') is misleading, it reflects successful network-level authentication, not a completed interactive logon; correlating across all three channels (within about 1 minute tolerance) is needed for a complete session timeline.",
+      "related_artifacts": [
+        "security-eventlog"
+      ],
+      "group": "eventlogs",
+      "file": "data/artifacts/eventlogs/rdp-eventlogs.json"
     },
     {
       "id": "security-eventlog",
@@ -1008,6 +1229,331 @@
       ],
       "group": "eventlogs",
       "file": "data/artifacts/eventlogs/system-eventlog.json"
+    },
+    {
+      "id": "ifeo-appinit",
+      "name": "Image File Execution Options / AppInit_DLLs",
+      "category": "registry",
+      "subcategory": "persistence",
+      "os_min": "Windows Vista (IFEO Debugger abuse formalized); AppInit_DLLs from Windows NT",
+      "location": "HKLM\\SOFTWARE{\\Wow6432Node}\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\<executable>\\Debugger; AppInit_DLLs at HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows",
+      "purpose": "IFEO Debugger value causes a specified debugger/program to launch in place of (or before) the target executable; AppInit_DLLs forces a DLL to load into every process that loads user32.dll.",
+      "key_fields": [
+        "Debugger value under an executable's IFEO key",
+        "SilentProcessExit\\MonitorProcess value",
+        "AppInit_DLLs value list"
+      ],
+      "normal_baseline": "IFEO keys typically empty or used only by legitimate debugging/compatibility tooling; AppInit_DLLs typically empty on modern systems (deprecated with secure boot).",
+      "anomalies": [
+        "Debugger value attached to an accessibility or security-tool binary (e.g. utilman.exe, taskmgr.exe)",
+        "AppInit_DLLs pointing to an unsigned DLL in a user-writable path"
+      ],
+      "parsing_tools": [
+        "Autoruns (Sysinternals)",
+        "Registry Explorer (Eric Zimmerman)"
+      ],
+      "attack_techniques": [
+        "T1546.012"
+      ],
+      "anti_forensic_notes": "IFEO abuse can double as defense evasion by attaching an invalid or crashing debugger to security tools, silently disabling them.",
+      "related_artifacts": [
+        "software-hive"
+      ],
+      "group": "persistence",
+      "file": "data/artifacts/persistence/ifeo-appinit.json"
+    },
+    {
+      "id": "run-runonce-keys",
+      "name": "Run / RunOnce Registry Keys",
+      "category": "registry",
+      "subcategory": "persistence",
+      "os_min": "Windows NT 4.0",
+      "location": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run(Once) and HKCU (NTUSER.DAT) equivalents",
+      "purpose": "Machine-wide or per-user autostart mechanism executing listed commands at logon/boot.",
+      "key_fields": [
+        "Value name",
+        "Command/executable path",
+        "Key (machine vs. user)"
+      ],
+      "normal_baseline": "Entries match known startup agents (AV, cloud sync clients, drivers).",
+      "anomalies": [
+        "Entry pointing to a script interpreter with an encoded argument",
+        "New entry in a user-writable path added outside a software install event"
+      ],
+      "parsing_tools": [
+        "RegRipper (H. Carvey)",
+        "Autoruns (Sysinternals)"
+      ],
+      "attack_techniques": [
+        "T1547.001"
+      ],
+      "anti_forensic_notes": "Trivially removed by deleting the value; correlate against SOFTWARE/NTUSER.DAT hive backups (RegBack) to detect since-deleted entries.",
+      "related_artifacts": [
+        "software-hive",
+        "ntuser-dat-hive"
+      ],
+      "group": "persistence",
+      "file": "data/artifacts/persistence/run-runonce-keys.json"
+    },
+    {
+      "id": "scheduled-tasks",
+      "name": "Scheduled Tasks",
+      "category": "file",
+      "subcategory": "persistence",
+      "os_min": "Windows Vista (XML tasks); legacy .job on XP",
+      "location": "C:\\Windows\\System32\\Tasks\\<TaskName> (XML); registry mirror at HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tree and \\Tasks",
+      "purpose": "Defines actions executed on a schedule or trigger (logon, event, time); a common legitimate and malicious persistence mechanism.",
+      "key_fields": [
+        "Action command/arguments",
+        "Trigger definition",
+        "Author/principal (execution context)",
+        "Task creation/last-run time"
+      ],
+      "normal_baseline": "Tasks correspond to installed software's update/maintenance routines and OS-native scheduled maintenance.",
+      "anomalies": [
+        "Action node pointing to Temp/AppData with base64-encoded PowerShell arguments",
+        "Suspicious repetition interval (e.g. every few minutes)",
+        "Task registered without a corresponding Security 4698 event, suggesting log gaps or non-standard creation (e.g. direct XML drop)"
+      ],
+      "parsing_tools": [
+        "Autoruns (Sysinternals)",
+        "TaskScheduler view + PECmd/Registry Explorer for TaskCache"
+      ],
+      "attack_techniques": [
+        "T1053.005"
+      ],
+      "anti_forensic_notes": "TaskCache registry entries can persist under \\Tasks\\{GUID} even after the XML file is deleted, useful for timeline reconstruction. Event IDs 4698/4699 require Object Access auditing to be enabled, which many environments lack by default.",
+      "related_artifacts": [
+        "security-eventlog"
+      ],
+      "group": "persistence",
+      "file": "data/artifacts/persistence/scheduled-tasks.json"
+    },
+    {
+      "id": "services-persistence",
+      "name": "Windows Services (Persistence)",
+      "category": "registry",
+      "subcategory": "persistence",
+      "os_min": "Windows NT 4.0",
+      "location": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\<ServiceName> (ImagePath, Start, ServiceDll for svchost-hosted)",
+      "purpose": "Services configured with Start=2 (auto) or 3 (demand) launch at boot or on demand, commonly abused for SYSTEM-level persistence.",
+      "key_fields": [
+        "ImagePath",
+        "Start type",
+        "ServiceDll (for svchost-hosted services)",
+        "ObjectName (run-as account)"
+      ],
+      "normal_baseline": "Services correspond to installed hardware drivers and legitimate software.",
+      "anomalies": [
+        "ImagePath pointing to a non-standard directory",
+        "svchost-hosted service with an unrecognized ServiceDll",
+        "Service created shortly before/after other IOC timestamps"
+      ],
+      "parsing_tools": [
+        "Autoruns (Sysinternals)",
+        "RegRipper (H. Carvey)"
+      ],
+      "attack_techniques": [
+        "T1543.003"
+      ],
+      "anti_forensic_notes": "Services can be created/deleted quickly with sc.exe; correlate with Security event 4697/7045 (System log) for creation evidence when auditing is enabled.",
+      "related_artifacts": [
+        "system-hive",
+        "system-eventlog"
+      ],
+      "group": "persistence",
+      "file": "data/artifacts/persistence/services-persistence.json"
+    },
+    {
+      "id": "startup-folders",
+      "name": "Startup Folders",
+      "category": "file",
+      "subcategory": "persistence",
+      "os_min": "Windows NT 4.0",
+      "location": "%AppData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup (per-user) and %ProgramData%\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp (all-users)",
+      "purpose": "Any shortcut or executable placed here launches automatically at user logon.",
+      "key_fields": [
+        "File/shortcut name",
+        "Target path (if LNK)",
+        "Creation/modification timestamp of the item"
+      ],
+      "normal_baseline": "Contains only shortcuts placed by legitimate software installers.",
+      "anomalies": [
+        "Unrecognized script or executable dropped directly into the folder",
+        "LNK target pointing to a scripting interpreter with suspicious arguments"
+      ],
+      "parsing_tools": [
+        "Autoruns (Sysinternals)",
+        "manual file listing / KAPE"
+      ],
+      "attack_techniques": [
+        "T1547.001"
+      ],
+      "anti_forensic_notes": "Trivially removed by deleting the file; file-system timestamps on the item itself (not just its LNK target) can help date when persistence was planted.",
+      "related_artifacts": [
+        "lnk-files"
+      ],
+      "group": "persistence",
+      "file": "data/artifacts/persistence/startup-folders.json"
+    },
+    {
+      "id": "wmi-event-subscription",
+      "name": "WMI Permanent Event Subscription",
+      "category": "file",
+      "subcategory": "persistence",
+      "os_min": "Windows XP (WMI infrastructure); technique common from Windows 7+",
+      "location": "CIM repository: C:\\Windows\\System32\\wbem\\Repository\\OBJECTS.DATA (root\\subscription namespace: __EventFilter, __EventConsumer, __FilterToConsumerBinding)",
+      "purpose": "Lets code execute automatically when a defined WMI event occurs (e.g. process start, time, logon), providing fileless, reboot-surviving persistence.",
+      "key_fields": [
+        "__EventFilter (Query, QueryLanguage - WQL)",
+        "__EventConsumer (CommandLineTemplate or ScriptText)",
+        "__FilterToConsumerBinding (links filter to consumer)"
+      ],
+      "normal_baseline": "Subscriptions correspond to known monitoring/management software (SCCM, AV agents); a subscription is only active when filter, consumer, and binding all exist.",
+      "anomalies": [
+        "CommandLineEventConsumer or ActiveScriptEventConsumer with an unrecognized command or obfuscated script",
+        "wmic.exe or mofcomp.exe process creating filter/consumer objects"
+      ],
+      "parsing_tools": [
+        "PyWMIPersistenceFinder",
+        "python-cim / Get-WmiObject",
+        "KAPE (WMI repository collection)"
+      ],
+      "attack_techniques": [
+        "T1546.003",
+        "T1047"
+      ],
+      "anti_forensic_notes": "Leaves no on-disk executable if using a script consumer, making it a favored fileless technique; corroborate with Microsoft-Windows-WMI-Activity/Operational Event ID 5861 and Sysmon Event IDs 19/20/21 for a live-log view of when it was installed or fired.",
+      "related_artifacts": [
+        "sysmon"
+      ],
+      "group": "persistence",
+      "file": "data/artifacts/persistence/wmi-event-subscription.json"
+    },
+    {
+      "id": "browser-downloads-session",
+      "name": "Browser Downloads History and Session Restore",
+      "category": "file",
+      "subcategory": "browser-artifact",
+      "os_min": "N/A (application-level)",
+      "location": "Chrome/Edge: History.downloads table in the profile folder; Firefox: downloads recorded via moz_annos in places.sqlite (or separate downloads.sqlite on older versions)",
+      "purpose": "Records files downloaded through the browser (source URL, save path, timestamp) and, via session-restore files, the set of tabs/windows open at last shutdown or crash.",
+      "key_fields": [
+        "Download source URL",
+        "Local save path",
+        "Download start/end time",
+        "Session-restore tab URLs"
+      ],
+      "normal_baseline": "Downloads correspond to work-related documents/installers from known sources.",
+      "anomalies": [
+        "Download from a known malicious-tool distribution site or file-sharing service immediately preceding execution evidence for the same file",
+        "Session-restore tabs referencing an exfiltration or C2 panel URL"
+      ],
+      "parsing_tools": [
+        "Hindsight",
+        "BrowsingHistoryView (Nirsoft)"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "Downloads table entries can be cleared alongside general history clearing; the downloaded file itself, if kept, will separately carry Zone.Identifier MOTW evidence of its origin.",
+      "related_artifacts": [
+        "chrome-edge-browser-artifacts",
+        "motw-zone-identifier"
+      ],
+      "group": "browser",
+      "file": "data/artifacts/browser/browser-downloads-session.json"
+    },
+    {
+      "id": "browser-extension-ids",
+      "name": "Browser Extension IDs / Manifests",
+      "category": "file",
+      "subcategory": "browser-artifact",
+      "os_min": "N/A (application-level)",
+      "location": "Chrome/Edge: User Data\\Default\\Extensions\\<extension-id>\\<version>\\manifest.json; Preferences JSON also lists installed extension IDs",
+      "purpose": "Identifies browser extensions installed for a profile, including sideloaded/unpacked extensions not from an official store.",
+      "key_fields": [
+        "Extension ID",
+        "manifest.json (name, permissions, version)",
+        "Install source (webstore vs. unpacked)"
+      ],
+      "normal_baseline": "Extension list matches the organization's approved/allow-listed set.",
+      "anomalies": [
+        "Unpacked/developer-mode extension with broad host permissions (e.g. <all_urls>)",
+        "Extension ID not present in the official store, suggesting sideloading for credential theft or session hijacking"
+      ],
+      "parsing_tools": [
+        "Manual manifest.json review",
+        "Hindsight (extension parsing)"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "Removing an extension deletes its folder; the Preferences JSON's extension history or sync data may retain remnants briefly after removal.",
+      "related_artifacts": [
+        "chrome-edge-browser-artifacts"
+      ],
+      "group": "browser",
+      "file": "data/artifacts/browser/browser-extension-ids.json"
+    },
+    {
+      "id": "chrome-edge-browser-artifacts",
+      "name": "Chrome / Edge (Chromium) Browser Artifacts",
+      "category": "file",
+      "subcategory": "browser-artifact",
+      "os_min": "N/A (application-level)",
+      "location": "C:\\Users\\<user>\\AppData\\Local\\Google\\Chrome\\User Data\\Default (Chrome) or \\Microsoft\\Edge\\User Data\\Default (Edge); History, Login Data, Web Data, Cookies (under Network\\), Bookmarks, Preferences",
+      "purpose": "SQLite databases and JSON files recording browsing history, downloads, saved logins, autofill, and cookies.",
+      "key_fields": [
+        "History.urls / History.downloads tables",
+        "Login Data.logins table",
+        "Web Data.autofill table",
+        "Cookies (Network\\Cookies) table"
+      ],
+      "normal_baseline": "History reflects normal work-related browsing; Login Data contains credentials for known, approved services.",
+      "anomalies": [
+        "History entries for known malicious-tool download sites or paste sites shortly before an incident",
+        "Downloads entry for a payload matching a known hash",
+        "Unexpected extension IDs not present in the organization's approved list"
+      ],
+      "parsing_tools": [
+        "Hindsight",
+        "DB Browser for SQLite",
+        "Magnet AXIOM / Belkasoft (commercial)"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "Clearing browsing history removes rows from the SQLite tables but does not necessarily overwrite the underlying file pages, so carving deleted SQLite records can sometimes recover cleared history.",
+      "related_artifacts": [
+        "firefox-browser-artifacts"
+      ],
+      "group": "browser",
+      "file": "data/artifacts/browser/chrome-edge-browser-artifacts.json"
+    },
+    {
+      "id": "firefox-browser-artifacts",
+      "name": "Firefox Browser Artifacts",
+      "category": "file",
+      "subcategory": "browser-artifact",
+      "os_min": "N/A (application-level)",
+      "location": "C:\\Users\\<user>\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\<profile>\\ ; places.sqlite (history/bookmarks), cookies.sqlite, formhistory.sqlite, logins.json + key4.db (saved passwords)",
+      "purpose": "Stores browsing history, bookmarks, cookies, form autofill history, and encrypted saved logins in per-profile SQLite/JSON files.",
+      "key_fields": [
+        "moz_places / moz_historyvisits tables (URL, visit_date, visit_count)",
+        "moz_bookmarks",
+        "logins.json encrypted credential entries"
+      ],
+      "normal_baseline": "History reflects normal work-related browsing patterns for the profile owner.",
+      "anomalies": [
+        "History entries for malicious-tool or paste-site domains",
+        "A profile folder present with no corresponding profiles.ini entry, suggesting a portable/hidden profile"
+      ],
+      "parsing_tools": [
+        "BrowsingHistoryView (Nirsoft)",
+        "DB Browser for SQLite"
+      ],
+      "attack_techniques": [],
+      "anti_forensic_notes": "Deleting the whole profile folder removes all Firefox artifacts at once; profile folder can be copied off intact even after the browser is closed, as recommended by Mozilla for backups.",
+      "related_artifacts": [
+        "chrome-edge-browser-artifacts"
+      ],
+      "group": "browser",
+      "file": "data/artifacts/browser/firefox-browser-artifacts.json"
     }
   ]
 }

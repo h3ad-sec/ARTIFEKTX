@@ -1,0 +1,29 @@
+{
+  "id": "lnk-files",
+  "name": "LNK (Shortcut) Files",
+  "category": "file",
+  "subcategory": "user-activity",
+  "os_min": "Windows 95",
+  "location": "%AppData%\\Microsoft\\Windows\\Recent\\ and Desktop/Start Menu locations",
+  "purpose": "Auto-created shortcuts to recently opened files/folders, encoding target path, volume serial, and MAC timestamps of the target at time of access.",
+  "key_fields": [
+    "Target full path",
+    "Volume serial number",
+    "TrackerDataBlock (machine ID / MAC address)",
+    "Target MAC timestamps embedded at creation"
+  ],
+  "normal_baseline": "Shortcuts correspond to documents/programs the user has opened, consistent with normal work patterns.",
+  "anomalies": [
+    "LNK pointing to a target on removable media matching an unauthorized USBSTOR entry",
+    "LNK referencing a file staged in a temp/exfil directory"
+  ],
+  "parsing_tools": [
+    "LECmd (Eric Zimmerman)"
+  ],
+  "attack_techniques": [],
+  "anti_forensic_notes": "Persists after the target file is deleted, preserving path and volume evidence; the TrackerDataBlock MAC address can help attribute the originating machine when a file was moved across systems.",
+  "related_artifacts": [
+    "jump-lists",
+    "usrclass-dat-hive"
+  ]
+}

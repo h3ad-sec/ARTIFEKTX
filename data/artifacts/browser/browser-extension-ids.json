@@ -1,0 +1,28 @@
+{
+  "id": "browser-extension-ids",
+  "name": "Browser Extension IDs / Manifests",
+  "category": "file",
+  "subcategory": "browser-artifact",
+  "os_min": "N/A (application-level)",
+  "location": "Chrome/Edge: User Data\\Default\\Extensions\\<extension-id>\\<version>\\manifest.json; Preferences JSON also lists installed extension IDs",
+  "purpose": "Identifies browser extensions installed for a profile, including sideloaded/unpacked extensions not from an official store.",
+  "key_fields": [
+    "Extension ID",
+    "manifest.json (name, permissions, version)",
+    "Install source (webstore vs. unpacked)"
+  ],
+  "normal_baseline": "Extension list matches the organization's approved/allow-listed set.",
+  "anomalies": [
+    "Unpacked/developer-mode extension with broad host permissions (e.g. <all_urls>)",
+    "Extension ID not present in the official store, suggesting sideloading for credential theft or session hijacking"
+  ],
+  "parsing_tools": [
+    "Manual manifest.json review",
+    "Hindsight (extension parsing)"
+  ],
+  "attack_techniques": [],
+  "anti_forensic_notes": "Removing an extension deletes its folder; the Preferences JSON's extension history or sync data may retain remnants briefly after removal.",
+  "related_artifacts": [
+    "chrome-edge-browser-artifacts"
+  ]
+}

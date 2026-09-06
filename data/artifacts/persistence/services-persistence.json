@@ -1,0 +1,33 @@
+{
+  "id": "services-persistence",
+  "name": "Windows Services (Persistence)",
+  "category": "registry",
+  "subcategory": "persistence",
+  "os_min": "Windows NT 4.0",
+  "location": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\<ServiceName> (ImagePath, Start, ServiceDll for svchost-hosted)",
+  "purpose": "Services configured with Start=2 (auto) or 3 (demand) launch at boot or on demand, commonly abused for SYSTEM-level persistence.",
+  "key_fields": [
+    "ImagePath",
+    "Start type",
+    "ServiceDll (for svchost-hosted services)",
+    "ObjectName (run-as account)"
+  ],
+  "normal_baseline": "Services correspond to installed hardware drivers and legitimate software.",
+  "anomalies": [
+    "ImagePath pointing to a non-standard directory",
+    "svchost-hosted service with an unrecognized ServiceDll",
+    "Service created shortly before/after other IOC timestamps"
+  ],
+  "parsing_tools": [
+    "Autoruns (Sysinternals)",
+    "RegRipper (H. Carvey)"
+  ],
+  "attack_techniques": [
+    "T1543.003"
+  ],
+  "anti_forensic_notes": "Services can be created/deleted quickly with sc.exe; correlate with Security event 4697/7045 (System log) for creation evidence when auditing is enabled.",
+  "related_artifacts": [
+    "system-hive",
+    "system-eventlog"
+  ]
+}

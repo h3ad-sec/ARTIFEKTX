@@ -26,6 +26,7 @@
   --mono:'Share Tech Mono',monospace;--ui:'IBM Plex Sans',sans-serif;--fs-xs:11px;
   --grp-registry:#58a6ff;--grp-execution:#00d4ff;--grp-user-activity:#a855f7;
   --grp-filesystem:#f59e0b;--grp-eventlogs:#06b6d4;
+  --grp-persistence:#6366f1;--grp-browser:#ec4899;
 }
 body.light{
   --bg:#eef2f8;--panel:#ffffff;--panel-alt:#e4ecf6;--surface:#ccd8ec;
@@ -117,6 +118,8 @@ body.light .filter-search:focus{box-shadow:0 0 0 2px rgba(2,132,199,.12);}
 .filter-pill[data-group="user-activity"].active{color:var(--grp-user-activity);border-color:color-mix(in srgb, var(--grp-user-activity) 30%, transparent);background:color-mix(in srgb, var(--grp-user-activity) 8%, transparent);}
 .filter-pill[data-group="filesystem"].active{color:var(--grp-filesystem);border-color:color-mix(in srgb, var(--grp-filesystem) 30%, transparent);background:color-mix(in srgb, var(--grp-filesystem) 8%, transparent);}
 .filter-pill[data-group="eventlogs"].active{color:var(--grp-eventlogs);border-color:color-mix(in srgb, var(--grp-eventlogs) 30%, transparent);background:color-mix(in srgb, var(--grp-eventlogs) 8%, transparent);}
+.filter-pill[data-group="persistence"].active{color:var(--grp-persistence);border-color:color-mix(in srgb, var(--grp-persistence) 30%, transparent);background:color-mix(in srgb, var(--grp-persistence) 8%, transparent);}
+.filter-pill[data-group="browser"].active{color:var(--grp-browser);border-color:color-mix(in srgb, var(--grp-browser) 30%, transparent);background:color-mix(in srgb, var(--grp-browser) 8%, transparent);}
 .fp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 .fp-name{flex:1;}
 .fp-count{font-size:9px;color:var(--muted-dim);}
@@ -136,6 +139,8 @@ body.light .filter-search:focus{box-shadow:0 0 0 2px rgba(2,132,199,.12);}
   .mobile-filter .filter-pill[data-group="user-activity"].active{color:var(--grp-user-activity);border-bottom-color:var(--grp-user-activity);}
   .mobile-filter .filter-pill[data-group="filesystem"].active{color:var(--grp-filesystem);border-bottom-color:var(--grp-filesystem);}
   .mobile-filter .filter-pill[data-group="eventlogs"].active{color:var(--grp-eventlogs);border-bottom-color:var(--grp-eventlogs);}
+  .mobile-filter .filter-pill[data-group="persistence"].active{color:var(--grp-persistence);border-bottom-color:var(--grp-persistence);}
+  .mobile-filter .filter-pill[data-group="browser"].active{color:var(--grp-browser);border-bottom-color:var(--grp-browser);}
 }
 
 /* ── Grid + cards ── */
@@ -411,7 +416,9 @@ var GROUPS=[
   {id:'execution',label:'EXECUTION EVIDENCE',color:'var(--grp-execution)'},
   {id:'user-activity',label:'USER ACTIVITY',color:'var(--grp-user-activity)'},
   {id:'filesystem',label:'FILESYSTEM',color:'var(--grp-filesystem)'},
-  {id:'eventlogs',label:'EVENT LOGS',color:'var(--grp-eventlogs)'}
+  {id:'eventlogs',label:'EVENT LOGS',color:'var(--grp-eventlogs)'},
+  {id:'persistence',label:'PERSISTENCE',color:'var(--grp-persistence)'},
+  {id:'browser',label:'BROWSER',color:'var(--grp-browser)'}
 ];
 var allArtifacts=[];
 var activeGroup='all';

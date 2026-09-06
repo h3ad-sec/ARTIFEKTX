@@ -1,0 +1,32 @@
+{
+  "id": "scheduled-tasks",
+  "name": "Scheduled Tasks",
+  "category": "file",
+  "subcategory": "persistence",
+  "os_min": "Windows Vista (XML tasks); legacy .job on XP",
+  "location": "C:\\Windows\\System32\\Tasks\\<TaskName> (XML); registry mirror at HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tree and \\Tasks",
+  "purpose": "Defines actions executed on a schedule or trigger (logon, event, time); a common legitimate and malicious persistence mechanism.",
+  "key_fields": [
+    "Action command/arguments",
+    "Trigger definition",
+    "Author/principal (execution context)",
+    "Task creation/last-run time"
+  ],
+  "normal_baseline": "Tasks correspond to installed software's update/maintenance routines and OS-native scheduled maintenance.",
+  "anomalies": [
+    "Action node pointing to Temp/AppData with base64-encoded PowerShell arguments",
+    "Suspicious repetition interval (e.g. every few minutes)",
+    "Task registered without a corresponding Security 4698 event, suggesting log gaps or non-standard creation (e.g. direct XML drop)"
+  ],
+  "parsing_tools": [
+    "Autoruns (Sysinternals)",
+    "TaskScheduler view + PECmd/Registry Explorer for TaskCache"
+  ],
+  "attack_techniques": [
+    "T1053.005"
+  ],
+  "anti_forensic_notes": "TaskCache registry entries can persist under \\Tasks\\{GUID} even after the XML file is deleted, useful for timeline reconstruction. Event IDs 4698/4699 require Object Access auditing to be enabled, which many environments lack by default.",
+  "related_artifacts": [
+    "security-eventlog"
+  ]
+}
