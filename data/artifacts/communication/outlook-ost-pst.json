@@ -1,0 +1,39 @@
+{
+  "id": "outlook-ost-pst",
+  "name": "Outlook OST/PST Files",
+  "category": "file",
+  "subcategory": "communication-artifact",
+  "os_min": "Windows XP",
+  "location": "Classic Outlook cached-mode OST: %LOCALAPPDATA%\\Microsoft\\Outlook\\ (default since Outlook 2013/2016). PST: %USERPROFILE%\\Documents\\Outlook Files\\ (Outlook 2013+ default) or %LOCALAPPDATA%\\Microsoft\\Outlook\\ (legacy/upgraded profiles, hidden folder). Exact per-store paths are recorded in HKEY_CURRENT_USER\\Software\\Microsoft\\Office\\<version>\\Outlook\\Profiles\\<profile>\\9375CFF0413111d3B88A00104B2A6676\\<service>\\001f6700 (or similarly-named binary values) and in the legacy HKCU\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows Messaging Subsystem\\Profiles\\<profile> key. Note: the current \"New Outlook\" / Outlook for Windows (Monarch) client does not use the classic Cached Exchange Mode/OST model for Exchange/M365 mailboxes - Microsoft does not document an equivalent user-accessible cache file path for it, so do not assume a New-Outlook mailbox has a parseable local OST.",
+  "purpose": "OST (Offline Storage Table) is a local, encrypted cache of an Exchange/IMAP mailbox used for offline access and cached mode sync; PST (Personal Storage Table) is a self-contained archive/local-delivery store an analyst can open independently of any server. Both are structured containers (folders, messages, contacts, calendar) and are frequently the single richest local source of a user's email history, including items the user believes were deleted from the server.",
+  "key_fields": [
+    "File header 'magic' bytes: PST files begin with the ASCII signature '!BDN'; both formats follow the Microsoft [MS-PST] structured-storage layout (B-tree-on-heap, node database) even though OST is not itself covered by a public Microsoft spec",
+    "PST content type flag distinguishes ANSI (pre-Outlook 2003, 2 GB practical size limit) from Unicode (Outlook 2003+, much larger limit) format variants, which affects which parsing tool/library version is required",
+    "Per-message MAPI properties, e.g. PR_SUBJECT, PR_SENDER_EMAIL_ADDRESS, PR_MESSAGE_DELIVERY_TIME, PR_TRANSPORT_MESSAGE_HEADERS (0x007D) - the raw internet header block including the Received chain, preserved even when the item is viewed only through Outlook's rendered UI",
+    "Folder hierarchy and per-folder message counts, including Deleted Items and Recoverable Items/Dumpster-equivalent folders inside the store itself",
+    "OST encryption cookie tying the file to the specific mailbox/profile that created it (a 'compressible encryption' or 'high encryption' substitution cipher per [MS-PST]), which is why an orphaned OST cannot be opened by Outlook without its originating profile",
+    "Attachment objects stored as embedded MAPI attachment streams, extractable independent of whether the parent message is still 'live' in the active view"
+  ],
+  "normal_baseline": "A single OST per configured Exchange/IMAP account under the current user's profile, actively growing/syncing, paired with a matching Outlook profile in the registry; any PSTs present correspond to user-created archives or explicitly imported/exported data files the user can account for.",
+  "anomalies": [
+    "An orphaned OST (no matching Outlook profile in the registry, or the referencing profile was recently deleted) - for forensic purposes this is often more valuable than a live one, since it is a frozen snapshot of mailbox state as of the last sync, including server-side items the user has since deleted",
+    "A PST located outside the standard Documents\\Outlook Files or AppData paths, especially on a removable drive, in a temp/download folder, or with a name suggesting exfiltration staging (e.g., generic or misleading filenames) rather than a normal archive name",
+    "PR_TRANSPORT_MESSAGE_HEADERS present on a message but showing a Received chain inconsistent with the claimed sender domain, or missing entirely on a message type that should carry one",
+    "A PST/OST file with a modification time far newer than any Outlook process activity on the host, suggesting the file was copied in from elsewhere rather than generated locally",
+    "Registry profile entries (Windows Messaging Subsystem\\Profiles or Outlook\\Profiles) referencing a PST/OST path that no longer exists on disk - indicates deletion or relocation of a data file after the profile was configured",
+    "PST file password-protection (CRC32-based, not strong encryption per historical Outlook implementations) present on a file otherwise inconsistent with the user's normal workflow, suggesting deliberate access restriction"
+  ],
+  "parsing_tools": [
+    "libpff / pffexport (libyal, open-source, implements the OST/PST structured-storage format)",
+    "MFCMAPI (Microsoft, open-source on GitHub - low-level MAPI property browser, can convert between MSG/EML and inspect PR_TRANSPORT_MESSAGE_HEADERS)",
+    "Kernel/Aid4Mail-class commercial e-discovery viewers for bulk PST/OST processing"
+  ],
+  "attack_techniques": [
+    "T1114.001"
+  ],
+  "anti_forensic_notes": "OST files cannot be opened outside their originating Outlook profile because the encryption cookie is bound to the mailbox's unique ID validated against the profile/server - this is a legitimate access control, not tampering, but it means an examiner must either restore the original profile context or use a format-aware parser (libpff) that bypasses the MAPI layer entirely. Deleting a PST/OST removes the local copy, but for an OST this is low-impact anti-forensics since the data still exists server-side and Outlook will simply resync; deleting a PST used for local-only archiving or POP3 delivery is high-impact since no server copy exists. Registry profile remnants (Windows Messaging Subsystem\\Profiles, Outlook\\Profiles) can survive deletion of the data file itself and are useful for proving a store once existed at a specific path.",
+  "related_artifacts": [
+    "msg-eml-files",
+    "ntuser-dat-hive"
+  ]
+}

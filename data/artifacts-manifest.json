@@ -1,6 +1,6 @@
 {
-  "generated": "2026-09-06T05:28:44.470278+00:00",
-  "count": 42,
+  "generated": "2026-09-06T05:38:28.631909+00:00",
+  "count": 55,
   "artifacts": [
     {
       "id": "ntuser-dat-hive",
@@ -545,6 +545,46 @@
       ],
       "group": "user-activity",
       "file": "data/artifacts/user-activity/runmru.json"
+    },
+    {
+      "id": "setupapi-devlog",
+      "name": "SetupAPI Device Install Log (setupapi.dev.log)",
+      "category": "file",
+      "subcategory": "user-activity/removable-media",
+      "os_min": "Windows XP",
+      "location": "%SystemRoot%\\inf\\setupapi.dev.log (Windows Vista and later). On Windows XP/2000/Server 2003 the equivalent file is %SystemRoot%\\setupapi.log (note: no 'inf' subfolder, different filename). ANSI plain-text file; when it grows large it is not simply truncated - a related setupapi.upgrade.log is created during OS upgrades to record driver migration for previously-installed devices.",
+      "purpose": "System-wide, chronological plain-text log written by the Plug and Play (PnP) manager and SetupAPI recording every device/driver installation operation on the host, including the exact local-time timestamp a device's driver was first installed. For removable media this is the highest-confidence source for establishing precisely when a USB device was FIRST connected to a system, complementing (and independently corroborating) the registry-based USBSTOR 'last connected/removed' property timestamps.",
+      "key_fields": [
+        "Text log header - operating system version and computer architecture, written once at the top of the file",
+        "Text log section header - format '[timestamp process-id.instance description]', e.g. a 'Device Install' section opening with a line like '>>> [Device Install (Hardware initiated) - USB\\VID_xxxx&PID_xxxx\\<serial>]' followed by a 'Section start YYYY/MM/DD HH:MM:SS.sss' line",
+        "time_stamp field format: yyyy/mm/dd hh:mm:ss.sss, recorded in the local system time zone at the time of installation (not UTC, unlike most registry timestamps)",
+        "Device instance ID string embedded in the section header/body - contains device class, VID (vendor ID), PID (product ID), and the device's reported serial number, present for every Plug-and-Play device, not just USB mass storage",
+        "Driver installation outcome lines within the section (e.g., driver package search, selection, and install success/failure), useful for confirming whether a device install actually completed versus was only attempted",
+        "Section end marker with final status code, indicating whether SetupAPI considered the installation successful"
+      ],
+      "normal_baseline": "A single append-only log file growing over the life of the OS install, containing device-install sections for expected hardware (docking stations, printers, and the same recurring set of user storage devices) with first-install timestamps that align with when the user says they first used each device, and no sections for unfamiliar device classes.",
+      "anomalies": [
+        "A USBSTOR registry entry exists for a device with no corresponding Device Install section in setupapi.dev.log (or vice versa) - the two sources should agree on first-connection time, so a mismatch suggests log tampering, registry manipulation, or that the connection happened under a different/rolled-back log",
+        "A Device Install section timestamp inconsistent with the surrounding log entries (out of chronological order), suggesting the log file was edited or entries were spliced in after the fact",
+        "The active setupapi.dev.log missing historical entries the analyst expects based on other evidence (e.g., USBSTOR first-install property data older than the earliest entry in the current log), consistent with deliberate deletion/replacement of the log or a Windows Setup/upgrade event that reset it - check for a setupapi.upgrade.log, which can retain migration records for previously-connected devices even after the main log is cleared",
+        "A burst of many distinct, unfamiliar VID/PID device installs in a short window, especially immediately before or after a suspected data-exfiltration or intrusion timeframe",
+        "A gap in section timestamps spanning a period the host was known to be powered on and in use, suggesting the log was cleared or truncated during that window"
+      ],
+      "parsing_tools": [
+        "Any text editor / findstr/grep (plain ANSI text format, no proprietary parser required)",
+        "USB Detective (commercial - parses setupapi.dev.log alongside registry USB artifacts into a unified device timeline)",
+        "KAPE (Eric Zimmerman - collects setupapi.dev.log via built-in USB-related collection targets for offline review)"
+      ],
+      "attack_techniques": [
+        "T1091",
+        "T1052.001"
+      ],
+      "anti_forensic_notes": "setupapi.dev.log only records the FIRST installation of a given device/driver combination system-wide - it does not log every subsequent reconnect, so later connect/disconnect timing must still come from registry property timestamps (USBSTOR Properties 0x0066/0x0067) or MountPoints2. Because it is a plain-text, non-protected file under %SystemRoot%\\inf, it is straightforward to delete or edit and is explicitly called out in anti-forensic guidance as a file to remove to obscure USB history; deletion removes the earliest-connection evidence but does not affect the registry-based artifacts, so the two sources should always be checked together. A Windows Feature Update/in-place upgrade can also effectively reset this log, though a setupapi.upgrade.log may retain some historical migration records for devices that existed before the upgrade.",
+      "related_artifacts": [
+        "usb-device-history"
+      ],
+      "group": "user-activity",
+      "file": "data/artifacts/user-activity/setupapi-devlog.json"
     },
     {
       "id": "shellbags",
@@ -1554,6 +1594,496 @@
       ],
       "group": "browser",
       "file": "data/artifacts/browser/firefox-browser-artifacts.json"
+    },
+    {
+      "id": "memory-code-injection",
+      "name": "Injected Code / Process Hollowing Detection (Malfind)",
+      "category": "file",
+      "subcategory": "memory-forensics",
+      "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
+      "location": "Not a disk location - identified within a RAM acquisition using Volatility 3's malfind plugin (windows.malfind; renamed to windows.malware.malfind as the malware-related plugins were consolidated under the windows.malware namespace, with the old windows.malfind name deprecated).",
+      "purpose": "Walks each process's Virtual Address Descriptor (VAD) tree looking for memory regions whose protection and backing are consistent with injected code - executable-and-writable private memory not backed by any file on disk - and dumps a hex/disassembly preview of the region so an analyst can confirm shellcode, a reflectively-loaded PE, or a hollowed-out legitimate process.",
+      "key_fields": [
+        "Process / PID - the process whose VAD tree contained the suspicious region",
+        "Start VPN / End VPN - virtual address range of the flagged VAD",
+        "Tag - the VAD's internal tag; VadS or VadF indicates a private allocation with no mapped file (e.g. VirtualAlloc'd memory), as opposed to a normal image-backed Vad/VadImageMap",
+        "Protection - the region's memory protection constant; malfind flags EXECUTE+WRITE combinations such as PAGE_EXECUTE_READWRITE, which is abnormal for a legitimately loaded module (normal module code pages are typically PAGE_EXECUTE_WRITECOPY or PAGE_EXECUTE_READ)",
+        "Hexdump / Disassembly preview - the plugin's rendered preview of the first bytes of the flagged region, used to spot a PE header (MZ), shellcode patterns, or an unpacking stub",
+        "Empty-VAD filtering - malfind checks whether a candidate region is entirely paged-out or all-zero and suppresses it, to avoid reporting VADs that match the protection/tag criteria but hold no actual injected content"
+      ],
+      "normal_baseline": "On a clean system, malfind returns few or no hits; a small number of false positives can occur from legitimate just-in-time compilation (.NET CLR, JVM, browser JS engines) which intentionally allocate executable-writable private memory - these should map to a known JIT-using process and be corroborated before being treated as suspicious.",
+      "anomalies": [
+        "A VAD with PAGE_EXECUTE_READWRITE protection and a VadS/VadF (private, non-image) tag inside a process with no legitimate reason to JIT-compile code - the canonical injected-shellcode or reflective-DLL signature",
+        "A flagged region whose hexdump/disassembly preview begins with an MZ/PE header sitting in private (non-image-backed) memory, consistent with a manually-mapped or reflectively-loaded executable rather than one loaded through the normal Windows loader",
+        "The main executable's own VAD region (normally image-backed) showing content inconsistent with the on-disk file, or a mismatch between the process's reported image path and the actual code present at its base address - consistent with process hollowing, where a legitimate process is started suspended and its original image is unmapped and replaced",
+        "Cross-referencing a malfind hit's PID against windows.pslist/windows.psscan to find the process is otherwise unremarkable (normal parent, normal path) but carries this one anomalous VAD - typical of injection into an existing benign process rather than a wholly malicious one",
+        "Multiple unrelated processes each carrying a similarly-shaped injected VAD (same size, same protection pattern), suggesting a single injection tool or loader was used against several targets"
+      ],
+      "parsing_tools": [
+        "Volatility 3 (Volatility Foundation) - windows.malfind / windows.malware.malfind",
+        "Volatility 3 - windows.vadinfo / windows.vadyarascan for follow-up VAD inspection and YARA scanning of flagged regions"
+      ],
+      "attack_techniques": [
+        "T1055",
+        "T1055.012"
+      ],
+      "anti_forensic_notes": "malfind's detection logic depends on a specific, known-abusable protection/tag combination; malware authors aware of this commonly allocate memory as PAGE_READWRITE, write their payload, then call VirtualProtect to flip it to PAGE_EXECUTE_READ or PAGE_EXECUTE_WRITECOPY before execution, which removes the EXECUTE+WRITE combination malfind screens for and causes a false negative - a clean malfind result therefore does not rule out injection and should be paired with manual VAD review (windows.vadinfo) and cross-process handle/thread analysis (windows.handles, windows.threads) rather than trusted alone.",
+      "related_artifacts": [
+        "memory-process-list",
+        "memory-network-connections",
+        "memory-commandline-history"
+      ],
+      "group": "memory",
+      "file": "data/artifacts/memory/memory-code-injection.json"
+    },
+    {
+      "id": "memory-commandline-history",
+      "name": "Command-Line History via Process-Creation Auditing (4688 / Sysmon EID 1)",
+      "category": "file",
+      "subcategory": "memory-forensics",
+      "os_min": "N/A - Event ID 4688 command-line logging requires Windows Vista/Server 2008 or later plus the specific audit policy below enabled; Sysmon requires separate installation on any supported Windows version.",
+      "location": "Security.evtx (Event ID 4688, Process Command Line field) and/or Microsoft-Windows-Sysmon%4Operational.evtx (Event ID 1, CommandLine field).",
+      "purpose": "This entry documents the mechanism that must be in place for command-line arguments to be captured at process-creation time at all - it is not the general Security or Sysmon event log entry, but specifically what has to be configured (or not) for the Process Command Line / CommandLine field to be populated, and how analysts use that field to reconstruct exactly what an attacker typed or a script executed.",
+      "key_fields": [
+        "4688 requires two separate settings to show a command line: (1) Audit Process Creation itself, under Computer Configuration > Policies > Windows Settings > Security Settings > Advanced Audit Policy Configuration > Detailed Tracking - without this, no 4688 events are generated at all; (2) the separate policy 'Include command line in process creation events', under Computer Configuration > Policies > Administrative Templates > System > Audit Process Creation - without this second setting, 4688 events fire but the Process Command Line field is blank",
+        "Registry equivalent of the second setting: HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\Audit\\ProcessCreationIncludeCmdLine_Enabled (DWORD 1 = enabled); both settings default to Not Configured / disabled out of the box",
+        "4688 Process Command Line - the full command line of the newly created process, logged in plain text once both policies above are enabled",
+        "4688 New Process Name / Creator Process Name - full image paths of the child and parent processes, correlating via Process ID and Logon ID",
+        "Sysmon Event ID 1 (Process Create) CommandLine and ParentCommandLine fields - captured by default as part of the event schema the moment Sysmon is installed and its configuration does not explicitly filter out Event ID 1; unlike 4688, there is no separate 'include command line' toggle to enable - if Sysmon logs a Process Create event at all, the full command line is in it",
+        "Sysmon Event ID 1 also carries ProcessGuid, Hashes (SHA1 by default, or MD5/SHA256/IMPHASH depending on config), and integrity level alongside the command line, giving more built-in context than 4688 for the same event"
+      ],
+      "normal_baseline": "On a host where both 4688 audit settings are enabled, or where Sysmon is deployed with a config that does not suppress Event ID 1, process-creation events accumulate continuously with plausible command lines matching normal software behavior (installers, browser helper processes, scheduled maintenance scripts) and legible arguments; on a host where only 'Audit Process Creation' is enabled without the command-line addendum, 4688 events exist but every Process Command Line field is empty - a very common and easily overlooked misconfiguration that silently blinds command-line reconstruction while giving the false impression that process auditing is fully enabled.",
+      "anomalies": [
+        "4688 events present but every Process Command Line field is blank across the board - indicates the 'Include command line in process creation events' policy was never enabled, meaning command-line reconstruction from this host is not possible from 4688 alone regardless of the time period examined",
+        "A command line containing encoded/obfuscated content (e.g. powershell.exe -EncodedCommand, base64 blobs, excessive character escaping) used specifically to defeat casual review of the logged text",
+        "A command line invoking a living-off-the-land binary (certutil, mshta, rundll32, regsvr32, bitsadmin) with arguments inconsistent with that binary's normal administrative use",
+        "A gap in 4688 or Sysmon Event ID 1 volume that does not align with any other logged activity stopping - Sysmon or the audit policy may have been reconfigured/tampered with rather than the host simply going idle",
+        "Sysmon Event ID 1 present with populated CommandLine while the Security log's 4688 events for the same time window show blank Process Command Line fields - confirms the audit-policy gap above and that Sysmon is the only reliable source of command-line data on that host",
+        "A parent-child command-line pair showing a script interpreter (cmd.exe, powershell.exe, wscript.exe) spawned from an Office application, browser, or PDF reader with an unexpected command line - the standard initial-access-to-execution pivot point analysts search for first"
+      ],
+      "parsing_tools": [
+        "Windows Event Viewer",
+        "wevtutil",
+        "EvtxECmd (Eric Zimmerman)",
+        "Hayabusa"
+      ],
+      "attack_techniques": [
+        "T1059",
+        "T1562.002",
+        "T1070.001"
+      ],
+      "anti_forensic_notes": "An attacker who disables or stops the EventLog service, clears the Security log (which itself generates a 4688-independent 1102 event), or reconfigures/uninstalls Sysmon removes future command-line visibility going forward, but cannot retroactively populate command lines that were never captured because the audit policy addendum was off in the first place - the absence of command-line data on a host is therefore ambiguous between 'never configured' and 'deliberately tampered with' and must be checked against the actual policy/registry state and against whether other event types from the same source continued logging normally.",
+      "related_artifacts": [
+        "security-eventlog",
+        "sysmon",
+        "memory-process-list",
+        "powershell-operational"
+      ],
+      "group": "memory",
+      "file": "data/artifacts/memory/memory-commandline-history.json"
+    },
+    {
+      "id": "memory-network-connections",
+      "name": "Network Connections at Capture Time (Memory Forensics)",
+      "category": "file",
+      "subcategory": "memory-forensics/network",
+      "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
+      "location": "Not a disk location - reconstructed from a RAM acquisition using Volatility 3's windows.netscan and windows.netstat plugins.",
+      "purpose": "Recovers TCP/UDP endpoints and TCP listeners that existed in memory at the moment of capture, including connections a live netstat could no longer show because the process had already exited or the socket had closed - giving an analyst a network snapshot tied to the exact moment of acquisition rather than to whenever the host was later examined live.",
+      "key_fields": [
+        "windows.netscan - scans the entire memory image pool allocations (via Volatility's poolscanner) for network object structures, independent of any kernel list; recovers both currently active and recently-closed/terminated connections still resident in memory",
+        "windows.netstat - parses the kernel's live TcpPortPool/UdpPortPool (or, on newer builds, TcpCompartmentSet/UdpCompartmentSet) structures the same way the real netstat.exe does; faster but reports only endpoints still tracked by those live structures",
+        "Offset - virtual address of the recovered network object structure",
+        "Proto - transport protocol (TCPv4, TCPv6, UDPv4, UDPv6)",
+        "Local Address / Local Port and Foreign Address / Foreign Port",
+        "State - TCP connection state (e.g. LISTENING, ESTABLISHED, CLOSE_WAIT, TIME_WAIT)",
+        "PID and Owner - the owning process ID and its image name, letting a suspicious connection be pivoted directly to the process-list/DLL/handle findings for that PID",
+        "Created - the timestamp the connection/listener was created, when recoverable from the structure"
+      ],
+      "normal_baseline": "Listeners and established connections map cleanly to known services and applications (browser processes with ESTABLISHED connections to expected destination ports, svchost.exe instances LISTENING on expected service ports), with owning PIDs matching the process list produced by pslist/psscan for the same image.",
+      "anomalies": [
+        "An endpoint or listener recovered by windows.netscan that windows.netstat does not report, because netstat only walks the live port-pool structures - the discrepancy itself can indicate a connection whose owning process has since exited or that used a technique bypassing the standard pool tracking",
+        "A connection owned by a PID that does not appear at all in windows.pslist/windows.psscan for that same image, indicating the owning process itself was hidden or has since exited, but its network footprint persisted in memory",
+        "A well-known process name (svchost.exe, explorer.exe, rundll32.exe) shown as the Owner of an ESTABLISHED connection to an unexpected external address/port, especially over ports not typical for that binary",
+        "A LISTENING state on an unexpected local port bound by a process with no legitimate reason to accept inbound connections (backdoor / reverse-shell listener)",
+        "Connections whose Owner is blank/unresolvable in netscan output - the underlying object was found by pool signature but its owning EPROCESS pointer could not be resolved, which itself is unusual and worth flagging",
+        "Foreign address matching a known C2 IP/CIDR range or a raw IP with no corresponding DNS cache entry elsewhere in the same memory image"
+      ],
+      "parsing_tools": [
+        "Volatility 3 (Volatility Foundation) - windows.netscan, windows.netstat"
+      ],
+      "attack_techniques": [
+        "T1049",
+        "T1071"
+      ],
+      "anti_forensic_notes": "Because windows.netscan finds network objects by scanning memory for pool signatures rather than by following any kernel list, it will still surface a connection object even after the owning process exits or a rootkit unlinks the process elsewhere - making memory acquisition timing (as close as possible to the suspected activity) the main lever an analyst has, since a connection's pool allocation can eventually be overwritten/reused by later memory activity and become unrecoverable. windows.netstat, by only walking the live port-pool structures, will show nothing for a connection whose structure has already been torn down, so relying on netstat alone can silently miss activity that netscan would still catch - always run both and diff the results rather than treating either as complete on its own.",
+      "related_artifacts": [
+        "memory-process-list",
+        "memory-code-injection",
+        "memory-commandline-history"
+      ],
+      "group": "memory",
+      "file": "data/artifacts/memory/memory-network-connections.json"
+    },
+    {
+      "id": "memory-process-list",
+      "name": "Process List, Handles & Loaded DLLs (Memory Forensics)",
+      "category": "file",
+      "subcategory": "memory-forensics",
+      "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
+      "location": "Not a disk location - reconstructed from a RAM acquisition (raw memory image, hibernation file, or crash dump) using Volatility 3's windows.pslist, windows.pstree, windows.psscan, windows.dlllist, and windows.handles plugins.",
+      "purpose": "Reconstructs which processes were running at the moment of memory capture, their parent-child relationships, loaded modules, and open handles, by parsing EPROCESS/ETHREAD kernel structures and the process PEB directly out of the memory image. Because several of these plugins locate processes by different mechanisms, comparing their output is the primary way to catch a process a rootkit tried to hide.",
+      "key_fields": [
+        "windows.pslist - walks the kernel's doubly-linked PsActiveProcessHead list (via each EPROCESS's ActiveProcessLinks) to enumerate PID, PPID, process name, thread count, handle count, and create/exit time",
+        "windows.pstree - same enumeration as pslist, rendered as a parent-child tree using the recorded PPID/creation-time relationships",
+        "windows.psscan - does not trust the active-process list; scans the entire memory image for pool allocations matching the EPROCESS pool tag/structure signature, so it also surfaces unlinked and recently terminated processes",
+        "windows.dlllist - per process, walks the PEB's InLoadOrderModuleList (a list of _LDR_DATA_TABLE_ENTRY structures) to list loaded module path, base address, and size",
+        "windows.handles - per process, enumerates the open handle table and reports handle type (Process, Thread, Key, Event, Mutant, Token, File, Section, etc.), the target object, and access rights; filterable by object type",
+        "PID / PPID - process and parent process ID (both are simply reused numbers in Windows and can be spoofed by an attacker's chosen parent)",
+        "Offset (virtual) - the EPROCESS structure's memory address, useful for direct correlation between plugin outputs and for volshell follow-up"
+      ],
+      "normal_baseline": "pslist, pstree, and psscan agree on the same set of processes and PIDs; every process has a plausible parent (e.g. explorer.exe under a userinit/logon chain, svchost.exe under services.exe), loaded DLLs match what the executable and its known dependencies would load, and handle counts are unremarkable for the process type.",
+      "anomalies": [
+        "A process visible in windows.psscan's raw pool scan but absent from windows.pslist's linked-list walk - the classic signature of a rootkit that used Direct Kernel Object Manipulation (DKOM) to unlink the EPROCESS from PsActiveProcessHead while the process's threads kept running",
+        "A process name mimicking a legitimate system binary but running from an unexpected path (e.g. svchost.exe outside %SystemRoot%\\System32) or with an implausible parent (e.g. lsass.exe or services.exe not spawned by wininit.exe)",
+        "windows.dlllist showing a module loaded from a suspicious or non-standard path (temp directory, user profile) inside an otherwise legitimate process, consistent with DLL injection",
+        "A process with very few or zero entries in windows.dlllist despite being a normal Windows executable that should have a substantial import list - can indicate manual PEB/module-list unlinking to hide an injected or reflectively-loaded module",
+        "windows.handles showing a process holding a handle to lsass.exe with access rights consistent with memory-reading (credential dumping), or holding handles to another unrelated process with PROCESS_VM_WRITE/PROCESS_CREATE_THREAD rights (injection primitives)",
+        "PPID mismatch such as a PID reused by an unrelated later process (PPID spoofing), or a shell/office-application process tree where a document viewer or browser is the direct parent of cmd.exe or powershell.exe",
+        "psscan surfacing a process that has already exited (terminated) but whose EPROCESS pool allocation has not yet been reused - itself not anomalous, but the executable path, command line, and DLL list of that terminated process can still be extracted and are worth checking against other indicators"
+      ],
+      "parsing_tools": [
+        "Volatility 3 (Volatility Foundation) - windows.pslist, windows.pstree, windows.psscan, windows.dlllist, windows.handles",
+        "volshell (Volatility 3 interactive shell) for manual EPROCESS/PEB inspection"
+      ],
+      "attack_techniques": [
+        "T1057",
+        "T1014",
+        "T1055"
+      ],
+      "anti_forensic_notes": "Volatility 3 does not ship a direct equivalent of Volatility 2's psxview cross-view plugin; the cross-view check that psxview automated must be performed manually by diffing the PID sets returned by windows.pslist (linked-list walk) against windows.psscan (raw pool scan) - a PID present in the latter but missing from the former is the strongest single indicator of DKOM-based process hiding. Because psscan finds EPROCESS structures by pool signature rather than by following any list, an attacker who fully unlinks a process from every kernel list Volatility can walk still cannot prevent that process's memory pool footprint from being found by psscan, short of also zeroing/overwriting the EPROCESS pool tag itself, which would typically crash the running process's scheduling.",
+      "related_artifacts": [
+        "memory-code-injection",
+        "memory-network-connections",
+        "memory-commandline-history",
+        "prefetch",
+        "shimcache",
+        "amcache"
+      ],
+      "group": "memory",
+      "file": "data/artifacts/memory/memory-process-list.json"
+    },
+    {
+      "id": "arp-cache",
+      "name": "ARP Cache",
+      "category": "file",
+      "subcategory": "network-activity",
+      "os_min": "Windows XP (caching mechanism changed significantly starting Windows Vista)",
+      "location": "In-memory neighbor/ARP table maintained by the TCP/IP stack; not written to a file or registry hive. Viewed live via `arp -a` or PowerShell `Get-NetNeighbor` / `netsh interface ipv4 show neighbors`.",
+      "purpose": "Maps IPv4 addresses on the local subnet to their resolved MAC (link-layer) addresses so the host doesn't re-broadcast an ARP request for every packet; shows which local hosts a machine has actually exchanged Layer 2 traffic with recently.",
+      "key_fields": [
+        "Internet Address (IPv4)",
+        "Physical Address (MAC)",
+        "Type (dynamic / static / invalid)"
+      ],
+      "normal_baseline": "A short list of entries for the default gateway, local DNS/DHCP server, and any recently-contacted LAN hosts. Under Vista-and-later's RFC 4861-based Neighbor Discovery, entries cycle between Reachable and Stale states rather than aging on a fixed timer.",
+      "anomalies": [
+        "The default gateway's IP resolving to an unexpected MAC address (classic ARP spoofing / on-path attacker indicator)",
+        "Unexplained static (permanent) entries added via arp -s that don't correspond to known network hardware",
+        "One MAC address mapped to multiple IPs at once, or duplicate/conflicting entries for the same IP",
+        "Entries for hosts the asset owner denies contacting, captured during live triage of a suspected lateral-movement incident"
+      ],
+      "parsing_tools": [
+        "arp -a (built-in)",
+        "Get-NetNeighbor (PowerShell NetTCPIP module)",
+        "netsh interface ipv4 show neighbors"
+      ],
+      "attack_techniques": [
+        "T1557.002"
+      ],
+      "anti_forensic_notes": "Purely volatile: the whole table is lost on reboot, and Windows Vista and later moves an unused entry from Reachable to Stale after roughly 15-45 seconds (BaseReachableTime defaults to 30000 ms, randomized per RFC 4861) unless it is re-referenced, so it must be captured live per the RFC 3227 order-of-volatility guidance or the evidence is gone. Windows XP/Server 2003 exposed ArpCacheLife and ArpCacheMinReferencedLife registry values to tune this timing, but Microsoft documents that these values no longer apply from Windows Vista onward, which instead uses Neighbor Unreachability Detection tunable via netsh interface ipv4 set interface ... basereachable=.",
+      "related_artifacts": [
+        "dns-client-cache",
+        "windows-firewall-log",
+        "sysmon"
+      ],
+      "group": "network",
+      "file": "data/artifacts/network/arp-cache.json"
+    },
+    {
+      "id": "dns-client-cache",
+      "name": "DNS Client (Resolver) Cache",
+      "category": "file",
+      "subcategory": "network-activity",
+      "os_min": "Windows 2000 (DNS Client / Dnscache service); Get-DnsClientCache cmdlet requires Windows 8 / Server 2012+",
+      "location": "In-memory cache maintained by the DNS Client (Dnscache) service; not persisted to disk. Related configuration lives at HKLM\\SYSTEM\\CurrentControlSet\\Services\\Dnscache\\Parameters (e.g. MaxCacheTtl). Viewed live via `ipconfig /displaydns` or PowerShell `Get-DnsClientCache`.",
+      "purpose": "Speeds up repeat name resolution by caching successfully resolved DNS answers and negative (failed) lookups, and preloads static mappings from the local Hosts file; records which domain names a host recently attempted or succeeded in resolving.",
+      "key_fields": [
+        "Record Name",
+        "Record Type (A, AAAA, CNAME, PTR, SRV, etc.)",
+        "Time To Live (remaining TTL, seconds)",
+        "Data (resolved value)",
+        "Status (Success / NotExist / NoRecords)",
+        "Section (Answer / Authority / Additional)"
+      ],
+      "normal_baseline": "Entries reflecting the browsing, telemetry, and update domains for applications actually running on the host, each with a TTL counting down from the value the authoritative DNS server supplied; Hosts file entries also appear here as preloaded records.",
+      "anomalies": [
+        "Resolved entries for known C2/malicious domains or high-entropy, DGA-style hostnames",
+        "A legitimate domain resolving to an unexpected, attacker-controlled IP (upstream DNS hijack or cache poisoning)",
+        "Cache found empty during incident response with no corresponding reboot, suggesting ipconfig /flushdns or Clear-DnsClientCache was run to cover tracks",
+        "An unusually large number of distinct subdomains under one parent domain, consistent with DNS-based C2/tunneling"
+      ],
+      "parsing_tools": [
+        "ipconfig /displaydns (built-in)",
+        "Get-DnsClientCache / Clear-DnsClientCache (PowerShell DnsClient module)",
+        "DNSDataView (NirSoft)"
+      ],
+      "attack_techniques": [
+        "T1071.004"
+      ],
+      "anti_forensic_notes": "Entirely volatile, like the ARP cache: it lives only in the Dnscache service's memory and is wiped on reboot or by ipconfig /flushdns / Clear-DnsClientCache, so it must be collected during live response. A cache that is suspiciously empty on a system clearly used for recent browsing is itself a possible indicator that it was deliberately flushed.",
+      "related_artifacts": [
+        "hosts-file",
+        "arp-cache",
+        "windows-firewall-log"
+      ],
+      "group": "network",
+      "file": "data/artifacts/network/dns-client-cache.json"
+    },
+    {
+      "id": "hosts-file",
+      "name": "Hosts File",
+      "category": "file",
+      "subcategory": "network-configuration",
+      "os_min": "Windows 2000 (path has remained stable through current Windows releases)",
+      "location": "%SystemRoot%\\System32\\drivers\\etc\\hosts (typically C:\\Windows\\System32\\drivers\\etc\\hosts)",
+      "purpose": "Plain-text, manually-maintained IP-to-hostname mapping table that the DNS Client consults before querying any DNS server; lets an administrator, or an attacker, override name resolution for specific domains without touching DNS infrastructure.",
+      "key_fields": [
+        "IP address",
+        "Hostname(s) mapped to that address",
+        "Optional # comment lines"
+      ],
+      "normal_baseline": "Ships with only commented example lines and, on many systems, a single localhost mapping (127.0.0.1 localhost / ::1 localhost); no active third-party entries.",
+      "anomalies": [
+        "Entries redirecting security-vendor, Windows Update, or telemetry domains to 0.0.0.0 or 127.0.0.1 (defense/update crippling)",
+        "Entries redirecting a legitimate domain (bank, SSO/MFA provider) to an attacker-controlled IP for credential harvesting, or to localhost specifically to break MFA callback traffic",
+        "File modification timestamp falling outside any known admin change window, or the file made hidden/read-only to resist casual edits",
+        "Unexpected growth into a long list of redirect entries, which can indicate either malicious blocking/redirection or a legitimate ad-blocking hosts file — intent must be judged by the specific target domains"
+      ],
+      "parsing_tools": [
+        "Any text editor / PowerShell Get-Content",
+        "diff against a known-good baseline hosts file",
+        "File-integrity monitoring or EDR alerting on writes to the etc\\hosts path"
+      ],
+      "attack_techniques": [
+        "T1556.006"
+      ],
+      "anti_forensic_notes": "A plain text file with no built-in audit trail of its own; NTFS timestamp metadata and any file-write telemetry (e.g. Sysmon Event ID 11) are the only artifacts of when it changed, and both can be altered by an attacker with sufficient privilege. Its contents are also preloaded into the volatile DNS client cache, so a redirect may still be visible in ipconfig /displaydns even after the hosts file itself has been reverted.",
+      "related_artifacts": [
+        "dns-client-cache",
+        "windows-firewall-log",
+        "defender-eventlog"
+      ],
+      "group": "network",
+      "file": "data/artifacts/network/hosts-file.json"
+    },
+    {
+      "id": "wifi-profiles",
+      "name": "WiFi (WLAN) Profiles",
+      "category": "file",
+      "subcategory": "network-configuration",
+      "os_min": "Windows Vista (Native Wifi / WLAN AutoConfig service and WLAN_profile XML schema)",
+      "location": "XML files under %ALLUSERSPROFILE%\\Microsoft\\Wlansvc\\Profiles\\Interfaces\\{interface-GUID}\\{profile-GUID}.xml, one file per saved network per wireless adapter; also queryable live via `netsh wlan show profiles` and `netsh wlan show profile name=\"SSID\" key=clear`.",
+      "purpose": "Stores every wireless network (SSID) a machine has been configured to connect to, including its authentication/encryption settings and, unless cleared, its pre-shared key — providing SSID connection history and potential credential recovery.",
+      "key_fields": [
+        "name (SSID / profile name)",
+        "connectionMode (auto / manual)",
+        "authEncryption (authentication and encryption type)",
+        "sharedKey/keyMaterial (the passphrase/key)",
+        "sharedKey/protected (true = keyMaterial is DPAPI-encrypted hex; false = keyMaterial is stored as cleartext, as seen in some GPO-deployed profiles)"
+      ],
+      "normal_baseline": "One profile per network the user has genuinely joined (home, workplace, known public hotspots); sharedKey/protected is normally \"true\", meaning keyMaterial is DPAPI-encrypted and unreadable outside the machine/user context that saved it.",
+      "anomalies": [
+        "A profile for an SSID the user denies ever connecting to (rogue AP / evil-twin association, or a profile silently added by a script or malware)",
+        "sharedKey/protected set to \"false\" with the passphrase stored in cleartext, outside of an expected GPO-managed wireless deployment",
+        "A burst of new profile files created in a short time window, consistent with a Wi-Fi credential-harvesting tool run rather than normal user connection behavior",
+        "Execution of `netsh wlan show profile ... key=clear` or a wireless key-recovery tool shortly before data staging/exfiltration"
+      ],
+      "parsing_tools": [
+        "netsh wlan show profiles / netsh wlan show profile name=X key=clear (built-in)",
+        "WirelessKeyView (NirSoft)",
+        "Direct XML review of the Wlansvc\\Profiles\\Interfaces path"
+      ],
+      "attack_techniques": [
+        "T1016.002"
+      ],
+      "anti_forensic_notes": "keyMaterial is DPAPI-protected by default (protected=\"true\"), tying decryption to the machine/user context that saved it, which is why recovery is normally done through `netsh ... key=clear` (or an equivalent DPAPI unwrap) run in that same context rather than by reading the XML key material directly. Deleting a saved network removes its XML profile file, and with it the SSID history, leaving only whatever MFT/file-deletion metadata the filesystem retains.",
+      "related_artifacts": [
+        "arp-cache",
+        "dns-client-cache"
+      ],
+      "group": "network",
+      "file": "data/artifacts/network/wifi-profiles.json"
+    },
+    {
+      "id": "windows-firewall-log",
+      "name": "Windows Firewall Log",
+      "category": "file",
+      "subcategory": "network-activity",
+      "os_min": "Windows XP (legacy pfirewall.log); Windows Vista+ for the Windows Firewall with Advanced Security event log channel",
+      "location": "Legacy text log, must be manually enabled and is off by default: %windir%\\System32\\LogFiles\\Firewall\\pfirewall.log. Rule-change/administrative history: Applications and Services Logs\\Microsoft-Windows-Windows Firewall With Advanced Security\\Firewall (.evtx).",
+      "purpose": "Records network traffic Windows Firewall evaluated (dropped and/or allowed connections, once logging is enabled) and, separately in the WFAS event channel, administrative changes to firewall rules and profile state — used to reconstruct blocked/allowed connection attempts and to detect firewall tampering.",
+      "key_fields": [
+        "date, time",
+        "action (ALLOW / DROP)",
+        "protocol, src-ip, dst-ip, src-port, dst-port, size",
+        "tcpflags, tcpsyn, tcpack, tcpwin, icmptype, icmpcode, info, path (W3C extended log fields in pfirewall.log)",
+        "Event ID 2004 (rule added) / 2005 (rule modified) / 2006 (rule deleted) in the WFAS Firewall event channel"
+      ],
+      "normal_baseline": "On a default installation pfirewall.log does not exist at all, because both dropped-packet and successful-connection logging are disabled by default on every profile (Domain/Private/Public). When enabled, entries reflect routine blocked broadcast/scan noise from the local segment plus a low, steady trickle of rule-change events tied to application installs.",
+      "anomalies": [
+        "pfirewall.log present with DROP entries for outbound traffic to known-bad IPs/ports, or unexplained inbound ALLOW entries",
+        "A burst of Event ID 2004/2005/2006 entries around the time of an intrusion, especially rules opening high ports or allowing a specific unsigned binary",
+        "Firewall log file missing or truncated on a system where logging was known (via GPO) to be enabled, suggesting tampering",
+        "Log rolling off at its default 4096 KB cap during a long-dwell intrusion, losing early entries"
+      ],
+      "parsing_tools": [
+        "PowerShell Import-Csv / text viewer against pfirewall.log",
+        "Get-WinEvent -LogName 'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'",
+        "Event Viewer",
+        "SIEM ingestion (e.g. Microsoft Sentinel Windows Firewall connector)"
+      ],
+      "attack_techniques": [
+        "T1562.004"
+      ],
+      "anti_forensic_notes": "Legacy pfirewall.log logging is off by default for both dropped and successful connections and must be explicitly enabled per network profile; an adversary with admin rights can disable logging, delete the file, or add/remove rules via netsh advfirewall, and the log itself is capped at a small rolling size (default 4096 KB / max 32767 KB, oldest entries deleted first), so its absence proves nothing about whether logging was ever on. The WFAS event log channel records rule-change events (2004/2005/2006) independently of whether text logging is enabled, though clearing that event log is itself recorded as a log-cleared event.",
+      "related_artifacts": [
+        "defender-eventlog",
+        "security-eventlog",
+        "arp-cache"
+      ],
+      "group": "network",
+      "file": "data/artifacts/network/windows-firewall-log.json"
+    },
+    {
+      "id": "msg-eml-files",
+      "name": "MSG/EML File Metadata",
+      "category": "file",
+      "subcategory": "communication-artifact",
+      "os_min": "Windows XP",
+      "location": "No fixed location - individual .msg (Outlook drag-and-save, or 'Save As' from a message) and .eml (saved by most other mail clients, and by Outlook when exporting/forwarding as RFC 822) files can appear anywhere on disk: user Documents/Desktop, Downloads folder, email attachments, removable media, or extracted attachments from an OST/PST.",
+      "purpose": "Individual saved-email files that carry a full self-contained copy of one message, independent of any mailbox store. .msg is Microsoft's OLE/Compound File Binary Format (CFBF) container preserving Outlook-specific MAPI properties; .eml is a plain-text file following the RFC 822/MIME structure used by virtually every other mail client, making it the more portable but MAPI-metadata-poor of the two.",
+      "key_fields": [
+        "MSG: OLE Compound File Binary Format container - each MAPI property (subject, sender, recipients, body, flags, categories, follow-up dates) lives in its own named stream; recipients and attachments each get their own storage, extractable independent of Outlook",
+        "MSG: PR_TRANSPORT_MESSAGE_HEADERS (0x007D) property - the original raw internet headers (including the full Received chain) preserved even though the message is now stored in Outlook's proprietary format",
+        "EML: plain-text RFC 822/MIME header block at the top of the file - From, To, Cc, Subject, Date, Message-ID, and the Received header chain, human-readable without any special parser",
+        "Received headers (both formats) form a stack, each relay prepending its own line; read bottom-up to trace the hop-by-hop path from originating server to final delivery, per RFC 5321 section 4.4 timestamp/host semantics",
+        "Authentication-Results header (EML, and preserved in MSG's transport headers) - SPF/DKIM/DMARC verification outcomes, which are far harder to forge than the From/Reply-To fields themselves",
+        "MIME boundary-delimited attachment sections (EML) vs. discrete attachment storages (MSG) - both preserve original attachment filenames and content, independent of whether the parent mailbox still contains the item",
+        "Filesystem metadata of the saved file itself (created/modified/accessed timestamps) - reflects when the message was exported to disk, not when it was originally sent/received"
+      ],
+      "normal_baseline": "Saved .msg/.eml files correspond to messages the user can explain (an attachment they saved, an email exported for a ticket/case), with filesystem save-timestamps that align with a plausible reason to export that specific message, and internal headers consistent with the claimed sender.",
+      "anomalies": [
+        "A saved .msg/.eml file whose internal Date/Received headers place the original message well before the user account or mailbox existed, or whose Message-ID domain doesn't match any header's claimed sending server - suggesting a fabricated or edited file",
+        "Missing or truncated Received header chain on an EML that should have passed through multiple hops, consistent with hand-crafted phishing lures rather than genuine delivered mail",
+        "A .msg file's PR_TRANSPORT_MESSAGE_HEADERS stream absent or empty despite the message showing standard sender/recipient properties, which is atypical for genuinely-delivered mail and can indicate the item was manually constructed in Outlook rather than received",
+        "SPF/DKIM/DMARC results in Authentication-Results showing fail/none on a message purporting to be from an internal or trusted domain",
+        "Saved-file location or naming inconsistent with normal user workflow (e.g., staged in a temp directory with sequential generic names), suggesting bulk export for exfiltration rather than individual message handling",
+        "Discrepancy between the file's filesystem timestamps and the internal message Date header far exceeding what a simple save/forward would produce, suggesting the file was copied from another system or backdated"
+      ],
+      "parsing_tools": [
+        "MFCMAPI (Microsoft, open-source - browses MSG MAPI properties, converts MSG to/from EML)",
+        "extract-msg (open-source Python library for reading MSG/CFBF structure and MAPI properties)",
+        "Any text editor (EML is plain text; headers are human-readable without a parser)"
+      ],
+      "attack_techniques": [
+        "T1114.001"
+      ],
+      "anti_forensic_notes": "Because EML is plain text and MSG headers are user-editable through MAPI property editors like MFCMAPI, both formats can be hand-crafted or altered to fabricate a convincing-looking message - unlike a message still resident in a live mailbox store or mail server log, a standalone saved file has no independent chain of custody proving it was actually delivered. Cross-referencing the file's internal Received chain and Message-ID against the corresponding OST/PST store or mail server logs (where available) is the primary way to validate authenticity; absence of any corroborating server-side record for a claimed-received message is itself a red flag.",
+      "related_artifacts": [
+        "outlook-ost-pst"
+      ],
+      "group": "communication",
+      "file": "data/artifacts/communication/msg-eml-files.json"
+    },
+    {
+      "id": "outlook-ost-pst",
+      "name": "Outlook OST/PST Files",
+      "category": "file",
+      "subcategory": "communication-artifact",
+      "os_min": "Windows XP",
+      "location": "Classic Outlook cached-mode OST: %LOCALAPPDATA%\\Microsoft\\Outlook\\ (default since Outlook 2013/2016). PST: %USERPROFILE%\\Documents\\Outlook Files\\ (Outlook 2013+ default) or %LOCALAPPDATA%\\Microsoft\\Outlook\\ (legacy/upgraded profiles, hidden folder). Exact per-store paths are recorded in HKEY_CURRENT_USER\\Software\\Microsoft\\Office\\<version>\\Outlook\\Profiles\\<profile>\\9375CFF0413111d3B88A00104B2A6676\\<service>\\001f6700 (or similarly-named binary values) and in the legacy HKCU\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows Messaging Subsystem\\Profiles\\<profile> key. Note: the current \"New Outlook\" / Outlook for Windows (Monarch) client does not use the classic Cached Exchange Mode/OST model for Exchange/M365 mailboxes - Microsoft does not document an equivalent user-accessible cache file path for it, so do not assume a New-Outlook mailbox has a parseable local OST.",
+      "purpose": "OST (Offline Storage Table) is a local, encrypted cache of an Exchange/IMAP mailbox used for offline access and cached mode sync; PST (Personal Storage Table) is a self-contained archive/local-delivery store an analyst can open independently of any server. Both are structured containers (folders, messages, contacts, calendar) and are frequently the single richest local source of a user's email history, including items the user believes were deleted from the server.",
+      "key_fields": [
+        "File header 'magic' bytes: PST files begin with the ASCII signature '!BDN'; both formats follow the Microsoft [MS-PST] structured-storage layout (B-tree-on-heap, node database) even though OST is not itself covered by a public Microsoft spec",
+        "PST content type flag distinguishes ANSI (pre-Outlook 2003, 2 GB practical size limit) from Unicode (Outlook 2003+, much larger limit) format variants, which affects which parsing tool/library version is required",
+        "Per-message MAPI properties, e.g. PR_SUBJECT, PR_SENDER_EMAIL_ADDRESS, PR_MESSAGE_DELIVERY_TIME, PR_TRANSPORT_MESSAGE_HEADERS (0x007D) - the raw internet header block including the Received chain, preserved even when the item is viewed only through Outlook's rendered UI",
+        "Folder hierarchy and per-folder message counts, including Deleted Items and Recoverable Items/Dumpster-equivalent folders inside the store itself",
+        "OST encryption cookie tying the file to the specific mailbox/profile that created it (a 'compressible encryption' or 'high encryption' substitution cipher per [MS-PST]), which is why an orphaned OST cannot be opened by Outlook without its originating profile",
+        "Attachment objects stored as embedded MAPI attachment streams, extractable independent of whether the parent message is still 'live' in the active view"
+      ],
+      "normal_baseline": "A single OST per configured Exchange/IMAP account under the current user's profile, actively growing/syncing, paired with a matching Outlook profile in the registry; any PSTs present correspond to user-created archives or explicitly imported/exported data files the user can account for.",
+      "anomalies": [
+        "An orphaned OST (no matching Outlook profile in the registry, or the referencing profile was recently deleted) - for forensic purposes this is often more valuable than a live one, since it is a frozen snapshot of mailbox state as of the last sync, including server-side items the user has since deleted",
+        "A PST located outside the standard Documents\\Outlook Files or AppData paths, especially on a removable drive, in a temp/download folder, or with a name suggesting exfiltration staging (e.g., generic or misleading filenames) rather than a normal archive name",
+        "PR_TRANSPORT_MESSAGE_HEADERS present on a message but showing a Received chain inconsistent with the claimed sender domain, or missing entirely on a message type that should carry one",
+        "A PST/OST file with a modification time far newer than any Outlook process activity on the host, suggesting the file was copied in from elsewhere rather than generated locally",
+        "Registry profile entries (Windows Messaging Subsystem\\Profiles or Outlook\\Profiles) referencing a PST/OST path that no longer exists on disk - indicates deletion or relocation of a data file after the profile was configured",
+        "PST file password-protection (CRC32-based, not strong encryption per historical Outlook implementations) present on a file otherwise inconsistent with the user's normal workflow, suggesting deliberate access restriction"
+      ],
+      "parsing_tools": [
+        "libpff / pffexport (libyal, open-source, implements the OST/PST structured-storage format)",
+        "MFCMAPI (Microsoft, open-source on GitHub - low-level MAPI property browser, can convert between MSG/EML and inspect PR_TRANSPORT_MESSAGE_HEADERS)",
+        "Kernel/Aid4Mail-class commercial e-discovery viewers for bulk PST/OST processing"
+      ],
+      "attack_techniques": [
+        "T1114.001"
+      ],
+      "anti_forensic_notes": "OST files cannot be opened outside their originating Outlook profile because the encryption cookie is bound to the mailbox's unique ID validated against the profile/server - this is a legitimate access control, not tampering, but it means an examiner must either restore the original profile context or use a format-aware parser (libpff) that bypasses the MAPI layer entirely. Deleting a PST/OST removes the local copy, but for an OST this is low-impact anti-forensics since the data still exists server-side and Outlook will simply resync; deleting a PST used for local-only archiving or POP3 delivery is high-impact since no server copy exists. Registry profile remnants (Windows Messaging Subsystem\\Profiles, Outlook\\Profiles) can survive deletion of the data file itself and are useful for proving a store once existed at a specific path.",
+      "related_artifacts": [
+        "msg-eml-files",
+        "ntuser-dat-hive"
+      ],
+      "group": "communication",
+      "file": "data/artifacts/communication/outlook-ost-pst.json"
+    },
+    {
+      "id": "teams-slack-cache",
+      "name": "Teams/Slack Local Cache (LevelDB)",
+      "category": "file",
+      "subcategory": "communication-artifact",
+      "os_min": "Windows 10",
+      "location": "Teams 2.x (current, Electron-based): %LOCALAPPDATA%\\Packages\\MSTeams_8wekyb3d8bbwe\\LocalCache\\Microsoft\\MSTeams\\ containing an IndexedDB directory whose LevelDB files hold cached messages/posts/contacts. Legacy classic Teams 1.x: %APPDATA%\\Microsoft\\Teams\\IndexedDB\\. Slack desktop: %APPDATA%\\Slack\\Local Storage\\leveldb\\ for LevelDB key-value data, with a separate Cache_data folder holding cached attachments/media (Chromium disk-cache format). Exact subfolder names can shift between client versions - confirm the live path on the target build before relying on it.",
+      "purpose": "Modern Teams and Slack desktop clients are Electron/Chromium apps that persist recent conversation state client-side using LevelDB (Chromium's key-value storage engine, backing IndexedDB and Local Storage) rather than a conventional flat file, so a forensic copy of these directories can yield message text, contact/channel metadata, and cached attachments even without server-side access.",
+      "key_fields": [
+        "LevelDB directory structure: .ldb (sorted table) files holding the actual key-value records, a MANIFEST file describing the current set of SST files, a CURRENT file pointing to the active manifest, and a LOG/LOCK file - all must be collected together, not just one .ldb file, or the store may not parse",
+        "IndexedDB object store records (JSON-like serialized values) containing message text, sender ID, channel/conversation ID, and timestamp for Teams; equivalent Local Storage key-value pairs for Slack workspace/session state",
+        "Chromium-format disk cache (Cache / Cache_data folder) holding cached images, files, and other attachment blobs referenced by conversation records, parseable with standard Chrome-cache tooling",
+        "Tombstone entries: LevelDB does not overwrite deleted records in place - a delete is appended as a new entry with an empty value and a higher sequence number, so the original key (and sometimes prior value fragments) can remain recoverable in the .ldb file until the database is compacted",
+        "Workspace/tenant and user-account identifiers embedded in the store path or records, useful for confirming which of several Teams/Slack identities the cache belongs to on a shared machine"
+      ],
+      "normal_baseline": "A single active LevelDB store per installed client tied to the logged-on user's profile, growing incrementally with normal conversation use, whose message timestamps align with the user's known working hours and known chat/channel memberships.",
+      "anomalies": [
+        "Presence of a Teams/Slack LevelDB cache directory persisting after the application was uninstalled - deletion of the app does not remove the cache, so recovered messages can predate or postdate the visible install by longer than expected",
+        "Recovered tombstone/deleted-record remnants in .ldb files containing message content the user claims was never sent or was deleted, indicating deleted messages are still forensically recoverable pre-compaction",
+        "Cache data belonging to a workspace/tenant or account the user is not authorized to access on that host, suggesting credential reuse or unauthorized account access",
+        "Message timestamps in the cache with no corresponding entry in server-side/admin-exportable chat logs (where cross-checkable), suggesting local tampering or a client-side spoofing tool rather than genuine app-generated data",
+        "Unusually large or unexplained growth in Cache_data volume shortly before a suspected exfiltration window, consistent with bulk attachment download and caching"
+      ],
+      "parsing_tools": [
+        "forensicsim (open-source Autopsy module/parser for Microsoft Teams IndexedDB LevelDB data)",
+        "leveldb-dump / ccl_chrome_indexeddb (open-source LevelDB and Chromium IndexedDB record parsers)",
+        "ChromeCacheViewer (Nirsoft, for the Chromium-format Cache_data attachment cache)"
+      ],
+      "attack_techniques": [
+        "T1213.005"
+      ],
+      "anti_forensic_notes": "LevelDB's append-only, log-structured design means deleted messages are not immediately purged - they persist as recoverable tombstones in .ldb files until the database runs compaction, so a user 'deleting' a message in the Teams/Slack UI does not reliably remove it from the local cache at the time of collection. Conversely, waiting too long before imaging a system, or the client running a compaction pass, can permanently remove that recoverable content - LevelDB evidence is time-sensitive in a way flat-file artifacts are not. Uninstalling the client does not delete the AppData cache directory, so absence of the parent application does not mean absence of message history.",
+      "related_artifacts": [
+        "chrome-edge-browser-artifacts"
+      ],
+      "group": "communication",
+      "file": "data/artifacts/communication/teams-slack-cache.json"
     }
   ]
 }

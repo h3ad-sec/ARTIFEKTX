@@ -1,0 +1,39 @@
+{
+  "id": "memory-code-injection",
+  "name": "Injected Code / Process Hollowing Detection (Malfind)",
+  "category": "file",
+  "subcategory": "memory-forensics",
+  "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
+  "location": "Not a disk location - identified within a RAM acquisition using Volatility 3's malfind plugin (windows.malfind; renamed to windows.malware.malfind as the malware-related plugins were consolidated under the windows.malware namespace, with the old windows.malfind name deprecated).",
+  "purpose": "Walks each process's Virtual Address Descriptor (VAD) tree looking for memory regions whose protection and backing are consistent with injected code - executable-and-writable private memory not backed by any file on disk - and dumps a hex/disassembly preview of the region so an analyst can confirm shellcode, a reflectively-loaded PE, or a hollowed-out legitimate process.",
+  "key_fields": [
+    "Process / PID - the process whose VAD tree contained the suspicious region",
+    "Start VPN / End VPN - virtual address range of the flagged VAD",
+    "Tag - the VAD's internal tag; VadS or VadF indicates a private allocation with no mapped file (e.g. VirtualAlloc'd memory), as opposed to a normal image-backed Vad/VadImageMap",
+    "Protection - the region's memory protection constant; malfind flags EXECUTE+WRITE combinations such as PAGE_EXECUTE_READWRITE, which is abnormal for a legitimately loaded module (normal module code pages are typically PAGE_EXECUTE_WRITECOPY or PAGE_EXECUTE_READ)",
+    "Hexdump / Disassembly preview - the plugin's rendered preview of the first bytes of the flagged region, used to spot a PE header (MZ), shellcode patterns, or an unpacking stub",
+    "Empty-VAD filtering - malfind checks whether a candidate region is entirely paged-out or all-zero and suppresses it, to avoid reporting VADs that match the protection/tag criteria but hold no actual injected content"
+  ],
+  "normal_baseline": "On a clean system, malfind returns few or no hits; a small number of false positives can occur from legitimate just-in-time compilation (.NET CLR, JVM, browser JS engines) which intentionally allocate executable-writable private memory - these should map to a known JIT-using process and be corroborated before being treated as suspicious.",
+  "anomalies": [
+    "A VAD with PAGE_EXECUTE_READWRITE protection and a VadS/VadF (private, non-image) tag inside a process with no legitimate reason to JIT-compile code - the canonical injected-shellcode or reflective-DLL signature",
+    "A flagged region whose hexdump/disassembly preview begins with an MZ/PE header sitting in private (non-image-backed) memory, consistent with a manually-mapped or reflectively-loaded executable rather than one loaded through the normal Windows loader",
+    "The main executable's own VAD region (normally image-backed) showing content inconsistent with the on-disk file, or a mismatch between the process's reported image path and the actual code present at its base address - consistent with process hollowing, where a legitimate process is started suspended and its original image is unmapped and replaced",
+    "Cross-referencing a malfind hit's PID against windows.pslist/windows.psscan to find the process is otherwise unremarkable (normal parent, normal path) but carries this one anomalous VAD - typical of injection into an existing benign process rather than a wholly malicious one",
+    "Multiple unrelated processes each carrying a similarly-shaped injected VAD (same size, same protection pattern), suggesting a single injection tool or loader was used against several targets"
+  ],
+  "parsing_tools": [
+    "Volatility 3 (Volatility Foundation) - windows.malfind / windows.malware.malfind",
+    "Volatility 3 - windows.vadinfo / windows.vadyarascan for follow-up VAD inspection and YARA scanning of flagged regions"
+  ],
+  "attack_techniques": [
+    "T1055",
+    "T1055.012"
+  ],
+  "anti_forensic_notes": "malfind's detection logic depends on a specific, known-abusable protection/tag combination; malware authors aware of this commonly allocate memory as PAGE_READWRITE, write their payload, then call VirtualProtect to flip it to PAGE_EXECUTE_READ or PAGE_EXECUTE_WRITECOPY before execution, which removes the EXECUTE+WRITE combination malfind screens for and causes a false negative - a clean malfind result therefore does not rule out injection and should be paired with manual VAD review (windows.vadinfo) and cross-process handle/thread analysis (windows.handles, windows.threads) rather than trusted alone.",
+  "related_artifacts": [
+    "memory-process-list",
+    "memory-network-connections",
+    "memory-commandline-history"
+  ]
+}

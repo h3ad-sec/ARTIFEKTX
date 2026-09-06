@@ -1,0 +1,41 @@
+{
+  "id": "memory-network-connections",
+  "name": "Network Connections at Capture Time (Memory Forensics)",
+  "category": "file",
+  "subcategory": "memory-forensics/network",
+  "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
+  "location": "Not a disk location - reconstructed from a RAM acquisition using Volatility 3's windows.netscan and windows.netstat plugins.",
+  "purpose": "Recovers TCP/UDP endpoints and TCP listeners that existed in memory at the moment of capture, including connections a live netstat could no longer show because the process had already exited or the socket had closed - giving an analyst a network snapshot tied to the exact moment of acquisition rather than to whenever the host was later examined live.",
+  "key_fields": [
+    "windows.netscan - scans the entire memory image pool allocations (via Volatility's poolscanner) for network object structures, independent of any kernel list; recovers both currently active and recently-closed/terminated connections still resident in memory",
+    "windows.netstat - parses the kernel's live TcpPortPool/UdpPortPool (or, on newer builds, TcpCompartmentSet/UdpCompartmentSet) structures the same way the real netstat.exe does; faster but reports only endpoints still tracked by those live structures",
+    "Offset - virtual address of the recovered network object structure",
+    "Proto - transport protocol (TCPv4, TCPv6, UDPv4, UDPv6)",
+    "Local Address / Local Port and Foreign Address / Foreign Port",
+    "State - TCP connection state (e.g. LISTENING, ESTABLISHED, CLOSE_WAIT, TIME_WAIT)",
+    "PID and Owner - the owning process ID and its image name, letting a suspicious connection be pivoted directly to the process-list/DLL/handle findings for that PID",
+    "Created - the timestamp the connection/listener was created, when recoverable from the structure"
+  ],
+  "normal_baseline": "Listeners and established connections map cleanly to known services and applications (browser processes with ESTABLISHED connections to expected destination ports, svchost.exe instances LISTENING on expected service ports), with owning PIDs matching the process list produced by pslist/psscan for the same image.",
+  "anomalies": [
+    "An endpoint or listener recovered by windows.netscan that windows.netstat does not report, because netstat only walks the live port-pool structures - the discrepancy itself can indicate a connection whose owning process has since exited or that used a technique bypassing the standard pool tracking",
+    "A connection owned by a PID that does not appear at all in windows.pslist/windows.psscan for that same image, indicating the owning process itself was hidden or has since exited, but its network footprint persisted in memory",
+    "A well-known process name (svchost.exe, explorer.exe, rundll32.exe) shown as the Owner of an ESTABLISHED connection to an unexpected external address/port, especially over ports not typical for that binary",
+    "A LISTENING state on an unexpected local port bound by a process with no legitimate reason to accept inbound connections (backdoor / reverse-shell listener)",
+    "Connections whose Owner is blank/unresolvable in netscan output - the underlying object was found by pool signature but its owning EPROCESS pointer could not be resolved, which itself is unusual and worth flagging",
+    "Foreign address matching a known C2 IP/CIDR range or a raw IP with no corresponding DNS cache entry elsewhere in the same memory image"
+  ],
+  "parsing_tools": [
+    "Volatility 3 (Volatility Foundation) - windows.netscan, windows.netstat"
+  ],
+  "attack_techniques": [
+    "T1049",
+    "T1071"
+  ],
+  "anti_forensic_notes": "Because windows.netscan finds network objects by scanning memory for pool signatures rather than by following any kernel list, it will still surface a connection object even after the owning process exits or a rootkit unlinks the process elsewhere - making memory acquisition timing (as close as possible to the suspected activity) the main lever an analyst has, since a connection's pool allocation can eventually be overwritten/reused by later memory activity and become unrecoverable. windows.netstat, by only walking the live port-pool structures, will show nothing for a connection whose structure has already been torn down, so relying on netstat alone can silently miss activity that netscan would still catch - always run both and diff the results rather than treating either as complete on its own.",
+  "related_artifacts": [
+    "memory-process-list",
+    "memory-code-injection",
+    "memory-commandline-history"
+  ]
+}
