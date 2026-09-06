@@ -1,0 +1,33 @@
+{
+  "id": "system-last-shutdown-time",
+  "name": "System Last Shutdown Time",
+  "category": "registry",
+  "subcategory": "system-identification",
+  "os": "Windows",
+  "os_min": "Windows XP (ShutdownCount value is Windows XP only)",
+  "location": "SYSTEM\\CurrentControlSet\\Control\\Windows (ShutdownTime value) ; SYSTEM\\CurrentControlSet\\Control\\Watchdog\\Display (ShutdownCount value, Windows XP only)",
+  "purpose": "Records the last time the system was shut down; on Windows XP, also records a running count of the total number of shutdowns.",
+  "key_fields": [
+    "ShutdownTime - 64-bit Windows FILETIME value for the most recent shutdown",
+    "ShutdownCount - running shutdown counter (Windows XP only)"
+  ],
+  "normal_baseline": "ShutdownTime consistent with routine business-hours shutdown/reboot patterns or a known scheduled-maintenance window for that host.",
+  "anomalies": [
+    "ShutdownTime immediately preceding or following other incident indicators, consistent with an attacker-forced reboot to complete malware/driver installation or to disrupt live-response collection of volatile evidence",
+    "ShutdownTime inconsistent with other timeline artifacts for uptime/boot activity, suggesting the value or the system clock was manipulated",
+    "A ShutdownTime value present despite other evidence indicating the system was never gracefully shut down (e.g., crash/power-loss indicators), suggesting the value was set through an unexpected process rather than a genuine shutdown"
+  ],
+  "parsing_tools": [
+    "Registry Explorer (Eric Zimmerman)",
+    "RegRipper (H. Carvey)"
+  ],
+  "attack_techniques": [],
+  "anti_forensic_notes": "ShutdownTime is a single value overwritten on every shutdown, so it only ever reflects the MOST RECENT shutdown - no history of prior shutdowns is retained here. Cross-reference System.evtx (e.g., Event ID 1074/6006 style shutdown/service-stop records) for a fuller shutdown/reboot history than this single registry value can provide on its own.",
+  "interpretation": "Determining the last shutdown time can help detect user behavior and system anomalies. The value is stored in 64-bit Windows FILETIME format.",
+  "related_artifacts": [
+    "operating-system-version",
+    "computer-name",
+    "system-eventlog",
+    "system-hive"
+  ]
+}

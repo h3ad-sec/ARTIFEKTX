@@ -1,0 +1,32 @@
+{
+  "id": "browser-downloads",
+  "name": "Browser Downloads",
+  "category": "file",
+  "subcategory": "browser-artifact",
+  "os": "Windows",
+  "os_min": "N/A (application-level)",
+  "location": "Chrome/Edge: History.downloads table in the profile folder; Firefox: downloads recorded via moz_annos in places.sqlite (or separate downloads.sqlite on older versions)",
+  "purpose": "Records files downloaded through the browser (source URL, save path, timestamp) and, via session-restore files, the set of tabs/windows open at last shutdown or crash.",
+  "key_fields": [
+    "Download source URL",
+    "Local save path",
+    "Download start/end time",
+    "Session-restore tab URLs"
+  ],
+  "normal_baseline": "Downloads correspond to work-related documents/installers from known sources.",
+  "anomalies": [
+    "Download from a known malicious-tool distribution site or file-sharing service immediately preceding execution evidence for the same file",
+    "Session-restore tabs referencing an exfiltration or C2 panel URL"
+  ],
+  "parsing_tools": [
+    "Hindsight",
+    "BrowsingHistoryView (Nirsoft)"
+  ],
+  "attack_techniques": [],
+  "anti_forensic_notes": "Downloads table entries can be cleared alongside general history clearing; the downloaded file itself, if kept, will separately carry Zone.Identifier MOTW evidence of its origin.",
+  "interpretation": "",
+  "related_artifacts": [
+    "chrome-edge-browser-artifacts",
+    "motw-zone-identifier"
+  ]
+}

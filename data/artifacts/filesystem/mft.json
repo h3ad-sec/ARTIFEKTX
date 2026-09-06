@@ -3,6 +3,7 @@
   "name": "Master File Table ($MFT)",
   "category": "file",
   "subcategory": "filesystem-metadata",
+  "os": "Windows",
   "os_min": "Windows NT 3.1 (any NTFS volume)",
   "location": "\\$MFT (root of every NTFS volume; not directly accessible via normal file APIs while the volume is mounted)",
   "purpose": "The MFT is the core NTFS structure holding one (or more) records per file and directory on the volume, including its attributes, timestamps, size, and data location. It is the primary source for filesystem timeline reconstruction and for detecting timestomping.",
@@ -35,7 +36,7 @@
     "usn-journal",
     "logfile",
     "recycle-bin",
-    "amcache",
+    "amcache-hve",
     "prefetch",
     "ntfs-timestamp-rules"
   ]

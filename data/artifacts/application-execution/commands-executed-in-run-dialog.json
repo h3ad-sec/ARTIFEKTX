@@ -1,0 +1,37 @@
+{
+  "id": "commands-executed-in-run-dialog",
+  "name": "Commands Executed in the Run Dialog",
+  "category": "registry",
+  "subcategory": "program-execution",
+  "os": "Windows",
+  "os_min": "Windows XP",
+  "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU",
+  "purpose": "Records the most-recently-used command strings typed into the Run dialog (Win+R), letting an analyst reconstruct commands, paths, or scripts a user (or an attacker operating in that user's context) manually invoked via Run.",
+  "key_fields": [
+    "Value names - single lowercase letters (a, b, c, ...) each holding one typed command string, generally suffixed with '\\1'",
+    "MRUList - REG_SZ string whose character order gives the recency order of the lettered values (leftmost = most recently used)",
+    "Key LastWrite time - approximates when the most recent command was executed via Run"
+  ],
+  "normal_baseline": "A short list of familiar administrative commands and paths (cmd, mstsc, \\\\server\\share, control, appwiz.cpl, notepad, common file/folder paths the user navigates to via Run).",
+  "anomalies": [
+    "PowerShell/cmd invocations with encoded, obfuscated, or unusually long argument strings",
+    "UNC paths to unfamiliar internal or external hosts, or to admin shares (\\\\host\\C$)",
+    "References to script interpreters (wscript, cscript, mshta, rundll32, regsvr32) with file paths in Temp, Downloads, or AppData",
+    "Commands referencing archive extraction tools or living-off-the-land binaries not normally used interactively by that user",
+    "RunMRU key or individual lettered values missing/reset while other evidence (Prefetch, EventLogs, UserAssist) shows Run-dialog-style activity in the same window, suggesting deliberate clearing",
+    "Only the letter values remain with no MRUList, or the MRUList does not reference all present letters, indicating partial/manual tampering rather than normal overwrite behavior"
+  ],
+  "parsing_tools": [
+    "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
+    "RegRipper (runmru.pl plugin)"
+  ],
+  "attack_techniques": [
+    "T1059"
+  ],
+  "anti_forensic_notes": "Only the last ~26 distinct commands are retained (one per lowercase letter a-z; the oldest is evicted as new commands are added), so heavy Run-dialog use can push older evidence out through normal operation, not just tampering. An entry is only committed to the registry once the Run dialog is closed, so live/volatile use may not yet be on disk. Attackers who know about this artifact often delete specific values or the whole key, but doing so still requires closing the Run dialog to commit the change, and its absence alongside other execution evidence is itself suspicious.",
+  "interpretation": "",
+  "related_artifacts": [
+    "userassist",
+    "user-typed-paths"
+  ]
+}

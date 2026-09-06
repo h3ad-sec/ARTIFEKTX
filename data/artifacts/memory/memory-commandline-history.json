@@ -3,6 +3,7 @@
   "name": "Command-Line History via Process-Creation Auditing (4688 / Sysmon EID 1)",
   "category": "file",
   "subcategory": "memory-forensics",
+  "os": "Windows",
   "os_min": "N/A - Event ID 4688 command-line logging requires Windows Vista/Server 2008 or later plus the specific audit policy below enabled; Sysmon requires separate installation on any supported Windows version.",
   "location": "Security.evtx (Event ID 4688, Process Command Line field) and/or Microsoft-Windows-Sysmon%4Operational.evtx (Event ID 1, CommandLine field).",
   "purpose": "This entry documents the mechanism that must be in place for command-line arguments to be captured at process-creation time at all - it is not the general Security or Sysmon event log entry, but specifically what has to be configured (or not) for the Process Command Line / CommandLine field to be populated, and how analysts use that field to reconstruct exactly what an attacker typed or a script executed.",

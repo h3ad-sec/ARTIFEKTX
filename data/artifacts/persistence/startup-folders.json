@@ -3,6 +3,7 @@
   "name": "Startup Folders",
   "category": "file",
   "subcategory": "persistence",
+  "os": "Windows",
   "os_min": "Windows NT 4.0",
   "location": "%AppData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup (per-user) and %ProgramData%\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp (all-users)",
   "purpose": "Any shortcut or executable placed here launches automatically at user logon.",
@@ -26,6 +27,7 @@
   "anti_forensic_notes": "Trivially removed by deleting the file; file-system timestamps on the item itself (not just its LNK target) can help date when persistence was planted.",
   "interpretation": "",
   "related_artifacts": [
-    "lnk-files"
+    "shortcut-lnk-files",
+    "system-boot-and-autostart-programs"
   ]
 }

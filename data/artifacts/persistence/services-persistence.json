@@ -3,6 +3,7 @@
   "name": "Windows Services (Persistence)",
   "category": "registry",
   "subcategory": "persistence",
+  "os": "Windows",
   "os_min": "Windows NT 4.0",
   "location": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\<ServiceName> (ImagePath, Start, ServiceDll for svchost-hosted)",
   "purpose": "Services configured with Start=2 (auto) or 3 (demand) launch at boot or on demand, commonly abused for SYSTEM-level persistence.",
@@ -29,6 +30,7 @@
   "interpretation": "",
   "related_artifacts": [
     "system-hive",
-    "system-eventlog"
+    "system-eventlog",
+    "service-events"
   ]
 }

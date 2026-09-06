@@ -1,0 +1,38 @@
+{
+  "id": "auto-complete-data",
+  "name": "Auto-Complete Data",
+  "category": "file",
+  "subcategory": "browser-artifact",
+  "os": "Windows",
+  "os_min": "N/A (application-level)",
+  "location": "Firefox: places.sqlite, formhistory.sqlite ; Chrome/Edge: History (keyword_search_terms table), Web Data (autofill table), Shortcuts, Network Action Predictor, Login Data",
+  "purpose": "Aggregates data a user has typed into the browser across several distinct databases — search-engine queries, web form entries, Omnibox/address-bar input, letter-by-letter typed predictions, and typed credentials.",
+  "key_fields": [
+    "keyword_search_terms table (History) — items typed into search engines",
+    "autofill table (Web Data) — items typed into web forms",
+    "Shortcuts table — items typed in the Omnibox URL bar",
+    "Network Action Predictor — records what was typed letter by letter",
+    "Login Data — inputted user credentials",
+    "moz_formhistory (Firefox formhistory.sqlite)"
+  ],
+  "normal_baseline": "Typed terms and form entries reflect routine work tasks and known account usage for the profile owner.",
+  "anomalies": [
+    "Search terms or typed URLs referencing hacking tools, exploit frameworks, or data-exfiltration services",
+    "Network Action Predictor entries showing a fully-typed sensitive term never submitted through the visible History, suggesting the user aborted before completion",
+    "Autofill/form entries containing credentials, tokens, or PII for accounts that do not belong to the profile owner"
+  ],
+  "parsing_tools": [
+    "DB Browser for SQLite",
+    "BrowsingHistoryView (NirSoft)"
+  ],
+  "attack_techniques": [
+    "T1217"
+  ],
+  "anti_forensic_notes": "Typed-data evidence is spread across five-plus independent databases, so clearing one (e.g., autofill) often leaves corroborating entries in another (e.g., Network Action Predictor or Shortcuts), making full suppression of typed history difficult without wiping the entire profile.",
+  "interpretation": "Includes both the typed-in data itself and metadata about the data type (search term vs. form field vs. URL vs. credential). Cross-referencing the separate tables connects typed content to a timeline and, combined with profile ownership, ties the typing activity to a specific user account rather than just \"the browser.\"",
+  "related_artifacts": [
+    "chrome-edge-browser-artifacts",
+    "firefox-browser-artifacts",
+    "stored-credentials"
+  ]
+}

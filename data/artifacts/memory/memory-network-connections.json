@@ -3,6 +3,7 @@
   "name": "Network Connections at Capture Time (Memory Forensics)",
   "category": "file",
   "subcategory": "memory-forensics",
+  "os": "Windows",
   "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
   "location": "Not a disk location - reconstructed from a RAM acquisition using Volatility 3's windows.netscan and windows.netstat plugins.",
   "purpose": "Recovers TCP/UDP endpoints and TCP listeners that existed in memory at the moment of capture, including connections a live netstat could no longer show because the process had already exited or the socket had closed - giving an analyst a network snapshot tied to the exact moment of acquisition rather than to whenever the host was later examined live.",

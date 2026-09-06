@@ -3,6 +3,7 @@
   "name": "Volume Shadow Copies (VSS)",
   "category": "file",
   "subcategory": "anti-forensics-detection",
+  "os": "Windows",
   "os_min": "Windows XP / Server 2003 (Volume Shadow Copy Service and vssadmin); the Explorer 'Previous Versions' / System Protection restore-point workflow used since Windows Vista",
   "location": "Mounted via device paths such as \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy<N>; the change-block storage for a volume's shadow copies is kept in the hidden System Volume Information\\ directory on that same volume",
   "purpose": "A Windows service that creates point-in-time snapshots of a volume, used by System Restore, backup software, and Explorer's 'Previous Versions' feature. Forensically, a mounted shadow copy lets an investigator browse a volume's file system and registry hives exactly as they existed at an earlier point in time, recovering files and hive states since deleted or modified on the live volume.",

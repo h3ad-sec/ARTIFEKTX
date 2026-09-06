@@ -1,0 +1,39 @@
+{
+  "id": "wlan-event-log",
+  "name": "WLAN Event Log",
+  "category": "file",
+  "subcategory": "network-configuration",
+  "os": "Windows",
+  "os_min": "Windows 7",
+  "location": "Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx (also cross-reference System.evtx Event ID 6100)",
+  "purpose": "Provides a historical, event-based record of wireless network association attempts and outcomes, complementing the current-state wifi-profiles XML files and the correlatable network-history registry keys.",
+  "key_fields": [
+    "Event ID 11000 - wireless network association started",
+    "Event ID 8001 - successful wireless connection",
+    "Event ID 8002 - failed wireless connection",
+    "Event ID 8003 - wireless disconnect",
+    "System.evtx Event ID 6100 - network diagnostics"
+  ],
+  "normal_baseline": "Association/connect/disconnect events limited to known, previously approved SSIDs matching the wifi-profiles inventory, with disconnects aligning with expected mobility (leaving the office, device sleep, etc.).",
+  "anomalies": [
+    "11000/8001 success events for an SSID with no corresponding wifi-profiles XML or network-history Profile entry, suggesting the resulting profile was subsequently deleted",
+    "A burst of 8002 failed-connection events against an unfamiliar SSID, consistent with automated or repeated association attempts against a rogue access point or evil-twin network",
+    "8001 success events for an SSID matching a known rogue-AP naming pattern that impersonates a legitimate network (e.g., a subtle variation on the organization's SSID)",
+    "Association events implying a geographic location inconsistent with the user's claimed whereabouts at that time"
+  ],
+  "parsing_tools": [
+    "Event Viewer",
+    "EvtxECmd (Eric Zimmerman)"
+  ],
+  "attack_techniques": [
+    "T1016.002"
+  ],
+  "anti_forensic_notes": "This is a separate, event-log-based record from the wifi-profiles XML files and NetworkList registry keys - deleting a saved Wi-Fi profile or a NetworkList entry does not retroactively remove the association/connect events already written here, making this log a durable cross-check even after profile-level cleanup. Conversely, clearing this operational log removes the association timeline while leaving the current-state profile artifacts intact.",
+  "interpretation": "Provides a historical record of wireless network connections. The SSID recorded here can be used to correlate against and retrieve additional network information from the Network History registry keys.",
+  "related_artifacts": [
+    "wifi-profiles",
+    "network-history",
+    "network-interfaces",
+    "system-eventlog"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "id": "usrclass-dat-hive",
+  "name": "UsrClass.dat (User Classes Hive)",
+  "category": "registry",
+  "subcategory": "user-configuration",
+  "os": "Windows",
+  "os_min": "Windows XP",
+  "location": "Mounted as HKEY_CURRENT_USER\\Software\\Classes (a per-user view of HKEY_CLASSES_ROOT) while the user is logged on. File: %LocalAppData%\\Microsoft\\Windows\\UsrClass.dat (Vista and later; Windows XP path was %UserProfile%\\Local Settings\\Application Data\\Microsoft\\Windows\\UsrClass.dat)",
+  "purpose": "A separate per-user hive, distinct from NTUSER.DAT, that holds the user-specific portion of the Classes registry: per-user COM class registrations and shell-extension data that override or supplement the machine-wide HKLM\\SOFTWARE\\Classes. It is also one of the two locations where Shellbags data is stored (the other being NTUSER.DAT on pre-Vista systems).",
+  "key_fields": [
+    "Local Settings\\Software\\Microsoft\\Windows\\Shell\\BagMRU — folder paths/names visited in Explorer, tracked as a most-recently-used tree",
+    "Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bags — per-folder view settings (window size, position, view mode) referenced by BagMRU entries",
+    "CLSID\\<GUID> subkeys — per-user COM class registrations (e.g. shell extension handlers, context-menu/property-sheet handlers)",
+    "Wow6432Node mirror for 32-bit COM registrations on 64-bit Windows"
+  ],
+  "normal_baseline": "COM/CLSID entries correspond to installed, legitimate applications' shell-extension components (e.g. archive managers, cloud-sync icon overlays); BagMRU/Bags entries reflect folders the user is known to have browsed, including removable and network paths no longer present on the system.",
+  "anomalies": [
+    "A CLSID entry registering a shell extension (context-menu handler, icon handler, property-sheet handler) whose InprocServer32 path points to a binary in a user-writable or unusual location rather than a normal application install directory — a known technique for gaining persistence that loads automatically whenever Explorer touches a file/folder.",
+    "BagMRU/Bags entries referencing paths on removable or network volumes that align with known data-staging or exfiltration locations, present even though the volume itself is no longer attached to the system — proving the folder was browsed at some point regardless of current volume presence.",
+    "Shellbags entries showing folder access to a sensitive directory that the account has no legitimate business reason to browse."
+  ],
+  "parsing_tools": [
+    "ShellBagsExplorer.exe and SBECmd.exe (Eric Zimmerman)",
+    "Registry Explorer / RECmd (Eric Zimmerman)",
+    "RegRipper"
+  ],
+  "attack_techniques": [],
+  "anti_forensic_notes": "Shellbags entries in this hive are not tied to a file's own metadata and are not cleared when the referenced folder or volume is deleted or removed, so they can outlive the evidence they point to — an analyst can prove a folder was accessed even after the folder, and the drive it was on, are both gone. Because the hive loads only for its owning user, correlating it correctly requires matching the hive to the right SID/profile.",
+  "interpretation": "",
+  "related_artifacts": [
+    "ntuser-dat-hive"
+  ]
+}

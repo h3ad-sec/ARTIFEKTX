@@ -3,6 +3,7 @@
   "name": "Run / RunOnce Registry Keys",
   "category": "registry",
   "subcategory": "persistence",
+  "os": "Windows",
   "os_min": "Windows NT 4.0",
   "location": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run(Once) and HKCU (NTUSER.DAT) equivalents",
   "purpose": "Machine-wide or per-user autostart mechanism executing listed commands at logon/boot.",
@@ -27,6 +28,7 @@
   "interpretation": "",
   "related_artifacts": [
     "software-hive",
-    "ntuser-dat-hive"
+    "ntuser-dat-hive",
+    "system-boot-and-autostart-programs"
   ]
 }

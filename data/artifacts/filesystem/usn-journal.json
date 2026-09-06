@@ -3,6 +3,7 @@
   "name": "USN Journal ($UsnJrnl)",
   "category": "file",
   "subcategory": "filesystem-metadata",
+  "os": "Windows",
   "os_min": "Windows 2000 (present but not enabled by default until Windows Vista, which enables it by default on NTFS volumes)",
   "location": "\\$Extend\\$UsnJrnl (root of the NTFS volume, inside the $Extend system directory); change records live in the alternate data stream $UsnJrnl:$J, with sizing/config metadata in $UsnJrnl:$Max",
   "purpose": "A per-volume, append-only log of file and directory create, delete, rename, and modification-type changes, recorded independently of the MFT. It provides a durable, sequential record of filesystem activity that often survives after the underlying file or its MFT entry is gone.",

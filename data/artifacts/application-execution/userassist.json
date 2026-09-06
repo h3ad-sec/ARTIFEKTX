@@ -1,0 +1,39 @@
+{
+  "id": "userassist",
+  "name": "UserAssist",
+  "category": "registry",
+  "subcategory": "program-execution",
+  "os": "Windows",
+  "os_min": "Windows XP",
+  "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist\\{GUID}\\Count",
+  "purpose": "Tracks GUI-launched programs and shortcuts per user, including how many times an item was run, how long it held focus, and when it was last executed. Populated by the Windows Explorer shell (explorer.exe/userassist.dll) when a user double-clicks an icon, shortcut, or Start Menu/Taskbar entry.",
+  "key_fields": [
+    "GUID subkey {CEBFF5CD-ACE2-4F4F-9178-9926F41749EA} - executed .exe files",
+    "GUID subkey {F4E57C4B-2036-45F0-A9AB-443BCFE33D9F} - shortcut (.lnk) launches, e.g. Start Menu items",
+    "Value name - ROT13-encoded full path or shortcut name of the launched item",
+    "Binary value data (Windows 7+, 72 bytes): Run Count (offset 4), Focus Count (offset 8), Focus Time in milliseconds (offset 12), Last Execution Time as FILETIME (offset 60)"
+  ],
+  "normal_baseline": "Populated with common user-facing applications (browsers, Office, Explorer, Settings) and OS utilities the user launched via the shell. Run counts grow gradually over normal daily use; focus time is nonzero for applications the user actually interacted with.",
+  "anomalies": [
+    "Entry for an executable in an unusual location (Temp, Downloads, AppData, ProgramData) with a high run count in a short time window",
+    "Run count present but focus time and focus count are zero or near-zero, suggesting the program launched and exited immediately (consistent with a dropper or one-shot loader) rather than genuine interactive use",
+    "Last-execution timestamp updated even though the underlying binary no longer exists on disk, indicating deleted post-execution malware",
+    "Entries for LOLBins (rundll32.exe, mshta.exe, regsvr32.exe, cmd.exe) launched via the shell (double-click/shortcut) rather than command line, which is unusual for these utilities",
+    "Complete absence of expected UserAssist entries for a period when other artifacts (Prefetch, EventLogs) show GUI activity, suggesting the key or its Count subkey was cleared",
+    "Session ID field indicating logons/sessions the analyst cannot otherwise account for"
+  ],
+  "parsing_tools": [
+    "Eric Zimmerman's RECmd / Registry Explorer (github.com/EricZimmerman)",
+    "Didier Stevens's userassist.py",
+    "Velociraptor Windows.Registry.UserAssist artifact"
+  ],
+  "attack_techniques": [
+    "T1204"
+  ],
+  "anti_forensic_notes": "Value names are ROT13-encoded, not encrypted, so this is trivially reversible and not a real obstacle to analysis. However, using 'Open file location' or similar shell actions from a search/menu can update a UserAssist entry's run count and timestamp without the target actually being executed, which can produce a false positive for execution if not corroborated with focus time/count or other execution artifacts (Prefetch, Amcache). The entire UserAssist key can be deleted or disabled by an attacker with registry access, and its absence where GUI activity is otherwise evidenced is itself a red flag.",
+  "interpretation": "",
+  "related_artifacts": [
+    "shell-bags",
+    "recent-files"
+  ]
+}

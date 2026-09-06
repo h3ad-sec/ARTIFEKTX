@@ -24,11 +24,12 @@
   --status-live:#00d4ff;--status-partial:#f59e0b;--status-soon:#2d3748;
   --nav-h:48px;
   --mono:'Share Tech Mono',monospace;--ui:'IBM Plex Sans',sans-serif;--fs-xs:11px;
-  --grp-registry:#58a6ff;--grp-execution:#00d4ff;--grp-user-activity:#a855f7;
-  --grp-filesystem:#f59e0b;--grp-eventlogs:#06b6d4;
-  --grp-persistence:#6366f1;--grp-browser:#ec4899;
-  --grp-memory:#64748b;--grp-network:#ea580c;--grp-communication:#78350f;
-  --grp-cloud-storage:#0ea5e9;--grp-system-info:#a3a3a3;--grp-accounts:#be185d;
+  --grp-registry-hives:#58a6ff;--grp-application-execution:#00d4ff;--grp-file-and-folder-opening:#a855f7;
+  --grp-deleted-items-and-file-existence:#eab308;--grp-browser-activity:#ec4899;
+  --grp-cloud-storage:#0ea5e9;--grp-external-device-usb-usage:#f59e0b;
+  --grp-system-information:#a3a3a3;--grp-account-usage:#be185d;--grp-network-activity:#ea580c;
+  --grp-eventlogs:#06b6d4;--grp-persistence:#6366f1;--grp-memory:#64748b;
+  --grp-communication:#78350f;--grp-filesystem:#8b5cf6;
 }
 body.light{
   --bg:#eef2f8;--panel:#ffffff;--panel-alt:#e4ecf6;--surface:#ccd8ec;
@@ -115,19 +116,21 @@ body.light .filter-search:focus{box-shadow:0 0 0 2px rgba(2,132,199,.12);}
   cursor:pointer;transition:all .14s;text-align:left;white-space:nowrap;}
 .vsb-nav .filter-pill:hover{color:var(--text-dim);background:rgba(255,255,255,.03);}
 .filter-pill.active{color:var(--text);background:rgba(255,255,255,.05);border-color:var(--border);}
-.filter-pill[data-group="registry"].active{color:var(--grp-registry);border-color:color-mix(in srgb, var(--grp-registry) 30%, transparent);background:color-mix(in srgb, var(--grp-registry) 8%, transparent);}
-.filter-pill[data-group="execution"].active{color:var(--grp-execution);border-color:color-mix(in srgb, var(--grp-execution) 30%, transparent);background:color-mix(in srgb, var(--grp-execution) 8%, transparent);}
-.filter-pill[data-group="user-activity"].active{color:var(--grp-user-activity);border-color:color-mix(in srgb, var(--grp-user-activity) 30%, transparent);background:color-mix(in srgb, var(--grp-user-activity) 8%, transparent);}
-.filter-pill[data-group="filesystem"].active{color:var(--grp-filesystem);border-color:color-mix(in srgb, var(--grp-filesystem) 30%, transparent);background:color-mix(in srgb, var(--grp-filesystem) 8%, transparent);}
+.filter-pill[data-group="registry-hives"].active{color:var(--grp-registry-hives);border-color:color-mix(in srgb, var(--grp-registry-hives) 30%, transparent);background:color-mix(in srgb, var(--grp-registry-hives) 8%, transparent);}
+.filter-pill[data-group="application-execution"].active{color:var(--grp-application-execution);border-color:color-mix(in srgb, var(--grp-application-execution) 30%, transparent);background:color-mix(in srgb, var(--grp-application-execution) 8%, transparent);}
+.filter-pill[data-group="file-and-folder-opening"].active{color:var(--grp-file-and-folder-opening);border-color:color-mix(in srgb, var(--grp-file-and-folder-opening) 30%, transparent);background:color-mix(in srgb, var(--grp-file-and-folder-opening) 8%, transparent);}
+.filter-pill[data-group="deleted-items-and-file-existence"].active{color:var(--grp-deleted-items-and-file-existence);border-color:color-mix(in srgb, var(--grp-deleted-items-and-file-existence) 30%, transparent);background:color-mix(in srgb, var(--grp-deleted-items-and-file-existence) 8%, transparent);}
+.filter-pill[data-group="browser-activity"].active{color:var(--grp-browser-activity);border-color:color-mix(in srgb, var(--grp-browser-activity) 30%, transparent);background:color-mix(in srgb, var(--grp-browser-activity) 8%, transparent);}
+.filter-pill[data-group="cloud-storage"].active{color:var(--grp-cloud-storage);border-color:color-mix(in srgb, var(--grp-cloud-storage) 30%, transparent);background:color-mix(in srgb, var(--grp-cloud-storage) 8%, transparent);}
+.filter-pill[data-group="external-device-usb-usage"].active{color:var(--grp-external-device-usb-usage);border-color:color-mix(in srgb, var(--grp-external-device-usb-usage) 30%, transparent);background:color-mix(in srgb, var(--grp-external-device-usb-usage) 8%, transparent);}
+.filter-pill[data-group="system-information"].active{color:var(--grp-system-information);border-color:color-mix(in srgb, var(--grp-system-information) 30%, transparent);background:color-mix(in srgb, var(--grp-system-information) 8%, transparent);}
+.filter-pill[data-group="account-usage"].active{color:var(--grp-account-usage);border-color:color-mix(in srgb, var(--grp-account-usage) 30%, transparent);background:color-mix(in srgb, var(--grp-account-usage) 8%, transparent);}
+.filter-pill[data-group="network-activity"].active{color:var(--grp-network-activity);border-color:color-mix(in srgb, var(--grp-network-activity) 30%, transparent);background:color-mix(in srgb, var(--grp-network-activity) 8%, transparent);}
 .filter-pill[data-group="eventlogs"].active{color:var(--grp-eventlogs);border-color:color-mix(in srgb, var(--grp-eventlogs) 30%, transparent);background:color-mix(in srgb, var(--grp-eventlogs) 8%, transparent);}
 .filter-pill[data-group="persistence"].active{color:var(--grp-persistence);border-color:color-mix(in srgb, var(--grp-persistence) 30%, transparent);background:color-mix(in srgb, var(--grp-persistence) 8%, transparent);}
-.filter-pill[data-group="browser"].active{color:var(--grp-browser);border-color:color-mix(in srgb, var(--grp-browser) 30%, transparent);background:color-mix(in srgb, var(--grp-browser) 8%, transparent);}
 .filter-pill[data-group="memory"].active{color:var(--grp-memory);border-color:color-mix(in srgb, var(--grp-memory) 30%, transparent);background:color-mix(in srgb, var(--grp-memory) 8%, transparent);}
-.filter-pill[data-group="network"].active{color:var(--grp-network);border-color:color-mix(in srgb, var(--grp-network) 30%, transparent);background:color-mix(in srgb, var(--grp-network) 8%, transparent);}
 .filter-pill[data-group="communication"].active{color:var(--grp-communication);border-color:color-mix(in srgb, var(--grp-communication) 30%, transparent);background:color-mix(in srgb, var(--grp-communication) 8%, transparent);}
-.filter-pill[data-group="cloud-storage"].active{color:var(--grp-cloud-storage);border-color:color-mix(in srgb, var(--grp-cloud-storage) 30%, transparent);background:color-mix(in srgb, var(--grp-cloud-storage) 8%, transparent);}
-.filter-pill[data-group="system-info"].active{color:var(--grp-system-info);border-color:color-mix(in srgb, var(--grp-system-info) 30%, transparent);background:color-mix(in srgb, var(--grp-system-info) 8%, transparent);}
-.filter-pill[data-group="accounts"].active{color:var(--grp-accounts);border-color:color-mix(in srgb, var(--grp-accounts) 30%, transparent);background:color-mix(in srgb, var(--grp-accounts) 8%, transparent);}
+.filter-pill[data-group="filesystem"].active{color:var(--grp-filesystem);border-color:color-mix(in srgb, var(--grp-filesystem) 30%, transparent);background:color-mix(in srgb, var(--grp-filesystem) 8%, transparent);}
 .fp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 .fp-name{flex:1;}
 .fp-count{font-size:9px;color:var(--muted-dim);}
@@ -142,19 +145,21 @@ body.light .filter-search:focus{box-shadow:0 0 0 2px rgba(2,132,199,.12);}
     background:transparent;color:var(--muted);border:none;border-bottom:2px solid transparent;cursor:pointer;
     transition:color .15s,border-color .15s;white-space:nowrap;flex-shrink:0;margin-bottom:-1px;}
   .mobile-filter .filter-pill.active{color:var(--accent);border-bottom-color:var(--accent);}
-  .mobile-filter .filter-pill[data-group="registry"].active{color:var(--grp-registry);border-bottom-color:var(--grp-registry);}
-  .mobile-filter .filter-pill[data-group="execution"].active{color:var(--grp-execution);border-bottom-color:var(--grp-execution);}
-  .mobile-filter .filter-pill[data-group="user-activity"].active{color:var(--grp-user-activity);border-bottom-color:var(--grp-user-activity);}
-  .mobile-filter .filter-pill[data-group="filesystem"].active{color:var(--grp-filesystem);border-bottom-color:var(--grp-filesystem);}
+  .mobile-filter .filter-pill[data-group="registry-hives"].active{color:var(--grp-registry-hives);border-bottom-color:var(--grp-registry-hives);}
+  .mobile-filter .filter-pill[data-group="application-execution"].active{color:var(--grp-application-execution);border-bottom-color:var(--grp-application-execution);}
+  .mobile-filter .filter-pill[data-group="file-and-folder-opening"].active{color:var(--grp-file-and-folder-opening);border-bottom-color:var(--grp-file-and-folder-opening);}
+  .mobile-filter .filter-pill[data-group="deleted-items-and-file-existence"].active{color:var(--grp-deleted-items-and-file-existence);border-bottom-color:var(--grp-deleted-items-and-file-existence);}
+  .mobile-filter .filter-pill[data-group="browser-activity"].active{color:var(--grp-browser-activity);border-bottom-color:var(--grp-browser-activity);}
+  .mobile-filter .filter-pill[data-group="cloud-storage"].active{color:var(--grp-cloud-storage);border-bottom-color:var(--grp-cloud-storage);}
+  .mobile-filter .filter-pill[data-group="external-device-usb-usage"].active{color:var(--grp-external-device-usb-usage);border-bottom-color:var(--grp-external-device-usb-usage);}
+  .mobile-filter .filter-pill[data-group="system-information"].active{color:var(--grp-system-information);border-bottom-color:var(--grp-system-information);}
+  .mobile-filter .filter-pill[data-group="account-usage"].active{color:var(--grp-account-usage);border-bottom-color:var(--grp-account-usage);}
+  .mobile-filter .filter-pill[data-group="network-activity"].active{color:var(--grp-network-activity);border-bottom-color:var(--grp-network-activity);}
   .mobile-filter .filter-pill[data-group="eventlogs"].active{color:var(--grp-eventlogs);border-bottom-color:var(--grp-eventlogs);}
   .mobile-filter .filter-pill[data-group="persistence"].active{color:var(--grp-persistence);border-bottom-color:var(--grp-persistence);}
-  .mobile-filter .filter-pill[data-group="browser"].active{color:var(--grp-browser);border-bottom-color:var(--grp-browser);}
   .mobile-filter .filter-pill[data-group="memory"].active{color:var(--grp-memory);border-bottom-color:var(--grp-memory);}
-  .mobile-filter .filter-pill[data-group="network"].active{color:var(--grp-network);border-bottom-color:var(--grp-network);}
   .mobile-filter .filter-pill[data-group="communication"].active{color:var(--grp-communication);border-bottom-color:var(--grp-communication);}
-  .mobile-filter .filter-pill[data-group="cloud-storage"].active{color:var(--grp-cloud-storage);border-bottom-color:var(--grp-cloud-storage);}
-  .mobile-filter .filter-pill[data-group="system-info"].active{color:var(--grp-system-info);border-bottom-color:var(--grp-system-info);}
-  .mobile-filter .filter-pill[data-group="accounts"].active{color:var(--grp-accounts);border-bottom-color:var(--grp-accounts);}
+  .mobile-filter .filter-pill[data-group="filesystem"].active{color:var(--grp-filesystem);border-bottom-color:var(--grp-filesystem);}
 }
 
 /* ── Grid + cards ── */
@@ -426,19 +431,21 @@ function toggleTheme(){
 /* ── Data + filtering ── */
 var GROUPS=[
   {id:'all',label:'ALL ARTIFACTS'},
-  {id:'registry',label:'REGISTRY HIVES',color:'var(--grp-registry)'},
-  {id:'execution',label:'EXECUTION EVIDENCE',color:'var(--grp-execution)'},
-  {id:'user-activity',label:'USER ACTIVITY',color:'var(--grp-user-activity)'},
-  {id:'filesystem',label:'FILESYSTEM',color:'var(--grp-filesystem)'},
+  {id:'registry-hives',label:'REGISTRY HIVES',color:'var(--grp-registry-hives)'},
+  {id:'application-execution',label:'APPLICATION EXECUTION',color:'var(--grp-application-execution)'},
+  {id:'file-and-folder-opening',label:'FILE AND FOLDER OPENING',color:'var(--grp-file-and-folder-opening)'},
+  {id:'deleted-items-and-file-existence',label:'DELETED ITEMS & FILE EXISTENCE',color:'var(--grp-deleted-items-and-file-existence)'},
+  {id:'browser-activity',label:'BROWSER ACTIVITY',color:'var(--grp-browser-activity)'},
+  {id:'cloud-storage',label:'CLOUD STORAGE',color:'var(--grp-cloud-storage)'},
+  {id:'external-device-usb-usage',label:'EXTERNAL DEVICE/USB USAGE',color:'var(--grp-external-device-usb-usage)'},
+  {id:'system-information',label:'SYSTEM INFORMATION',color:'var(--grp-system-information)'},
+  {id:'account-usage',label:'ACCOUNT USAGE',color:'var(--grp-account-usage)'},
+  {id:'network-activity',label:'NETWORK ACTIVITY & PHYSICAL LOCATION',color:'var(--grp-network-activity)'},
   {id:'eventlogs',label:'EVENT LOGS',color:'var(--grp-eventlogs)'},
   {id:'persistence',label:'PERSISTENCE',color:'var(--grp-persistence)'},
-  {id:'browser',label:'BROWSER',color:'var(--grp-browser)'},
-  {id:'memory',label:'MEMORY',color:'var(--grp-memory)'},
-  {id:'network',label:'NETWORK',color:'var(--grp-network)'},
+  {id:'memory',label:'MEMORY FORENSICS',color:'var(--grp-memory)'},
   {id:'communication',label:'COMMUNICATION',color:'var(--grp-communication)'},
-  {id:'cloud-storage',label:'CLOUD STORAGE',color:'var(--grp-cloud-storage)'},
-  {id:'system-info',label:'SYSTEM INFO',color:'var(--grp-system-info)'},
-  {id:'accounts',label:'ACCOUNTS',color:'var(--grp-accounts)'}
+  {id:'filesystem',label:'FILESYSTEM ARTIFACTS',color:'var(--grp-filesystem)'}
 ];
 var allArtifacts=[];
 var activeGroup='all';

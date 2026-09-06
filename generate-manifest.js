@@ -4,7 +4,7 @@ const path = require('path');
 const ARTIFACTS_DIR = path.join(__dirname, 'data/artifacts');
 const OUTPUT = path.join(__dirname, 'data/artifacts-manifest.json');
 
-const GROUPS = ['registry', 'execution', 'user-activity', 'filesystem', 'eventlogs', 'persistence', 'browser', 'memory', 'network', 'communication', 'cloud-storage', 'system-info', 'accounts'];
+const GROUPS = ['registry-hives', 'application-execution', 'file-and-folder-opening', 'deleted-items-and-file-existence', 'browser-activity', 'cloud-storage', 'external-device-usb-usage', 'system-information', 'account-usage', 'network-activity', 'eventlogs', 'persistence', 'memory', 'communication', 'filesystem'];
 const artifacts = [];
 
 for (const group of GROUPS) {

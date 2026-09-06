@@ -1,0 +1,33 @@
+{
+  "id": "office-oalerts",
+  "name": "Office OAlerts",
+  "category": "file",
+  "subcategory": "application-activity",
+  "os": "Windows",
+  "os_min": "Windows Vista",
+  "location": "OAlerts.evtx (%SystemRoot%\\System32\\Winevt\\Logs\\OAlerts.evtx)",
+  "purpose": "Captures the alert dialogs MS Office applications show users during risky or unsaved-work actions, such as attempting to close a document without saving.",
+  "key_fields": [
+    "Event ID 300 - used by all Office applications for these alerts",
+    "Program name - which Office application generated the alert",
+    "Dialog message text - the specific alert text shown to the user",
+    "TimeCreated - when the alert fired"
+  ],
+  "normal_baseline": "Occasional Event ID 300 entries tied to routine unsaved-changes or file-format warnings during normal Office use, at a low, steady rate.",
+  "anomalies": [
+    "A cluster of alerts around the time a document was closed or corrupted immediately following a suspected malicious macro execution",
+    "Alert text referencing a document type or feature (e.g. a compatibility or repair warning) inconsistent with the file the user claims to have been working on",
+    "Complete absence of any OAlerts entries on a system with heavy Office usage evidenced elsewhere in the timeline, suggesting the log was cleared"
+  ],
+  "parsing_tools": [
+    "Event Viewer",
+    "EvtxECmd (Eric Zimmerman)"
+  ],
+  "attack_techniques": [],
+  "anti_forensic_notes": "As a standard Windows Event Log, OAlerts.evtx can be cleared wholesale via wevtutil or the Event Viewer UI, which itself generates a Security log clear-event (Event ID 1102) - correlating the two logs can reveal deliberate clearing. Because every Office application shares the single Event ID 300, the dialog message text is required to distinguish alert types; the ID alone is not diagnostic.",
+  "interpretation": "All Office alert types share the same generic Event ID 300, so filtering on ID alone returns every kind of Office warning - the program name and message fields must be read together to determine what specific action (unsaved close, format warning, etc.) triggered a given entry.",
+  "related_artifacts": [
+    "office-recent-files",
+    "application-eventlog"
+  ]
+}

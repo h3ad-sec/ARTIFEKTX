@@ -1,0 +1,41 @@
+{
+  "id": "drive-letter-and-volume-name",
+  "name": "Drive Letter and Volume Name",
+  "category": "registry",
+  "subcategory": "removable-media",
+  "os": "Windows",
+  "os_min": "Windows XP",
+  "location": "Windows XP: SYSTEM\\CurrentControlSet\\Enum\\USBSTOR (find the device's ParentIdPrefix), then correlate that value against SYSTEM\\MountedDevices to find the last mount point. Windows 7+: SOFTWARE\\Microsoft\\Windows Portable Devices\\Devices; SYSTEM\\MountedDevices (examine \\DosDevices\\<letter> values for a matching device serial number); SOFTWARE\\Microsoft\\Windows Search\\VolumeInfoCache.",
+  "purpose": "Discovers the last drive letter and volume name assigned to a specific USB device the last time it was connected to the system.",
+  "key_fields": [
+    "USBSTOR ParentIdPrefix (Windows XP) - links a USBSTOR device entry to its MountedDevices record",
+    "MountedDevices \\DosDevices\\<letter> values - binary data containing a device serial number or volume GUID to match against a known device",
+    "SOFTWARE\\Microsoft\\Windows Portable Devices\\Devices subkeys (Windows 7+) - named for the device, storing the last friendly volume/device label",
+    "VolumeInfoCache entries (Windows 7+) - cached volume label and related metadata keyed by volume"
+  ],
+  "normal_baseline": "A stable, small set of drive-letter assignments for known recurring devices, with volume names matching each device's manufacturer default or a user-assigned label the analyst can independently confirm.",
+  "anomalies": [
+    "A drive letter reassigned between clearly unrelated devices in a short window, breaking the expected one-device-per-letter continuity an analyst would otherwise expect",
+    "A volume name that doesn't match a device's previously documented label, suggesting the media was relabeled/reformatted to blend in or to impersonate another known device",
+    "MountedDevices \\DosDevices value manually deleted or edited, breaking the letter-to-serial-number correlation for a device otherwise evidenced elsewhere (usb-device-history, setupapi-devlog)",
+    "VolumeInfoCache or Windows Portable Devices entries present with no corresponding USBSTOR/MountedDevices record, indicating partial artifact deletion"
+  ],
+  "parsing_tools": [
+    "Registry Explorer (Eric Zimmerman)",
+    "RegRipper (H. Carvey)"
+  ],
+  "attack_techniques": [
+    "T1091",
+    "T1052.001"
+  ],
+  "anti_forensic_notes": "These keys are overwritten on each new mount, so only the LAST drive-letter/volume-name mapping for a device is recoverable here - deleting or editing the relevant MountedDevices value removes that mapping with no lower-level history retained in these locations; connection history itself must come from usb-device-history's registry timestamps or setupapi-devlog.",
+  "interpretation": "Only the last USB device mapped to a specific drive letter can be identified from these keys - historical drive-letter assignments over time are not retained here. Cross-reference the recovered volume name and letter against shell-item data in LNK files and shellbags to place the device in a broader activity timeline.",
+  "related_artifacts": [
+    "usb-device-identification",
+    "setupapi-devlog",
+    "usb-user-information",
+    "volume-serial-number-vsn",
+    "shell-bags",
+    "shortcut-lnk-files"
+  ]
+}

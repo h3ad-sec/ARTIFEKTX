@@ -3,6 +3,7 @@
   "name": "WMI Permanent Event Subscription",
   "category": "file",
   "subcategory": "persistence",
+  "os": "Windows",
   "os_min": "Windows XP (WMI infrastructure); technique common from Windows 7+",
   "location": "CIM repository: C:\\Windows\\System32\\wbem\\Repository\\OBJECTS.DATA (root\\subscription namespace: __EventFilter, __EventConsumer, __FilterToConsumerBinding)",
   "purpose": "Lets code execute automatically when a defined WMI event occurs (e.g. process start, time, logon), providing fileless, reboot-surviving persistence.",
@@ -28,6 +29,7 @@
   "anti_forensic_notes": "Leaves no on-disk executable if using a script consumer, making it a favored fileless technique; corroborate with Microsoft-Windows-WMI-Activity/Operational Event ID 5861 and Sysmon Event IDs 19/20/21 for a live-log view of when it was installed or fired.",
   "interpretation": "",
   "related_artifacts": [
-    "sysmon"
+    "sysmon",
+    "system-boot-and-autostart-programs"
   ]
 }

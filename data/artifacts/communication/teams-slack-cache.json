@@ -3,6 +3,7 @@
   "name": "Teams/Slack Local Cache (LevelDB)",
   "category": "file",
   "subcategory": "communication-artifact",
+  "os": "Windows",
   "os_min": "Windows 10",
   "location": "Teams 2.x (current, Electron-based): %LOCALAPPDATA%\\Packages\\MSTeams_8wekyb3d8bbwe\\LocalCache\\Microsoft\\MSTeams\\ containing an IndexedDB directory whose LevelDB files hold cached messages/posts/contacts. Legacy classic Teams 1.x: %APPDATA%\\Microsoft\\Teams\\IndexedDB\\. Slack desktop: %APPDATA%\\Slack\\Local Storage\\leveldb\\ for LevelDB key-value data, with a separate Cache_data folder holding cached attachments/media (Chromium disk-cache format). Exact subfolder names can shift between client versions - confirm the live path on the target build before relying on it.",
   "purpose": "Modern Teams and Slack desktop clients are Electron/Chromium apps that persist recent conversation state client-side using LevelDB (Chromium's key-value storage engine, backing IndexedDB and Local Storage) rather than a conventional flat file, so a forensic copy of these directories can yield message text, contact/channel metadata, and cached attachments even without server-side access.",

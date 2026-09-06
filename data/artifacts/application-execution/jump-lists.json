@@ -1,0 +1,31 @@
+{
+  "id": "jump-lists",
+  "name": "Jump Lists",
+  "category": "file",
+  "subcategory": "file-folder-access",
+  "os": "Windows",
+  "os_min": "Windows 7",
+  "location": "AutomaticDestinations: %AppData%\\Microsoft\\Windows\\Recent\\AutomaticDestinations\\<AppID>.automaticDestinations-ms; CustomDestinations: \\CustomDestinations\\<AppID>.customDestinations-ms",
+  "purpose": "Tracks recently/frequently accessed files per application via embedded shell-link data, providing file-access evidence even for files later deleted.",
+  "key_fields": [
+    "Target file path",
+    "AppID (identifies the application)",
+    "Access/pin count and recency (DestList MRU)"
+  ],
+  "normal_baseline": "Entries correspond to files the user is known to have opened with the associated application.",
+  "anomalies": [
+    "Entries referencing files on removable/network shares with no current device",
+    "Target file path pointing to a staging or exfiltration directory"
+  ],
+  "parsing_tools": [
+    "JLECmd (Eric Zimmerman)",
+    "JumpList Explorer (Eric Zimmerman)"
+  ],
+  "attack_techniques": [],
+  "anti_forensic_notes": "The referenced file does not need to still exist for the Jump List entry to remain, aiding recovery after deletion; can be individually pruned via 'Remove from this list'.",
+  "interpretation": "",
+  "related_artifacts": [
+    "usrclass-dat-hive",
+    "shortcut-lnk-files"
+  ]
+}

@@ -3,6 +3,7 @@
   "name": "Box Drive",
   "category": "file",
   "subcategory": "cloud-storage",
+  "os": "Windows",
   "os_min": "Windows 8",
   "location": "Default reparse point to virtual filesystem: %USERPROFILE%\\Box. Default local file cache: %USERPROFILE%\\AppData\\Local\\Box\\Box\\cache. File metadata and configuration data: %USERPROFILE%\\AppData\\Local\\Box\\Box\\logs\\ (Box_Streem logs); %USERPROFILE%\\AppData\\Local\\Box\\Box\\data\\ (sync.db and streemsfs.db = file metadata, metrics.db = user account info).",
   "purpose": "Box Drive presents its synced content as a virtual filesystem implemented through an NTFS reparse point rather than a real local copy, and it logs unusually detailed metadata for both locally cached and cloud-only files.",
@@ -24,8 +25,15 @@
     "Generic SQLite browser (e.g. DB Browser for SQLite) for sync.db, streemsfs.db, and metrics.db",
     "Generic text/log viewer for Box_Streem logs"
   ],
-  "attack_techniques": ["T1567.002"],
+  "attack_techniques": [
+    "T1567.002"
+  ],
   "anti_forensic_notes": "Because Box Drive implements its virtual filesystem as an NTFS reparse point rather than storing full file content locally by default, a directory listing of %USERPROFILE%\\Box does not by itself prove file content was ever present on disk - streemsfs.db and sync.db must be examined to establish what was actually cached versus cloud-only. Box_Streem log retention is typically limited to a few weeks, so older activity may not be recoverable from logs alone even though the metadata databases can retain longer history.",
   "interpretation": "streemsfs.db and sync.db together cover metadata for both locally cached and cloud-only files, including SHA1 hashes useful for confirming file identity independent of filename. If the virtual filesystem folder location is not obvious from the reparse point, search Box_Streem logs for the string \"logDriveInformation\" to recover it. Detailed usage logging is available but generally only spans a few weeks, so timely collection matters more here than with some other cloud-sync clients.",
-  "related_artifacts": ["onedrive", "google-drive-desktop", "dropbox", "teams-slack-cache"]
+  "related_artifacts": [
+    "onedrive",
+    "google-drive-desktop",
+    "dropbox",
+    "teams-slack-cache"
+  ]
 }

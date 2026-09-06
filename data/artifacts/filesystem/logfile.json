@@ -3,6 +3,7 @@
   "name": "$LogFile (NTFS Transaction Log)",
   "category": "file",
   "subcategory": "filesystem-metadata",
+  "os": "Windows",
   "os_min": "Windows NT 3.1 (any NTFS volume)",
   "location": "\\$LogFile (root of the NTFS volume)",
   "purpose": "Implements NTFS's write-ahead logging for metadata operations, recording redo/undo records for filesystem transactions (creates, renames, deletes, attribute and index changes) so the volume can be rolled forward or back to a consistent state after a crash. Forensically it is a short-lived but very high-fidelity record of the most recent filesystem activity.",

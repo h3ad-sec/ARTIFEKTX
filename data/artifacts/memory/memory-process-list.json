@@ -3,6 +3,7 @@
   "name": "Process List, Handles & Loaded DLLs (Memory Forensics)",
   "category": "file",
   "subcategory": "memory-forensics",
+  "os": "Windows",
   "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
   "location": "Not a disk location - reconstructed from a RAM acquisition (raw memory image, hibernation file, or crash dump) using Volatility 3's windows.pslist, windows.pstree, windows.psscan, windows.dlllist, and windows.handles plugins.",
   "purpose": "Reconstructs which processes were running at the moment of memory capture, their parent-child relationships, loaded modules, and open handles, by parsing EPROCESS/ETHREAD kernel structures and the process PEB directly out of the memory image. Because several of these plugins locate processes by different mechanisms, comparing their output is the primary way to catch a process a rootkit tried to hide.",
@@ -42,6 +43,6 @@
     "memory-commandline-history",
     "prefetch",
     "shimcache",
-    "amcache"
+    "amcache-hve"
   ]
 }

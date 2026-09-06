@@ -1,0 +1,37 @@
+{
+  "id": "open-save-mru",
+  "name": "Open/Save MRU",
+  "category": "registry",
+  "subcategory": "file-folder-access",
+  "os": "Windows",
+  "os_min": "Windows XP",
+  "location": "XP: NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\OpenSaveMRU ; Windows 7/8/10: NTUSER.DAT\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\OpenSavePidlMRU",
+  "purpose": "Tracks individual files opened or saved through any application's standard Windows shell Open/Save dialog, spanning Office, browsers, chat clients, and most other common desktop software.",
+  "key_fields": [
+    "\"*\" subkey - a combined MRU of the most recent files of any extension used in an Open/Save dialog",
+    ".<ext> subkeys - one per specific file extension (e.g. .docx, .pdf, .zip), each with its own MRUListEx-ordered entries",
+    "MRUListEx - binary DWORD-array recording access order, most recent first, at both the \"*\" and per-extension level",
+    "Value data - filename plus (Win7+) a binary PIDL encoding the folder path the file was opened or saved from"
+  ],
+  "normal_baseline": "Extension subkeys matching file types the user regularly works with, populated with filenames and folder paths consistent with normal document, media, and download workflows.",
+  "anomalies": [
+    "A new extension subkey appearing for file types the user never normally handles (.ps1, .vbs, .hta, .scr, .iso, .lnk) around an incident window",
+    "A file opened or saved from a Downloads, Temp, or email-attachment staging folder shortly before other execution or persistence evidence appears",
+    "The \"*\" list and a specific extension subkey disagreeing on ordering or contents for the same time period, suggesting selective tampering",
+    "Entries for files that no longer exist anywhere on disk with no legitimate explanation for their absence"
+  ],
+  "parsing_tools": [
+    "Registry Explorer (Eric Zimmerman)",
+    "RegRipper"
+  ],
+  "attack_techniques": [
+    "T1204.002"
+  ],
+  "anti_forensic_notes": "Because this key is populated by the shared Windows common-dialog control rather than by individual applications, clearing it removes evidence of file interaction across many programs at once rather than just one - a single deletion event with broad evidentiary impact. Entries survive deletion of the underlying file, making this a durable record of files that once existed even after they and any Recycle Bin trace are gone.",
+  "interpretation": "The \"*\" key is a cross-extension MRU capturing only the single most recent files regardless of type, while the per-extension .??? subkeys retain a longer, type-specific history that can still hold an entry the \"*\" list has since rolled off. Reviewing both levels together, rather than just the \"*\" key, is necessary to recover the full file-interaction history for a specific extension of interest.",
+  "related_artifacts": [
+    "last-visited-mru",
+    "recent-files",
+    "office-recent-files"
+  ]
+}

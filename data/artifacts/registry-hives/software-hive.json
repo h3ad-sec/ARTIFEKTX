@@ -1,0 +1,37 @@
+{
+  "id": "software-hive",
+  "name": "SOFTWARE Hive",
+  "category": "registry",
+  "subcategory": "persistence",
+  "os": "Windows",
+  "os_min": "Windows 2000 (present in all NT-based Windows versions)",
+  "location": "HKLM\\SOFTWARE (file: %SystemRoot%\\System32\\config\\SOFTWARE)",
+  "purpose": "Stores machine-wide installed-application data, OS version/build identity, and system-wide autostart (Run/RunOnce) persistence locations that apply to every user of the machine.",
+  "key_fields": [
+    "Microsoft\\Windows\\CurrentVersion\\Run and \\RunOnce — machine-wide autostart command lines (REG_SZ/REG_EXPAND_SZ), run at every user logon",
+    "Microsoft\\Windows\\CurrentVersion\\Uninstall\\<AppGUID or Name> — DisplayName, DisplayVersion, Publisher, InstallDate, UninstallString, InstallLocation",
+    "Microsoft\\Windows NT\\CurrentVersion — ProductName, CurrentBuildNumber, InstallDate, RegisteredOwner",
+    "Wow6432Node mirror of the above Run/Uninstall keys, holding 32-bit software entries on 64-bit Windows"
+  ],
+  "normal_baseline": "Run/RunOnce entries correspond to known, digitally-signed vendor software (AV agents, GPU tray utilities, cloud-sync clients) launched from Program Files. Uninstall entries match software the organization actually deployed, with plausible InstallDate and Publisher values.",
+  "anomalies": [
+    "A Run or RunOnce value pointing to an executable or script in a user-writable path (%Temp%, %AppData%, Downloads) instead of Program Files.",
+    "A Run key value invoking powershell.exe, cmd.exe, mshta.exe, or rundll32.exe with an encoded or heavily obfuscated argument string — a common Registry Run Key persistence pattern.",
+    "An Uninstall key entry with no corresponding installed files on disk, or an InstallDate immediately followed by execution of its own UninstallString — suggesting a dropper that installs, runs, and removes its own uninstall metadata to reduce visibility.",
+    "An Uninstall entry's Publisher/DisplayName spoofing a well-known, trusted vendor."
+  ],
+  "parsing_tools": [
+    "Registry Explorer / RECmd (Eric Zimmerman)",
+    "RegRipper (run, uninstall plugins)",
+    "Autoruns (Sysinternals)"
+  ],
+  "attack_techniques": [
+    "T1547.001"
+  ],
+  "anti_forensic_notes": "RunOnce values are deleted by Windows automatically once the referenced command has executed, so a RunOnce-based dropper leaves nothing behind in this key after it fires — its absence is expected behavior, not evidence of tampering, and must be correlated with Prefetch or event-log data instead. An attacker may also manually delete a Run value once a longer-term persistence mechanism (e.g. a scheduled task or service) has taken over, leaving only the key's last-write time as a narrow window of evidence.",
+  "interpretation": "",
+  "related_artifacts": [
+    "ntuser-dat-hive",
+    "system-hive"
+  ]
+}

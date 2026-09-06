@@ -3,6 +3,7 @@
   "name": "Windows Defender Operational Log",
   "category": "file",
   "subcategory": "detection-evidence",
+  "os": "Windows",
   "os_min": "Windows 8 / Windows Defender",
   "location": "%SystemRoot%\\System32\\Winevt\\Logs\\Microsoft-Windows-Windows Defender%4Operational.evtx",
   "purpose": "Records Defender detections, remediation actions, and Attack Surface Reduction (ASR) rule activity.",

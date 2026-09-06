@@ -3,6 +3,7 @@
   "name": "PowerShell Operational Log",
   "category": "file",
   "subcategory": "script-execution",
+  "os": "Windows",
   "os_min": "Windows PowerShell 5.0 / Windows 10 (Module Logging available since PowerShell 3.0; Script Block Logging introduced with PowerShell 5.0)",
   "location": "%SystemRoot%\\System32\\winevt\\Logs\\Microsoft-Windows-PowerShell%4Operational.evtx (channel: Microsoft-Windows-PowerShell/Operational)",
   "purpose": "Records detailed PowerShell engine activity when Script Block Logging and/or Module Logging are enabled via Group Policy, capturing the actual code executed - including code assembled or decoded at runtime - rather than just the invoking command line.",

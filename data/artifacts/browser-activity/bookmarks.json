@@ -1,0 +1,35 @@
+{
+  "id": "bookmarks",
+  "name": "Bookmarks",
+  "category": "file",
+  "subcategory": "browser-artifact",
+  "os": "Windows",
+  "os_min": "N/A (application-level)",
+  "location": "Firefox: places.sqlite, bookmarkbackups\\bookmarks-<date>.jsonlz4 ; Chrome/Edge: Bookmarks (JSON), Bookmarks.bak (Chrome) / Bookmarks.msbak (Edge)",
+  "purpose": "Records default browser items as well as sites a user chose to save for future reference.",
+  "key_fields": [
+    "moz_bookmarks table (Firefox places.sqlite)",
+    "bookmarkbackups\\bookmarks-<date>.jsonlz4 (Firefox dated backups)",
+    "Bookmarks JSON: name, url, date_added (Chrome/Edge)",
+    "Bookmarks.bak / Bookmarks.msbak (prior-save backup copy)"
+  ],
+  "normal_baseline": "Bookmark set matches the user's known interests/workflow, added at a reasonable, spaced-out cadence.",
+  "anomalies": [
+    "A bookmark for a known malicious, C2, or paste-site URL that does not otherwise appear in browsing history, indicating a reference was saved without (yet) being visited",
+    "A burst of bookmarks added in a short window inconsistent with normal usage, suggesting bulk import or scripted activity",
+    "A Bookmarks.bak/backup copy showing entries later deleted from the live Bookmarks file"
+  ],
+  "parsing_tools": [
+    "Manual JSON review",
+    "DB Browser for SQLite (Firefox places.sqlite)"
+  ],
+  "attack_techniques": [
+    "T1217"
+  ],
+  "anti_forensic_notes": "Firefox retains multiple dated backups in bookmarkbackups\\, and Chrome/Edge keep a .bak/.msbak copy of the prior save, so deleting a single live bookmark file does not remove these backup copies — recently-deleted bookmarks are frequently recoverable.",
+  "interpretation": "Firefox's bookmarkbackups folder can hold multiple backup copies of the entire bookmark set in JSON format inside a compressed jsonlz4 container, letting an analyst diff bookmark state across dates. Chromium Bookmark files are plain JSON. Not all bookmarks are user-generated intent to visit — a URL can be bookmarked and never actually visited, so a bookmark alone is not proof of a visit.",
+  "related_artifacts": [
+    "chrome-edge-browser-artifacts",
+    "firefox-browser-artifacts"
+  ]
+}

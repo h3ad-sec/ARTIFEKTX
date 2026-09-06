@@ -3,6 +3,7 @@
   "name": "Injected Code / Process Hollowing Detection (Malfind)",
   "category": "file",
   "subcategory": "memory-forensics",
+  "os": "Windows",
   "os_min": "N/A (RAM capture, any Windows version supported by the analysis tool)",
   "location": "Not a disk location - identified within a RAM acquisition using Volatility 3's malfind plugin (windows.malfind; renamed to windows.malware.malfind as the malware-related plugins were consolidated under the windows.malware namespace, with the old windows.malfind name deprecated).",
   "purpose": "Walks each process's Virtual Address Descriptor (VAD) tree looking for memory regions whose protection and backing are consistent with injected code - executable-and-writable private memory not backed by any file on disk - and dumps a hex/disassembly preview of the region so an analyst can confirm shellcode, a reflectively-loaded PE, or a hollowed-out legitimate process.",

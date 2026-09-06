@@ -3,6 +3,7 @@
   "name": "MSG/EML File Metadata",
   "category": "file",
   "subcategory": "communication-artifact",
+  "os": "Windows",
   "os_min": "Windows XP",
   "location": "No fixed location - individual .msg (Outlook drag-and-save, or 'Save As' from a message) and .eml (saved by most other mail clients, and by Outlook when exporting/forwarding as RFC 822) files can appear anywhere on disk: user Documents/Desktop, Downloads folder, email attachments, removable media, or extracted attachments from an OST/PST.",
   "purpose": "Individual saved-email files that carry a full self-contained copy of one message, independent of any mailbox store. .msg is Microsoft's OLE/Compound File Binary Format (CFBF) container preserving Outlook-specific MAPI properties; .eml is a plain-text file following the RFC 822/MIME structure used by virtually every other mail client, making it the more portable but MAPI-metadata-poor of the two.",
