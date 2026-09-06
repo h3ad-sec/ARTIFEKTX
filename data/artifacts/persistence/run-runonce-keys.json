@@ -24,6 +24,7 @@
     "T1547.001"
   ],
   "anti_forensic_notes": "Trivially removed by deleting the value; correlate against SOFTWARE/NTUSER.DAT hive backups (RegBack) to detect since-deleted entries.",
+  "interpretation": "",
   "related_artifacts": [
     "software-hive",
     "ntuser-dat-hive"

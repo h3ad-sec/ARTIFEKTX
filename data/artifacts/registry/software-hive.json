@@ -28,6 +28,7 @@
     "T1547.001"
   ],
   "anti_forensic_notes": "RunOnce values are deleted by Windows automatically once the referenced command has executed, so a RunOnce-based dropper leaves nothing behind in this key after it fires — its absence is expected behavior, not evidence of tampering, and must be correlated with Prefetch or event-log data instead. An attacker may also manually delete a Run value once a longer-term persistence mechanism (e.g. a scheduled task or service) has taken over, leaving only the key's last-write time as a narrow window of evidence.",
+  "interpretation": "",
   "related_artifacts": [
     "ntuser-dat-hive",
     "system-hive"

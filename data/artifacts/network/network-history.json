@@ -1,0 +1,38 @@
+{
+  "id": "network-history",
+  "name": "Network History (Connected Networks)",
+  "category": "registry",
+  "subcategory": "network-configuration",
+  "os_min": "Windows Vista (NetworkList keys); Interfaces/NetworkCards present since Windows XP",
+  "location": "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces ; SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\NetworkCards ; SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\NetworkList\\Signatures\\Unmanaged ; \\NetworkList\\Signatures\\Managed ; \\NetworkList\\Nla\\Cache ; \\NetworkList\\Profiles",
+  "purpose": "Identifies networks the computer has connected to, including domain/intranet name, SSID, first and last connection times, and the network gateway's MAC address; covers wired, wireless, and VPN connections.",
+  "key_fields": [
+    "Interfaces\\{adapter-GUID}\\DhcpDomain - correlates an interface to its network domain",
+    "NetworkList\\Profiles\\{ProfileGUID}\\ProfileName, DateCreated, DateLastConnected, NameType",
+    "NetworkList\\Signatures\\Managed|Unmanaged\\{signature}\\DefaultGatewayMac, ProfileGuid",
+    "NetworkList\\Nla\\Cache entries - cached network location-awareness data"
+  ],
+  "normal_baseline": "A small, stable set of known/expected networks (home, office, approved VPN) with DateLastConnected timestamps consistent with routine use.",
+  "anomalies": [
+    "A Profile/Signature entry for an unfamiliar SSID or gateway MAC appearing around a suspected compromise window",
+    "A VPN-type (NameType 0x17) profile the user or organization does not recognize, consistent with attacker-established persistence or a tunnel out of the environment",
+    "A gateway MAC address associated with a known public or otherwise unexpected location inconsistent with the user's claimed whereabouts at the time",
+    "DateCreated/DateLastConnected values inconsistent with the surrounding activity timeline, suggesting manipulation"
+  ],
+  "parsing_tools": [
+    "Registry Explorer (Eric Zimmerman)",
+    "RegRipper (H. Carvey)"
+  ],
+  "attack_techniques": [
+    "T1016",
+    "T1016.002"
+  ],
+  "anti_forensic_notes": "These keys are populated by the OS only at connection time and hold no lower-level backup - deleting a Profile or Signature subkey removes that network's history entirely. A wired-only host still generates a Profiles/Signatures entry for its wired connection, so the absence of any wireless-type entries here is not by itself conclusive that Wi-Fi was never used; corroborate against wifi-profiles and the WLAN event log.",
+  "interpretation": "These keys correlate with each other: Interfaces links to NetworkCards/Signatures via the DhcpDomain value, while Signatures and Profiles link to each other via the ProfileGUID value, together building a richer picture of network activity including VPN connections. The MAC address of the gateway for an SSID can assist with device geolocation. NetworkList Profile NameType values: 6 (0x06) = Wired, 23 (0x17) = VPN, 71 (0x47) = Wireless, 243 (0xF3) = Mobile Broadband.",
+  "related_artifacts": [
+    "network-interfaces",
+    "wlan-eventlog",
+    "wifi-profiles",
+    "timezone-artifact"
+  ]
+}

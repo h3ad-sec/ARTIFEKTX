@@ -1,0 +1,34 @@
+{
+  "id": "browser-preferences",
+  "name": "Browser Preferences / Configuration",
+  "category": "file",
+  "subcategory": "browser-artifact",
+  "os_min": "N/A (application-level)",
+  "location": "Firefox: prefs.js (profile root) ; Chrome/Edge: Preferences (JSON, profile root)",
+  "purpose": "Configuration data associated with the browser application, including privacy settings and synchronization preferences.",
+  "key_fields": [
+    "Firefox: sync status, last sync time, artifacts selected to sync",
+    "Chrome: per_host_zoom_levels",
+    "Chrome: media_engagement",
+    "Chrome: site_engagement",
+    "Edge: account_info",
+    "Edge: clear_data_on_exit"
+  ],
+  "normal_baseline": "Sync tied to a single known account; privacy and clear-on-exit settings consistent with organizational policy or the user's established habits.",
+  "anomalies": [
+    "Sync account_info referencing a personal or unauthorized account on a corporate device, indicating possible data exfiltration via browser sync",
+    "clear_data_on_exit or an equivalent privacy setting enabled shortly before or during an incident window, suggesting deliberate anti-forensic staging",
+    "site_engagement/media_engagement scores showing heavy interaction with a domain otherwise absent or sparse in History"
+  ],
+  "parsing_tools": [
+    "Hindsight (Chrome/Edge Preferences)",
+    "Manual JSON review (text editor / JSON viewer)"
+  ],
+  "attack_techniques": [],
+  "anti_forensic_notes": "Preferences/prefs.js is a live file rewritten frequently during normal use, so it reflects only the current/recent configuration; prior settings changes are not versioned unless captured through other means (backups, Volume Shadow Copies).",
+  "interpretation": "Firefox's prefs.js exposes sync status, last sync time, and which artifact categories (history, passwords, bookmarks, etc.) are configured to sync — useful for tracing data that may have propagated to another device. Chrome's per_host_zoom_levels, media_engagement, and site_engagement values are indirect but useful proxies for how much a user actually interacted with a given site, beyond a simple visit count. Edge preferences additionally carry account_info and clear_data_on_exit/sync settings.",
+  "related_artifacts": [
+    "chrome-edge-browser-artifacts",
+    "firefox-browser-artifacts"
+  ]
+}

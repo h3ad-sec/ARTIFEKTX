@@ -1,0 +1,36 @@
+{
+  "id": "thumbs-db",
+  "name": "Thumbs.db",
+  "category": "file",
+  "subcategory": "file-folder-access",
+  "os_min": "Windows XP",
+  "location": "Hidden Thumbs.db file created inside each folder viewed in Explorer's thumbnail view (one per folder, colocated with the images it catalogs); creation behavior is OS-version dependent and most consistent on Windows XP",
+  "purpose": "Explorer's thumbnail-view feature writes a hidden Thumbs.db cache file into any folder whose contents were viewed as thumbnails. Because cached thumbnails and filenames remain in the file after the source pictures are deleted or moved, it functions as a historical record of a folder's prior contents.",
+  "key_fields": [
+    "Embedded thumbnail image of the original picture",
+    "Original filename of the source image (Windows XP only)",
+    "Last modification time of the source file (Windows XP only)",
+    "Implicit folder path - one Thumbs.db per folder, so its location identifies the catalogued directory"
+  ],
+  "normal_baseline": "Thumbs.db present in ordinary picture or media folders (My Pictures, Downloads, camera-import folders) on Windows XP systems, with thumbnails consistent with the images currently or previously stored there.",
+  "anomalies": [
+    "Thumbnail images of sensitive documents, credentials, or screenshots inside a Thumbs.db located in a folder the user's role gives no reason to browse",
+    "Thumbnails proving a folder once held files that have since been deleted, with no corresponding files remaining on disk",
+    "Thumbs.db present in a folder accessed only via a UNC network path on a modern (post-XP) system-an unusual circumstance the source material flags explicitly",
+    "Thumbnails consistent with exfiltration staging (screenshots of internal systems, scanned documents) in a location with no legitimate business use for image viewing"
+  ],
+  "parsing_tools": [
+    "Thumbs Viewer (thumbsviewer.github.io)",
+    "vinetto"
+  ],
+  "attack_techniques": [
+    "T1083"
+  ],
+  "anti_forensic_notes": "Thumbs.db is not commonly targeted by mainstream privacy cleaners, so it often survives well after the pictures it catalogs are deleted. Since Windows Vista, thumbnail caching moved by default to the centralized per-user Thumbcache database, so the absence of Thumbs.db on a modern system is expected and not itself suspicious-but its presence there (e.g., via a UNC-accessed folder) is worth explaining.",
+  "interpretation": "Thumbs.db is most relevant to Windows XP investigations, where each viewed folder gets its own file carrying the original filename and last-modified timestamp alongside the thumbnail image. On Vista and later, Windows shifted to the centralized Thumbcache database (see thumbcache), so a lone Thumbs.db on a modern OS usually indicates the folder was viewed through an unusual path, such as a UNC network share, rather than ordinary local thumbnail caching.",
+  "related_artifacts": [
+    "thumbcache",
+    "windows-search-db",
+    "shellbags"
+  ]
+}

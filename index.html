@@ -28,6 +28,7 @@
   --grp-filesystem:#f59e0b;--grp-eventlogs:#06b6d4;
   --grp-persistence:#6366f1;--grp-browser:#ec4899;
   --grp-memory:#64748b;--grp-network:#ea580c;--grp-communication:#78350f;
+  --grp-cloud-storage:#0ea5e9;--grp-system-info:#a3a3a3;--grp-accounts:#be185d;
 }
 body.light{
   --bg:#eef2f8;--panel:#ffffff;--panel-alt:#e4ecf6;--surface:#ccd8ec;
@@ -124,6 +125,9 @@ body.light .filter-search:focus{box-shadow:0 0 0 2px rgba(2,132,199,.12);}
 .filter-pill[data-group="memory"].active{color:var(--grp-memory);border-color:color-mix(in srgb, var(--grp-memory) 30%, transparent);background:color-mix(in srgb, var(--grp-memory) 8%, transparent);}
 .filter-pill[data-group="network"].active{color:var(--grp-network);border-color:color-mix(in srgb, var(--grp-network) 30%, transparent);background:color-mix(in srgb, var(--grp-network) 8%, transparent);}
 .filter-pill[data-group="communication"].active{color:var(--grp-communication);border-color:color-mix(in srgb, var(--grp-communication) 30%, transparent);background:color-mix(in srgb, var(--grp-communication) 8%, transparent);}
+.filter-pill[data-group="cloud-storage"].active{color:var(--grp-cloud-storage);border-color:color-mix(in srgb, var(--grp-cloud-storage) 30%, transparent);background:color-mix(in srgb, var(--grp-cloud-storage) 8%, transparent);}
+.filter-pill[data-group="system-info"].active{color:var(--grp-system-info);border-color:color-mix(in srgb, var(--grp-system-info) 30%, transparent);background:color-mix(in srgb, var(--grp-system-info) 8%, transparent);}
+.filter-pill[data-group="accounts"].active{color:var(--grp-accounts);border-color:color-mix(in srgb, var(--grp-accounts) 30%, transparent);background:color-mix(in srgb, var(--grp-accounts) 8%, transparent);}
 .fp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 .fp-name{flex:1;}
 .fp-count{font-size:9px;color:var(--muted-dim);}
@@ -148,6 +152,9 @@ body.light .filter-search:focus{box-shadow:0 0 0 2px rgba(2,132,199,.12);}
   .mobile-filter .filter-pill[data-group="memory"].active{color:var(--grp-memory);border-bottom-color:var(--grp-memory);}
   .mobile-filter .filter-pill[data-group="network"].active{color:var(--grp-network);border-bottom-color:var(--grp-network);}
   .mobile-filter .filter-pill[data-group="communication"].active{color:var(--grp-communication);border-bottom-color:var(--grp-communication);}
+  .mobile-filter .filter-pill[data-group="cloud-storage"].active{color:var(--grp-cloud-storage);border-bottom-color:var(--grp-cloud-storage);}
+  .mobile-filter .filter-pill[data-group="system-info"].active{color:var(--grp-system-info);border-bottom-color:var(--grp-system-info);}
+  .mobile-filter .filter-pill[data-group="accounts"].active{color:var(--grp-accounts);border-bottom-color:var(--grp-accounts);}
 }
 
 /* ── Grid + cards ── */
@@ -428,7 +435,10 @@ var GROUPS=[
   {id:'browser',label:'BROWSER',color:'var(--grp-browser)'},
   {id:'memory',label:'MEMORY',color:'var(--grp-memory)'},
   {id:'network',label:'NETWORK',color:'var(--grp-network)'},
-  {id:'communication',label:'COMMUNICATION',color:'var(--grp-communication)'}
+  {id:'communication',label:'COMMUNICATION',color:'var(--grp-communication)'},
+  {id:'cloud-storage',label:'CLOUD STORAGE',color:'var(--grp-cloud-storage)'},
+  {id:'system-info',label:'SYSTEM INFO',color:'var(--grp-system-info)'},
+  {id:'accounts',label:'ACCOUNTS',color:'var(--grp-accounts)'}
 ];
 var allArtifacts=[];
 var activeGroup='all';
@@ -462,7 +472,7 @@ function getFiltered(){
   return allArtifacts.filter(function(a){
     if(activeGroup!=='all'&&a.group!==activeGroup)return false;
     if(!searchTerm)return true;
-    var hay=[a.name,a.purpose,a.subcategory,a.location,(a.key_fields||[]).join(' '),(a.anomalies||[]).join(' ')].join(' ').toLowerCase();
+    var hay=[a.name,a.purpose,a.subcategory,a.location,a.interpretation,(a.key_fields||[]).join(' '),(a.anomalies||[]).join(' ')].join(' ').toLowerCase();
     return hay.indexOf(searchTerm)!==-1;
   });
 }
@@ -510,6 +520,7 @@ function buildCard(a){
       +(tools?'<div class="detail-row"><div class="detail-label">PARSING TOOLS</div><div class="tool-list">'+tools+'</div></div>':'')
       +(attackChips?'<div class="detail-row"><div class="detail-label">ATT&amp;CK TECHNIQUES</div><div class="chip-row">'+attackChips+'</div></div>':'')
       +'<div class="detail-row"><div class="detail-label">ANTI-FORENSIC NOTES</div><div class="detail-text">'+escapeHtml(a.anti_forensic_notes)+'</div></div>'
+      +(a.interpretation?'<div class="detail-row"><div class="detail-label">INTERPRETATION</div><div class="detail-text">'+escapeHtml(a.interpretation)+'</div></div>':'')
       +(related?'<div class="detail-row"><div class="detail-label">RELATED ARTIFACTS</div><div class="chip-row">'+related+'</div></div>':'')
       +'<div class="expanded-actions"><button class="btn-hide" onclick="event.stopPropagation();toggleCard(\''+a.id+'\')">COLLAPSE</button></div>'
     +'</div>'

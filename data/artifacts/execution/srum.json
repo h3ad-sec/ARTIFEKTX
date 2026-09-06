@@ -23,6 +23,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "SRUDB.dat can be deleted directly and Windows will recreate an empty one at next write, so a suspiciously short-lived SRUM history around an incident is itself a signal.",
+  "interpretation": "",
   "related_artifacts": [
     "prefetch"
   ]

@@ -1,0 +1,31 @@
+{
+  "id": "onedrive",
+  "name": "OneDrive Sync Client",
+  "category": "file",
+  "subcategory": "cloud-storage",
+  "os_min": "Windows 8",
+  "location": "Default local file storage: %USERPROFILE%\\OneDrive (Personal) or %USERPROFILE%\\OneDrive - <CompanyName> (Business). File storage folder location: NTUSER\\Software\\Microsoft\\OneDrive\\Accounts\\<Personal|Business1>. File metadata: %USERPROFILE%\\AppData\\Local\\Microsoft\\OneDrive\\logs\\<Personal|Business1>\\ (SyncDiagnostics.log, SyncEngine \"odl\" logs). Settings/account data: %USERPROFILE%\\AppData\\Local\\Microsoft\\OneDrive\\settings\\<Personal|Business1>\\ (<UserCid>.dat).",
+  "purpose": "OneDrive ships by default on Windows 8 and later but stays inactive until a user authenticates to a Microsoft cloud account, after which it silently maintains a two-way sync between a local folder and the associated Personal or Business OneDrive tenant.",
+  "key_fields": [
+    "SyncDiagnostics.log - sync engine diagnostics, sometimes contains file metadata",
+    "odl (SyncEngine) logs - low-level sync engine trace logs under logs\\<Personal|Business1>\\",
+    "<UserCid>.dat - account/settings identifier file under settings\\<Personal|Business1>\\",
+    "NTUSER\\Software\\Microsoft\\OneDrive\\Accounts\\<Personal|Business1> - confirms which account type is configured and the local sync folder path"
+  ],
+  "normal_baseline": "A single Personal or Business OneDrive account (occasionally both) configured under one NTUSER hive, with a local sync folder matching the registry-recorded path, log volume proportional to routine file activity, and sync activity confined to the user's normal working hours and known devices.",
+  "anomalies": [
+    "A Business OneDrive account newly configured on a machine shortly before resignation or termination, with a spike in file additions to the local sync folder consistent with staging data for exfiltration (T1567.002)",
+    "A Personal OneDrive account signed in and syncing on a corporate-managed endpoint with no business justification, suggesting use of an unsanctioned account to move data outside corporate visibility",
+    "Local sync folder path in the registry pointing to a location that does not match the visible %USERPROFILE%\\OneDrive folder, indicating a relocated or hidden sync root",
+    "SyncDiagnostics.log or odl logs showing large batches of file uploads immediately preceding account deletion, log deletion, or OneDrive uninstall - evidence tampering or cleanup",
+    "Metadata directories present under AppData\\Local\\Microsoft\\OneDrive with no corresponding OneDrive process history, suggesting a prior enablement that was later hidden or partially removed"
+  ],
+  "parsing_tools": [
+    "Generic text/log viewer for SyncDiagnostics.log and odl trace logs (plain-text/structured log format)",
+    "Registry viewer (e.g. Registry Explorer) for NTUSER OneDrive Accounts keys"
+  ],
+  "attack_techniques": ["T1567.002"],
+  "anti_forensic_notes": "Metadata files (logs, settings) only exist if OneDrive was actually enabled by user sign-in - a system with OneDrive installed but never authenticated will show no metadata trail at all, which can mask prior use if an account is later removed and logs are cleared. Some files are cloud-only and never touch local disk, so the local folder and its metadata are not a complete record of what the user stored in the tenant. Deleted items land in an online recycle bin (30 days Personal, 93 days Business) - past that window, recovery depends entirely on Microsoft 365 retention/audit rather than local artifacts.",
+  "interpretation": "Always confirm the local sync folder location via the registry rather than assuming the default path - it can be relocated by the user or by policy. SyncDiagnostics.log is a diagnostics log, not a guaranteed metadata source, but can incidentally contain file-level detail worth checking. Because cloud-only files never sync to disk, local artifacts alone cannot prove the full contents of a user's OneDrive at a point in time. For OneDrive for Business, Microsoft 365 Unified Audit Logs supply up to 90 days of user activity (uploads, downloads, sharing) that should be cross-referenced against local sync evidence.",
+  "related_artifacts": ["google-drive-desktop", "box-drive", "dropbox", "teams-slack-cache"]
+}

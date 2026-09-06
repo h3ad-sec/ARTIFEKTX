@@ -22,6 +22,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "The referenced file does not need to still exist for the Jump List entry to remain, aiding recovery after deletion; can be individually pruned via 'Remove from this list'.",
+  "interpretation": "",
   "related_artifacts": [
     "usrclass-dat-hive",
     "lnk-files"

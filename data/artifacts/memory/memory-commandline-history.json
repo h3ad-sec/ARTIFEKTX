@@ -35,6 +35,7 @@
     "T1070.001"
   ],
   "anti_forensic_notes": "An attacker who disables or stops the EventLog service, clears the Security log (which itself generates a 4688-independent 1102 event), or reconfigures/uninstalls Sysmon removes future command-line visibility going forward, but cannot retroactively populate command lines that were never captured because the audit policy addendum was off in the first place - the absence of command-line data on a host is therefore ambiguous between 'never configured' and 'deliberately tampered with' and must be checked against the actual policy/registry state and against whether other event types from the same source continued logging normally.",
+  "interpretation": "",
   "related_artifacts": [
     "security-eventlog",
     "sysmon",

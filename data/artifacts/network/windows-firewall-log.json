@@ -30,6 +30,7 @@
     "T1562.004"
   ],
   "anti_forensic_notes": "Legacy pfirewall.log logging is off by default for both dropped and successful connections and must be explicitly enabled per network profile; an adversary with admin rights can disable logging, delete the file, or add/remove rules via netsh advfirewall, and the log itself is capped at a small rolling size (default 4096 KB / max 32767 KB, oldest entries deleted first), so its absence proves nothing about whether logging was ever on. The WFAS event log channel records rule-change events (2004/2005/2006) independently of whether text logging is enabled, though clearing that event log is itself recorded as a log-cleared event.",
+  "interpretation": "",
   "related_artifacts": [
     "defender-eventlog",
     "security-eventlog",

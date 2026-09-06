@@ -26,6 +26,7 @@
     "T1543.003"
   ],
   "anti_forensic_notes": "Services can be created/deleted quickly with sc.exe; correlate with Security event 4697/7045 (System log) for creation evidence when auditing is enabled.",
+  "interpretation": "",
   "related_artifacts": [
     "system-hive",
     "system-eventlog"

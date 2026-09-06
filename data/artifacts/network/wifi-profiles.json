@@ -29,6 +29,7 @@
     "T1016.002"
   ],
   "anti_forensic_notes": "keyMaterial is DPAPI-protected by default (protected=\"true\"), tying decryption to the machine/user context that saved it, which is why recovery is normally done through `netsh ... key=clear` (or an equivalent DPAPI unwrap) run in that same context rather than by reading the XML key material directly. Deleting a saved network removes its XML profile file, and with it the SSID history, leaving only whatever MFT/file-deletion metadata the filesystem retains.",
+  "interpretation": "",
   "related_artifacts": [
     "arp-cache",
     "dns-client-cache"

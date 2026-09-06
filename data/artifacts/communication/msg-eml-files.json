@@ -33,6 +33,7 @@
     "T1114.001"
   ],
   "anti_forensic_notes": "Because EML is plain text and MSG headers are user-editable through MAPI property editors like MFCMAPI, both formats can be hand-crafted or altered to fabricate a convincing-looking message - unlike a message still resident in a live mailbox store or mail server log, a standalone saved file has no independent chain of custody proving it was actually delivered. Cross-referencing the file's internal Received chain and Message-ID against the corresponding OST/PST store or mail server logs (where available) is the primary way to validate authenticity; absence of any corroborating server-side record for a claimed-received message is itself a red flag.",
+  "interpretation": "",
   "related_artifacts": [
     "outlook-ost-pst"
   ]

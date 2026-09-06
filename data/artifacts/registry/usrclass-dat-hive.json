@@ -25,6 +25,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "Shellbags entries in this hive are not tied to a file's own metadata and are not cleared when the referenced folder or volume is deleted or removed, so they can outlive the evidence they point to — an analyst can prove a folder was accessed even after the folder, and the drive it was on, are both gone. Because the hive loads only for its owning user, correlating it correctly requires matching the hive to the right SID/profile.",
+  "interpretation": "",
   "related_artifacts": [
     "ntuser-dat-hive"
   ]

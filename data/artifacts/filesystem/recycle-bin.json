@@ -28,6 +28,7 @@
     "T1070.004"
   ],
   "anti_forensic_notes": "Deleting a file directly (Shift+Delete, `del` from a command shell, or most malware self-deletion routines) bypasses the Recycle Bin entirely and leaves no $I/$R pair - the absence of an expected Recycle Bin entry for a known deletion is itself a signal that a non-Explorer deletion path was used. An attacker can also delete just the $R content file while leaving the $I metadata behind, or clear the whole $Recycle.Bin folder, so a lone surviving $I record should still be treated as valuable evidence of the deletion event even without recoverable content.",
+  "interpretation": "",
   "related_artifacts": [
     "mft",
     "usn-journal",

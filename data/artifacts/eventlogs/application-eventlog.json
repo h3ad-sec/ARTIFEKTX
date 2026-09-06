@@ -22,6 +22,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "Lower signal-to-noise than Security/System logs for security investigations; useful mainly to corroborate AV/EDR crash-based defense evasion.",
+  "interpretation": "",
   "related_artifacts": [
     "security-eventlog"
   ]

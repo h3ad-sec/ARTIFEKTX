@@ -1,0 +1,35 @@
+{
+  "id": "computer-name",
+  "name": "Computer Name (Hostname)",
+  "category": "registry",
+  "subcategory": "system-identification",
+  "os_min": "Windows XP",
+  "location": "SYSTEM\\CurrentControlSet\\Control\\ComputerName\\ComputerName",
+  "purpose": "Stores the hostname of the system in the ComputerName value, used to identify the machine on a network and correlate its identity across logs and other artifacts.",
+  "key_fields": [
+    "ComputerName value - the configured hostname, effective from the next reboot",
+    "ComputerName\\ActiveComputerName\\ComputerName - the hostname actually in effect for the current boot session"
+  ],
+  "normal_baseline": "Hostname matches the organization's naming convention and asset inventory, and remains stable for the operational life of the system; ComputerName and ActiveComputerName values agree.",
+  "anomalies": [
+    "Hostname changed shortly before or after other incident indicators, consistent with renaming a compromised host to evade endpoint-name-based detections, blocklists, or analyst attention",
+    "Hostname not matching the organization's naming convention, DNS record, or asset inventory for that machine",
+    "ComputerName and ActiveComputerName values differing at time of acquisition, indicating a rename was staged but had not yet taken effect (pending reboot) when the system was imaged",
+    "Mismatch between the ComputerName registry value and the hostname recorded in logs collected from the same system, indicating the value was changed after those logs were generated"
+  ],
+  "parsing_tools": [
+    "Registry Explorer (Eric Zimmerman)",
+    "RegRipper (H. Carvey)"
+  ],
+  "attack_techniques": [
+    "T1082"
+  ],
+  "anti_forensic_notes": "A rename only fully takes effect after reboot; comparing ComputerName\\ComputerName (pending/current) against ComputerName\\ActiveComputerName (in effect for the current session) can reveal a rename made but not yet completed at the time of acquisition, which is otherwise easy to miss if only one of the two subkeys is checked.",
+  "interpretation": "Hostname can facilitate correlation of log data and other artifacts that reference the machine by name. Because the value only changes fully after a reboot, compare ActiveComputerName (current session) against ComputerName (pending/next-boot) to detect an in-progress or recent rename.",
+  "related_artifacts": [
+    "os-version-info",
+    "system-last-shutdown",
+    "system-hive",
+    "security-eventlog"
+  ]
+}

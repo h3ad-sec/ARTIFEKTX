@@ -25,6 +25,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "Clearing browsing history removes rows from the SQLite tables but does not necessarily overwrite the underlying file pages, so carving deleted SQLite records can sometimes recover cleared history.",
+  "interpretation": "",
   "related_artifacts": [
     "firefox-browser-artifacts"
   ]

@@ -30,6 +30,7 @@
     "T1490"
   ],
   "anti_forensic_notes": "Deleting the VSS catalog via vssadmin, WMI, or diskshadow removes the enumerable shadow copy set, but the underlying change-block data in System Volume Information is not necessarily zeroed and may still be recoverable through raw carving until overwritten by subsequent disk activity. Because VSS deletion is a near-universal precursor to ransomware detonation, its presence is high-signal - but a system where System Restore was already disabled will show no shadow copies for entirely benign reasons, so absence alone should not be conflated with an attacker's deletion without corroborating command-line or event evidence.",
+  "interpretation": "",
   "related_artifacts": [
     "mft",
     "usn-journal",

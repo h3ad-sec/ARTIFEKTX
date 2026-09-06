@@ -27,6 +27,7 @@
     "T1556.006"
   ],
   "anti_forensic_notes": "A plain text file with no built-in audit trail of its own; NTFS timestamp metadata and any file-write telemetry (e.g. Sysmon Event ID 11) are the only artifacts of when it changed, and both can be altered by an attacker with sufficient privilege. Its contents are also preloaded into the volatile DNS client cache, so a redirect may still be visible in ipconfig /displaydns even after the hosts file itself has been reverted.",
+  "interpretation": "",
   "related_artifacts": [
     "dns-client-cache",
     "windows-firewall-log",

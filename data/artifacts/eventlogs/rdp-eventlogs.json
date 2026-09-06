@@ -26,6 +26,7 @@
     "T1021.001"
   ],
   "anti_forensic_notes": "1149's description ('User authentication succeeded') is misleading, it reflects successful network-level authentication, not a completed interactive logon; correlating across all three channels (within about 1 minute tolerance) is needed for a complete session timeline.",
+  "interpretation": "",
   "related_artifacts": [
     "security-eventlog"
   ]

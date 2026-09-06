@@ -30,6 +30,7 @@
     "T1070.004"
   ],
   "anti_forensic_notes": "An attacker with administrative access can delete and recreate the journal via `fsutil usn deletejournal <volume>`, wiping all prior change history for that volume in one step; because this resets the journal's starting USN, an unexplained discontinuity in the sequence numbers is itself the anti-forensic indicator to look for. The journal's fixed size also means it naturally overwrites its own oldest entries during normal system use, so the absence of activity from further back than the volume's typical churn rate cannot be assumed to be suspicious on its own.",
+  "interpretation": "",
   "related_artifacts": [
     "mft",
     "logfile",

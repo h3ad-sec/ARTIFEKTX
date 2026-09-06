@@ -23,6 +23,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "A detected-and-quarantined threat still generates a 1116/1117 record even if the file itself is gone, making this log valuable when malware self-deletes; excluded paths configured via GPO produce no detection at all.",
+  "interpretation": "",
   "related_artifacts": [
     "application-eventlog"
   ]

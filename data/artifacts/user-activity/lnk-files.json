@@ -22,6 +22,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "Persists after the target file is deleted, preserving path and volume evidence; the TrackerDataBlock MAC address can help attribute the originating machine when a file was moved across systems.",
+  "interpretation": "",
   "related_artifacts": [
     "jump-lists",
     "usrclass-dat-hive"

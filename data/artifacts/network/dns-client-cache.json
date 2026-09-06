@@ -30,6 +30,7 @@
     "T1071.004"
   ],
   "anti_forensic_notes": "Entirely volatile, like the ARP cache: it lives only in the Dnscache service's memory and is wiped on reboot or by ipconfig /flushdns / Clear-DnsClientCache, so it must be collected during live response. A cache that is suspiciously empty on a system clearly used for recent browsing is itself a possible indicator that it was deliberately flushed.",
+  "interpretation": "",
   "related_artifacts": [
     "hosts-file",
     "arp-cache",

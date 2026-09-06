@@ -1,0 +1,34 @@
+{
+  "id": "wordwheelquery",
+  "name": "WordWheelQuery",
+  "category": "registry",
+  "subcategory": "file-folder-access",
+  "os_min": "Windows 7",
+  "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\WordWheelQuery",
+  "purpose": "Maintains an ordered history of the search terms a user has typed into the File Explorer search box.",
+  "key_fields": [
+    "Numbered values - each holding one Unicode search term string",
+    "MRUListEx - binary DWORD-array giving the order terms were entered, most recent first",
+    "Key LastWrite time - approximates when the most recent search term was entered"
+  ],
+  "normal_baseline": "A handful of everyday search terms (partial filenames, project names, common file extensions) consistent with the user routinely locating their own files.",
+  "anomalies": [
+    "Search terms for file extensions or keywords associated with sensitive data categories (passwords, finance, HR, credentials, wallet, config) shortly before a data-access or exfiltration incident",
+    "Search terms naming security tools, log files, or forensic artifacts (event log names, AV product names) suggesting reconnaissance or anti-forensic intent",
+    "Search terms for another user's name or profile-specific paths, suggesting lateral browsing of another account's data",
+    "A burst of many distinct search queries in a very short window, inconsistent with normal manual typing"
+  ],
+  "parsing_tools": [
+    "Registry Explorer (Eric Zimmerman)",
+    "RegRipper"
+  ],
+  "attack_techniques": [
+    "T1083"
+  ],
+  "anti_forensic_notes": "WordWheelQuery is not touched by mainstream browser-focused privacy cleaners, so its survival alongside cleared browser history can point an analyst toward local file-system searching that other tools missed. The key can still be cleared directly via registry edit, and its complete absence on an otherwise active profile is itself worth noting.",
+  "interpretation": "Search terms are stored in Unicode and ordered purely by the MRUListEx sequence, not by embedded timestamps within each value - only the key's overall LastWrite time anchors the list in time, so establishing when an earlier (non-most-recent) search term was entered is not possible from this artifact alone.",
+  "related_artifacts": [
+    "typed-paths",
+    "shellbags"
+  ]
+}

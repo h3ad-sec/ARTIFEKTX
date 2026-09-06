@@ -30,6 +30,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "Deleting the binary from disk does not remove its Amcache record: the inventory snapshot persists in the hive until the next Compatibility Appraiser scheduled-task run, and the prior entry is often still recoverable from the Amcache.hve.LOG1/.LOG2 transaction logs even after that. An investigator who collects only the .hve file (not its .LOG1/.LOG2 companions) on a system that wasn't cleanly shut down can miss the most recent writes. Wiping or replacing Amcache.hve outright, or disabling the Microsoft Compatibility Appraiser task, stops new entries from being recorded going forward but is itself an unusual, noteworthy action to find during triage.",
+  "interpretation": "",
   "related_artifacts": [
     "shimcache",
     "prefetch",

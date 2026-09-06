@@ -1,0 +1,31 @@
+{
+  "id": "ntfs-timestamp-rules",
+  "name": "NTFS $STANDARD_INFORMATION Timestamp Behavior Rules",
+  "category": "file",
+  "subcategory": "filesystem-metadata",
+  "os_min": "Behavior documented for Windows 10 v1903 and Windows 11 v22H2 (SANS FOR500 poster testing) — varies by OS version and action combination on other builds",
+  "location": "Not a location itself — this is a reference matrix describing how the $MFT's $STANDARD_INFORMATION attribute (Modified/Access/Creation/Metadata-change, i.e. MACE) changes under common file operations. See the `mft` artifact for where this data physically lives.",
+  "purpose": "Documents exactly which of the four $STANDARD_INFORMATION timestamps (Modified, Access, Creation, Metadata/MFT-entry-change) update, stay unchanged, or get inherited from the source file for each common file operation (creation, access, modification, rename, local move, volume move via CLI, volume move via cut/paste, copy, deletion) — the single most load-bearing reference for timeline reconstruction and timestomping detection.",
+  "key_fields": [
+    "File Creation: Creation/Metadata/Modified all set to time of creation; Access set to time of creation (Win11 access time may differ by a few seconds from actual activity)",
+    "File Access: only Access updates (to time of access); on Windows 11 with the system volume over 128 GiB, Access may show No Change at all due to the last-access-update throttling introduced in that build",
+    "File Modification: Modified and Metadata update to time of data modification; Creation stays unchanged",
+    "File Rename: only Metadata updates (to time of rename); Modified/Creation/Access unchanged",
+    "Local File Move (same volume, Explorer or CLI): only Metadata updates (to time of move); Modified/Creation/Access unchanged",
+    "Volume File Move via CLI (cross-volume, command line): Creation, Access, and Metadata all update to the time of the move; Modified is inherited from the original",
+    "Volume File Move via cut/paste in Explorer (cross-volume): Access and Metadata update to time of cut/paste; Modified and Creation are inherited from the original",
+    "File Copy (new file created): Access, Creation, and Metadata all set to time of copy; Modified is inherited from the original file",
+    "File Deletion (Shift+Delete): no $STANDARD_INFORMATION change at all on the now-deleted MFT record — Modified/Access/Creation/Metadata remain exactly as they were before deletion"
+  ],
+  "normal_baseline": "Timestamp deltas across an evidence file's MACE values are internally consistent with one of the operation patterns above — e.g. a file with Creation and Modified times that differ, and a Metadata time matching neither, is consistent with an ordinary copy rather than tampering.",
+  "anomalies": [
+    "$STANDARD_INFORMATION Creation time later than the $FILE_NAME attribute's creation time for the same MFT record — the classic timestomping signature, since common timestomp tools rewrite $SI but not $FN",
+    "A timestamp pattern that matches none of the known operation signatures above for the OS in use (e.g. Modified predating Creation with no corresponding move/copy/rename context)",
+    "Batch of files sharing suspiciously identical MACE values inconsistent with individual creation/access history, suggesting a scripted timestamp-setting tool rather than organic use"
+  ],
+  "parsing_tools": ["MFTECmd (Eric Zimmerman)", "The Sleuth Kit (istat)", "Registry Explorer / any $MFT-capable forensic suite"],
+  "attack_techniques": ["T1070.006"],
+  "anti_forensic_notes": "This behavior is highly version- and action-specific (the SANS poster itself documents meaningful differences between Windows 10 v1903 and Windows 11 v22H2 for the same operations), so rules here are heuristics for common actions, not guarantees — always validate against the specific OS build and exact action sequence when the finding is load-bearing for a case. Attackers who timestomp $SI but leave $FN untouched are still caught by comparing the two attributes.",
+  "interpretation": "Read as: given an observed MACE pattern on a file, work backward to the most likely operation that produced it, then check whether that operation is consistent with the rest of the case timeline. Windows 11 introduces two specific quirks worth remembering: (1) Access time updates can be fully suppressed if the system volume exceeds 128 GiB, so a static-looking Access time on Win11 does not by itself prove the file was never accessed; (2) some Access-time updates on Win11 (e.g. after data modification or rename) were observed to differ from the true activity time by up to a few seconds, so treat Win11 Access times as approximate, not exact, when timing precision matters. Cross-reference the `mft` artifact for the $STANDARD_INFORMATION vs $FILE_NAME structural distinction that makes timestomp detection possible in the first place.",
+  "related_artifacts": ["mft", "usn-journal"]
+}

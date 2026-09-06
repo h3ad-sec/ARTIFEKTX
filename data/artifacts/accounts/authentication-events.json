@@ -1,0 +1,38 @@
+{
+  "id": "authentication-events",
+  "name": "Authentication Events (NTLM / Kerberos)",
+  "category": "file",
+  "subcategory": "authentication",
+  "os_min": "Windows 7",
+  "location": "Security.evtx",
+  "purpose": "Identifies where authentication of credentials actually occurred, distinguishing local/workgroup account authentication (recorded on the workstation itself) from domain/Active Directory authentication (recorded on the domain controller), via NTLM and Kerberos protocol events.",
+  "key_fields": [
+    "Event ID 4776 (NTLM) - the system attempted to validate credentials for an account, success or failure",
+    "Event ID 4768 (Kerberos) - a Ticket Granting Ticket was requested/granted, indicating a successful logon",
+    "Event ID 4769 (Kerberos) - a Service Ticket was requested, indicating access to a server resource",
+    "Event ID 4771 (Kerberos) - Kerberos pre-authentication failed, indicating a failed logon"
+  ],
+  "normal_baseline": "4768/4769 activity concentrated on domain controllers, matching normal business-hours logon and resource-access patterns for known accounts; 4776 activity limited to expected local/workgroup authentication scenarios.",
+  "anomalies": [
+    "A burst of 4771 (Kerberos pre-authentication failed) events against one or many accounts followed by a 4768 success, consistent with a password-spray or brute-force attack that ultimately succeeded",
+    "4769 Service Ticket requests for service accounts using weak/legacy ticket encryption at unusual hours, consistent with Kerberoasting",
+    "4776 NTLM authentication occurring where Kerberos would normally be expected for that account/resource, consistent with a forced protocol downgrade or a pass-the-hash style attempt",
+    "Authentication events recorded on a host other than where the analyst expects for that account type (e.g., a domain account appearing to authenticate locally rather than at a domain controller), consistent with cached-credential logon"
+  ],
+  "parsing_tools": [
+    "Event Viewer",
+    "EvtxECmd (Eric Zimmerman)"
+  ],
+  "attack_techniques": [
+    "T1110.003",
+    "T1078",
+    "T1558.003"
+  ],
+  "anti_forensic_notes": "These events are recorded only on the system that actually performed the authentication - a host showing no local 4776/4768/4769 activity for a given account has not necessarily seen no authentication, it may simply mean the authentication happened elsewhere (the domain controller for a domain account). Standard Security-log clearing and retention limits otherwise apply (see security-eventlog's Event ID 1102 note).",
+  "interpretation": "Authentication events identify where authentication of credentials occurred, which is particularly useful when tracking local vs. domain account usage. They are recorded on the system that authenticated the credentials: Local Account/Workgroup authentication is recorded on the workstation itself, while Domain/Active Directory authentication is recorded on the domain controller.",
+  "related_artifacts": [
+    "security-eventlog",
+    "sam-hive",
+    "user-profile-list"
+  ]
+}

@@ -23,6 +23,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "Downloads table entries can be cleared alongside general history clearing; the downloaded file itself, if kept, will separately carry Zone.Identifier MOTW evidence of its origin.",
+  "interpretation": "",
   "related_artifacts": [
     "chrome-edge-browser-artifacts",
     "motw-zone-identifier"

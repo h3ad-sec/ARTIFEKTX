@@ -27,6 +27,7 @@
     "T1557.002"
   ],
   "anti_forensic_notes": "Purely volatile: the whole table is lost on reboot, and Windows Vista and later moves an unused entry from Reachable to Stale after roughly 15-45 seconds (BaseReachableTime defaults to 30000 ms, randomized per RFC 4861) unless it is re-referenced, so it must be captured live per the RFC 3227 order-of-volatility guidance or the evidence is gone. Windows XP/Server 2003 exposed ArpCacheLife and ArpCacheMinReferencedLife registry values to tune this timing, but Microsoft documents that these values no longer apply from Windows Vista onward, which instead uses Neighbor Unreachability Detection tunable via netsh interface ipv4 set interface ... basereachable=.",
+  "interpretation": "",
   "related_artifacts": [
     "dns-client-cache",
     "windows-firewall-log",

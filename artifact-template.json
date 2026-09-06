@@ -1,5 +1,5 @@
 {
-  "_comment": "Copy this file to data/artifacts/{folder}/{id}.json. Folders are organizational (registry | execution | user-activity); the `category` field below is the literal artifact type (registry | file), independent of which folder it lives in.",
+  "_comment": "Copy this file to data/artifacts/{folder}/{id}.json. Folders are organizational; the `category` field below is the literal artifact type (registry | file), independent of which folder it lives in. Locked schema, 15 fields exactly — see feedback_artifektx_schema memory.",
   "id": "your-artifact-id",
   "name": "Human-readable artifact name",
   "category": "registry",
@@ -16,5 +16,6 @@
   "parsing_tools": ["Tool name (author/vendor)"],
   "attack_techniques": ["T1204"],
   "anti_forensic_notes": "How this artifact is commonly cleared, evaded, or is inherently unreliable — and what that absence itself signals",
+  "interpretation": "Analyst decoding guidance that doesn't fit the fields above: sub-key/value meanings, format quirks, capacity limits, what this artifact proves vs doesn't prove. Added 2026-09-06 after reviewing the SANS FOR500 poster's own Description/Location/Interpretation structure — leave as empty string if there's nothing beyond what purpose/key_fields/anomalies already cover.",
   "related_artifacts": ["other-artifact-id"]
 }

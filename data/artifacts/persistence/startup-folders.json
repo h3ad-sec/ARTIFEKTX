@@ -24,6 +24,7 @@
     "T1547.001"
   ],
   "anti_forensic_notes": "Trivially removed by deleting the file; file-system timestamps on the item itself (not just its LNK target) can help date when persistence was planted.",
+  "interpretation": "",
   "related_artifacts": [
     "lnk-files"
   ]

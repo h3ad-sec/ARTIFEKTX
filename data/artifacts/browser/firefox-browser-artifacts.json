@@ -22,6 +22,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "Deleting the whole profile folder removes all Firefox artifacts at once; profile folder can be copied off intact even after the browser is closed, as recommended by Mozilla for backups.",
+  "interpretation": "",
   "related_artifacts": [
     "chrome-edge-browser-artifacts"
   ]

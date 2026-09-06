@@ -38,6 +38,7 @@
     "T1070.001"
   ],
   "anti_forensic_notes": "Attackers frequently favor stopping or reconfiguring a security service through the normal SCM control path (sc.exe stop, Stop-Service, or the SCM API) because it produces only a routine-looking 7036 'stopped' event rather than the more conspicuous 7034 crash event - so a 7036 stop for a security product is not automatically benign and should be checked against who/what triggered it. Clearing the System log to remove 7045/7036/7040 evidence itself generates Event ID 104, which an attacker must separately suppress or accept as a trace.",
+  "interpretation": "",
   "related_artifacts": [
     "security-eventlog",
     "system-hive",

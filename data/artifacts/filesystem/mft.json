@@ -30,11 +30,13 @@
     "T1070.006"
   ],
   "anti_forensic_notes": "Standard timestomping tools and the Win32 SetFileTime API only reach $STANDARD_INFORMATION, so comparing $SI against $FN exposes most cases - but 'double timestomping' that also rewrites $FILE_NAME defeats this comparison, and if a timestomped file is later moved or renamed, Windows copies the (already-forged) $SI times into a freshly written $FN attribute, erasing the discrepancy entirely. Deleted-file MFT records are frequently overwritten as the volume reuses space, so the window to recover a deleted entry's full attribute set shrinks over time, making correlation with the USN Journal and $LogFile necessary once the live MFT record itself has been reused.",
+  "interpretation": "",
   "related_artifacts": [
     "usn-journal",
     "logfile",
     "recycle-bin",
     "amcache",
-    "prefetch"
+    "prefetch",
+    "ntfs-timestamp-rules"
   ]
 }

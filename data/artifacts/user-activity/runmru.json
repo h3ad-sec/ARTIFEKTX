@@ -28,6 +28,7 @@
     "T1059"
   ],
   "anti_forensic_notes": "Only the last ~26 distinct commands are retained (one per lowercase letter a-z; the oldest is evicted as new commands are added), so heavy Run-dialog use can push older evidence out through normal operation, not just tampering. An entry is only committed to the registry once the Run dialog is closed, so live/volatile use may not yet be on disk. Attackers who know about this artifact often delete specific values or the whole key, but doing so still requires closing the Run dialog to commit the change, and its absence alongside other execution evidence is itself suspicious.",
+  "interpretation": "",
   "related_artifacts": [
     "userassist",
     "typed-paths"

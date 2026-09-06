@@ -22,6 +22,7 @@
   ],
   "attack_techniques": [],
   "anti_forensic_notes": "Removing an extension deletes its folder; the Preferences JSON's extension history or sync data may retain remnants briefly after removal.",
+  "interpretation": "",
   "related_artifacts": [
     "chrome-edge-browser-artifacts"
   ]

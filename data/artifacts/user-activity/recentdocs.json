@@ -29,6 +29,7 @@
     "T1083"
   ],
   "anti_forensic_notes": "Entries persist after the referenced file is deleted, so RecentDocs commonly outlives the evidence it points to and is a good source for reconstructing what files existed even after cleanup. The key's LastWrite time only reflects the most recent addition across the whole key structure, so establishing a precise timeline for older entries requires the MRUListEx ordering rather than timestamps alone.",
+  "interpretation": "",
   "related_artifacts": [
     "shellbags",
     "userassist"
