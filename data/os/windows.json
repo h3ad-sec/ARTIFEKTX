@@ -1,7 +1,7 @@
 {
   "os": "Windows",
-  "generated": "2026-09-08T07:11:09.146160+00:00",
-  "count": 130,
+  "generated": "2026-09-08T07:51:08.302159+00:00",
+  "count": 134,
   "categories": {
     "Account Usage": [
       {
@@ -473,6 +473,90 @@
           "sam-hive",
           "security-hive",
           "authentication-events"
+        ]
+      },
+      {
+        "id": "rdp-bitmap-cache",
+        "name": "RDP Bitmap Cache",
+        "type": "file",
+        "os_min": "Windows XP+",
+        "location": "Windows 7+: %LOCALAPPDATA%\\Microsoft\\Terminal Server Client\\Cache\\ \u2014 Cache0000.bin, Cache0001.bin, etc. plus bcache2.bmc / bcache22.bmc / bcache24.bmc index files (suffix denotes bitmap quality level). Windows XP: %USERPROFILE%\\Local Settings\\Application Data\\Microsoft\\Terminal Server Client\\Cache\\. Default cache path is configurable via HKCU\\Software\\Microsoft\\Terminal Server Client.",
+        "purpose": "Stores small bitmap tiles the RDP client caches locally to speed up redraw of a remote session's screen; the .bin files hold raw tile pixel data while the bcache*.bmc files index cache keys to tile offsets, so a session's tiles can potentially be reassembled into images of what was visually displayed.",
+        "key_fields": [
+          "Cache000N.bin tile data files",
+          "bcache2.bmc / bcache22.bmc / bcache24.bmc index files",
+          "64x64 pixel bitmap tile entries",
+          "tile cache-key-to-offset index",
+          "HKCU\\Software\\Microsoft\\Terminal Server Client (cache path override)"
+        ],
+        "normal_baseline": "Cache directory grows over the life of RDP client usage, typically 10-100MB depending on OS and session volume; presence alone only proves the RDP client was used at some point, not what was displayed on a given date without tile reconstruction.",
+        "anomalies": [
+          "Cache tiles present with no corresponding rdp-eventlogs or connection-history entry for that session (possible log clearing)",
+          "Reconstructed tiles showing command-line tools, admin consoles, or sensitive documents on a host with no legitimate RDP administration need",
+          "Cache files recently modified despite disabled or cleared RDP connection history",
+          "Unusually large or numerous cache files suggesting an extended interactive session inconsistent with expected usage"
+        ],
+        "parsing_tools": [
+          "BMC-Tools (ANSSI-FR)",
+          "RdpCacheStitcher (BSI - German Federal Office for Information Security)"
+        ],
+        "attack_techniques": [
+          "T1021.001"
+        ],
+        "anti_forensic_notes": "Clearing or disabling the RDP client cache (or wiping %LOCALAPPDATA%\\Microsoft\\Terminal Server Client\\Cache\\) removes this evidence entirely; because tiles are only fragments of frames actually redrawn, static or unchanged screen regions may never be cached, and reconstruction (via RdpCacheStitcher) is manual/best-effort rather than a guaranteed full-frame recovery.",
+        "interpretation": "",
+        "related_artifacts": [
+          "rdp-eventlogs",
+          "remote-desktop-protocol-rdp-usage"
+        ]
+      },
+      {
+        "id": "kerberos-ticket-cache",
+        "name": "Kerberos Ticket Cache",
+        "type": "file",
+        "os_min": "Windows 2000+ (Kerberos default auth); klist included since Windows XP/Server 2003",
+        "location": "Memory-resident only \u2014 held by the LSASS process on the local machine, not the registry or a persistent on-disk file. Enumerated live via klist (tickets/tgt) or recovered post-mortem from an LSASS memory dump (e.g. procdump, comsvcs.dll MiniDump, or a full memory/hiberfil.sys capture) parsed with a tool such as Mimikatz. No ticket cache file exists on disk under normal operation; tickets are lost at logoff/reboot unless captured beforehand.",
+        "purpose": "Holds the Kerberos TGTs and service tickets a logon session has obtained from the KDC, enabling SSO to Kerberos-authenticated resources without re-entering credentials; forensically it is the primary evidence source for Kerberoasting, Pass-the-Ticket, overpass-the-hash, and Golden/Silver Ticket activity.",
+        "key_fields": [
+          "Client / Server (klist tickets)",
+          "KerbTicket Encryption Type",
+          "Ticket Flags",
+          "Start Time / End Time / Renew Time (klist tickets)",
+          "Session Key Type",
+          "ServiceName / TargetName / DomainName / TargetDomainName / RenewUntil / TimeSkew (klist tgt)",
+          "LogonID (LUID)"
+        ],
+        "normal_baseline": "A logged-on session normally holds one TGT (service krbtgt) plus service tickets for each Kerberos-authenticated resource accessed since logon. Default Kerberos Policy sets Maximum lifetime for user ticket to 10 hours and Maximum lifetime for user ticket renewal to 7 days; tickets are purged at logoff/reboot or via klist purge.",
+        "anomalies": [
+          "Service or TGT tickets with lifetimes/RenewUntil values exceeding the domain's configured Kerberos Policy maximum (forged Golden/Silver Ticket)",
+          "A TGT present for a user with no corresponding interactive or network logon event (injected/passed ticket)",
+          "High volume of RC4 (etype 0x17) service-ticket requests across multiple SPNs in a short window from a single account (Kerberoasting)",
+          "AS-REQ succeeding without prior authentication for accounts unexpectedly flagged 'Do not require Kerberos preauthentication' (AS-REP Roasting)",
+          "Identical ticket material appearing in the cache of two different host sessions (ticket reuse / Pass-the-Ticket)",
+          "Non-standard process (e.g. Mimikatz, Rubeus, procdump) accessing LSASS shortly before ticket anomalies appear"
+        ],
+        "parsing_tools": [
+          "klist",
+          "Mimikatz (sekurlsa::tickets, kerberos::list, kerberos::ptt)",
+          "Rubeus"
+        ],
+        "attack_techniques": [
+          "T1558",
+          "T1558.001",
+          "T1558.002",
+          "T1558.003",
+          "T1558.004",
+          "T1550.003"
+        ],
+        "anti_forensic_notes": "Tickets are volatile and memory-resident, purged at logoff, reboot, or klist purge, so no artifact persists unless captured live or via a memory/LSASS dump taken before that point. Rubeus avoids directly touching LSASS memory (uses LsaCallAuthenticationPackage instead of a memory read) to reduce detection relative to Mimikatz's direct LSASS access, and forged Golden/Silver Tickets occupy the same in-memory location as legitimate ones, so detection depends on ticket field/timing anomalies and event log correlation rather than location.",
+        "interpretation": "",
+        "related_artifacts": [
+          "security-eventlog",
+          "authentication-events",
+          "logon-event-types",
+          "memory-process-list",
+          "lsa-secrets",
+          "successful-failed-logons"
         ]
       }
     ],
@@ -1111,6 +1195,53 @@
           "powershell-scriptblock-transcripts",
           "commands-executed-in-run-dialog",
           "memory-commandline-history"
+        ]
+      },
+      {
+        "id": "sysinternals-eula-keys",
+        "name": "Sysinternals Tool Execution (EULA Keys)",
+        "type": "registry",
+        "os_min": "Windows XP+ (Sysinternals Suite EULA-acceptance behavior is consistent across all modern Windows versions)",
+        "location": "HKCU\\Software\\Sysinternals\\<ToolName>\\EulaAccepted (per-user, current interactive user); HKU\\<SID>\\Software\\Sysinternals\\<ToolName>\\EulaAccepted (other loaded user hives); global override: HKCU\\Software\\Sysinternals\\EulaAccepted",
+        "purpose": "Records that a specific Sysinternals utility (e.g., PsExec, ProcDump, PsList, Autoruns, Process Explorer, Handle) was executed on the host under a given user context and had its EULA accepted, either interactively or via the -accepteula/-accepteula switch.",
+        "key_fields": [
+          "Registry subkey name under HKCU\\Software\\Sysinternals\\ (identifies which specific tool was run)",
+          "EulaAccepted (DWORD value, 1 = accepted)",
+          "Hive/SID the key was written under (identifies which user context ran the tool)",
+          "Key last-write timestamp (approximates first-run time of that tool for that user)"
+        ],
+        "normal_baseline": "IT administrators routinely run Sysinternals tools (Process Explorer, Autoruns, TCPView, Handle) for troubleshooting; a small, consistent set of EulaAccepted keys tied to known admin accounts on workstations/servers they manage is expected.",
+        "anomalies": [
+          "EulaAccepted key for PsExec, ProcDump, PsExec64, or PsKill appearing under a non-administrative or service account's hive",
+          "Key present under a user profile with no other history of interactive logon or admin activity on that host",
+          "EulaAccepted key written by a renamed/disguised binary (filename does not match the legitimate Sysinternals executable for that subkey) \u2014 a documented evasion pattern where a renamed tool still triggers the same registry write",
+          "Multiple distinct Sysinternals tool keys appearing in rapid succession across several user hives on a single host, consistent with an attacker staging a toolkit",
+          "ProcDump EulaAccepted key present with no corresponding legitimate troubleshooting ticket/change record, especially alongside LSASS-related process access",
+          "Global HKCU\\Software\\Sysinternals\\EulaAccepted set (bulk pre-acceptance script), which suppresses the per-tool prompt and can mask which individual tools were later run"
+        ],
+        "parsing_tools": [
+          "Registry Explorer (Eric Zimmerman)",
+          "RECmd (Eric Zimmerman)",
+          "regrippy (Airbus CERT \u2014 sysinternals plugin)",
+          "Velociraptor (Windows.Registry.Sysinternals.Eulacheck artifact)"
+        ],
+        "attack_techniques": [
+          "T1569.002",
+          "T1570",
+          "T1021.002",
+          "T1003.001"
+        ],
+        "anti_forensic_notes": "An operator can pre-patch a tool or set the key manually (or via -accepteula) to avoid a GUI prompt, but this still writes the same registry artifact. Deliberately deleting the per-tool EulaAccepted key removes that specific trace, though it does not necessarily remove other execution evidence (Prefetch, Amcache, Shimcache, event logs, or file artifacts). Renaming the executable does not prevent the key from being written under the tool's original internal name, which is itself a detectable inconsistency.",
+        "interpretation": "",
+        "related_artifacts": [
+          "ntuser-dat-hive",
+          "usrclass-dat-hive",
+          "amcache-hve",
+          "shimcache",
+          "prefetch",
+          "run-runonce-keys",
+          "sysmon",
+          "security-eventlog"
         ]
       }
     ],
@@ -4008,6 +4139,57 @@
           "network-history",
           "network-interfaces",
           "system-eventlog"
+        ]
+      },
+      {
+        "id": "vpn-client-artifacts",
+        "name": "VPN Client Connection Artifacts",
+        "type": "file",
+        "os_min": "Windows XP+ (rasphone.pbk phonebook path/format); Windows Vista+ (RasClient Application-log Event IDs 20221-20227)",
+        "location": "%APPDATA%\\Microsoft\\Network\\Connections\\Pbk\\rasphone.pbk (per-user phonebook); %ProgramData%\\Microsoft\\Network\\Connections\\Pbk\\rasphone.pbk (all-users/device tunnel phonebook); %APPDATA%\\Microsoft\\Network\\Connections\\Pbk\\_hiddenPbk\\rasphone.pbk (API-only hidden connections, not shown in Settings UI); HKLM\\SYSTEM\\CurrentControlSet\\Services\\Rasman\\Config\\AutoTrigger (VPN auto-trigger profile mapping); HKCU\\SOFTWARE\\Microsoft\\RAS EAP\\UserEapInfo (DPAPI-protected cached EAP sign-in info); Application.evtx, Source/Provider \"RasClient\" (client-side connect/disconnect events, Event IDs 20221-20227)",
+        "purpose": "Reconstructs Windows built-in RAS/VPN connection history and profile configuration \u2014 which VPN/dial-up profiles exist, their settings, and when connections were attempted or established. Does not cover third-party VPN clients (e.g., Cisco AnyConnect, GlobalProtect, OpenVPN), which store their own separate, vendor-specific logs and configuration.",
+        "key_fields": [
+          "Phonebook entry name/section header (connection profile name) in rasphone.pbk",
+          "Type= (connection type, e.g., VPN), VpnStrategy= (tunneling protocol)",
+          "PhoneNumber= / server address field",
+          "UseRasCredentials=, AutoLogon= (saved-credential behavior flags)",
+          "DialParamsUID=, Guid= (unique identifiers for the entry)",
+          "HighDateTime=/LowDateTime= (last-used timestamp, FILETIME split fields)",
+          "RasClient Event IDs 20221 (connection attempt initiated), 20222-20224 (establishment sequence), 20225 (successfully connected), 20226 (disconnected), 20227 (connection error)",
+          "RasClient event fields: source username, dial-in username, connection/connectoid name, VPN server address, assigned tunnel IP"
+        ],
+        "normal_baseline": "A handful of stable, named VPN/dial-up phonebook entries matching corporate-issued connection profiles, with RasClient event sequences (20221->20225) aligning with normal remote-work login times and known VPN server addresses.",
+        "anomalies": [
+          "Entries present only under the hidden _hiddenPbk phonebook (invisible in the Settings/Network UI, reachable only via API/rasdial), suggesting deliberate concealment",
+          "VPN connections established via rasdial.exe (scriptable, non-interactive) rather than the GUI rasphone.exe, indicating scripted/automated connection setup",
+          "Phonebook entries pointing to unfamiliar or non-corporate server addresses",
+          "Repeated Event ID 20227 (connection errors) or clusters of failed attempts consistent with brute-force or misconfigured credential-stuffing attempts",
+          "RasClient connection events occurring at times inconsistent with the user's normal work pattern or from an unexpected source host",
+          "Phonebook entry deleted or timestamps altered while RasClient event log entries for that same connection name still exist, indicating anti-forensic cleanup",
+          "AutoTrigger registry entries referencing a VPN profile that no longer has a corresponding phonebook entry"
+        ],
+        "parsing_tools": [
+          "EvtxECmd (Eric Zimmerman)",
+          "Registry Explorer / RECmd (Eric Zimmerman)",
+          "Velociraptor (Windows.EventLogs.RemoteAccessVPN artifact)",
+          "Chainsaw",
+          "wevtutil / Event Viewer",
+          "plain text viewer (rasphone.pbk is an unencrypted, human-readable INI-style text file)"
+        ],
+        "attack_techniques": [
+          "T1133"
+        ],
+        "anti_forensic_notes": "rasphone.pbk is plain text and trivially editable or deletable without special tooling; an attacker or user can remove a connection profile from the phonebook after use while corresponding RasClient Application-log events (20221-20227) persist unless the event log itself is cleared or that specific event source is disabled, so cross-referencing phonebook state against event log history can reveal after-the-fact profile deletion.",
+        "interpretation": "",
+        "related_artifacts": [
+          "dns-client-cache",
+          "network-interfaces",
+          "wifi-profiles",
+          "windows-firewall-log",
+          "security-eventlog",
+          "application-eventlog",
+          "credential-manager-vault",
+          "dpapi-masterkeys"
         ]
       }
     ],
