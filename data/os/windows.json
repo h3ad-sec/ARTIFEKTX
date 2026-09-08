@@ -1,7 +1,7 @@
 {
   "os": "Windows",
-  "generated": "2026-09-06T16:05:17.358464+00:00",
-  "count": 107,
+  "generated": "2026-09-08T07:11:09.146160+00:00",
+  "count": 130,
   "categories": {
     "Account Usage": [
       {
@@ -304,6 +304,175 @@
           "cloud-account-details",
           "successful-failed-logons",
           "last-login-and-password-change"
+        ]
+      },
+      {
+        "id": "dpapi-masterkeys",
+        "name": "DPAPI Master Keys",
+        "type": "file",
+        "os_min": "Windows 2000+ (DPAPI itself introduced in Windows 2000; current per-user master key file format in use since Windows XP/2000 era, largely unchanged through modern Windows)",
+        "location": "C:\\Users\\<Username>\\AppData\\Roaming\\Microsoft\\Protect\\<User SID>\\<MasterKey GUID> (per-user master keys); C:\\Windows\\System32\\Microsoft\\Protect\\S-1-5-18\\User\\<GUID> (SYSTEM/machine master keys); CREDHIST file in the same Protect\\<SID> folder; domain DPAPI backup key held on Domain Controllers",
+        "purpose": "Stores the symmetric master keys the Windows Data Protection API (DPAPI) uses to derive encryption keys for user secrets \u2014 saved browser/Wi-Fi passwords, Credential Manager entries, private keys/certificates, and EFS keys \u2014 with each master key itself protected by a key derived from the user's logon password or a domain/local backup key.",
+        "key_fields": [
+          "MasterKey GUID (filename)",
+          "Version",
+          "Salt",
+          "MasterKeyLen",
+          "BackupKeyLen",
+          "CredHistLen",
+          "DomainKeyLen",
+          "encrypted MasterKey blob",
+          "encrypted BackupKey blob",
+          "CredHist GUID reference (CREDHIST file)",
+          "DomainKey blob (RSA-encrypted with domain DPAPI backup key)"
+        ],
+        "normal_baseline": "One Protect\\<SID> folder per local profile that has ever used DPAPI-backed protection (browsers, Wi-Fi profiles, EFS, Credential Manager, password managers); a small number of GUID-named master key files accumulate over time, generally one new key per password change or periodic rotation, alongside a CREDHIST file in the same folder.",
+        "anomalies": [
+          "Master key files copied off-host (temp directory, removable media, exfil staging) without corresponding legitimate user activity",
+          "Access to another user's Protect\\<SID> folder from a different user context or an unrelated SYSTEM/admin process",
+          "Master key files created/modified immediately following a suspicious password reset (can be used to force derivable new master keys)",
+          "Command-line/process evidence of dpapi::masterkey, dpapi::cred, or SharpDPAPI/dploot triage commands coinciding with master key file access",
+          "Theft of the domain DPAPI backup key (via LSASS or NTDS.dit access) followed by mass reads across many users' Protect folders, indicating domain-wide decryption capability"
+        ],
+        "parsing_tools": [
+          "Mimikatz (dpapi::masterkey, dpapi::cred, dpapi::blob)",
+          "SharpDPAPI (GhostPack)",
+          "DPAPIck",
+          "dploot",
+          "Impacket secretsdump.py (retrieves DPAPI_SYSTEM key material)"
+        ],
+        "attack_techniques": [
+          "T1555",
+          "T1555.003",
+          "T1555.004"
+        ],
+        "anti_forensic_notes": "Master key files are opaque binary blobs with no plaintext indication of what they protect, so their presence alone reveals nothing without the user's password, the domain backup key, or the SYSTEM DPAPI_SYSTEM/DPAPI_USERS LSA secret; an attacker who obtains the domain backup key from a Domain Controller can decrypt any domain user's master keys indefinitely without ever touching the victim host again, leaving no artifact there to find.",
+        "interpretation": "",
+        "related_artifacts": [
+          "stored-credentials",
+          "chrome-edge-browser-artifacts",
+          "wifi-profiles",
+          "security-hive"
+        ]
+      },
+      {
+        "id": "credential-manager-vault",
+        "name": "Credential Manager Vault",
+        "type": "file",
+        "os_min": "Windows Vista+ (Credential Manager/Windows Vault introduced with Vista; backup/restore and modern locker split added in Windows 7)",
+        "location": "%LOCALAPPDATA%\\Microsoft\\Vault\\<GUID>\\ (Web/Windows Vault: Policy.vpol, *.vcrd, *.vsch); %LOCALAPPDATA%\\Microsoft\\Credentials\\ (Windows Credentials locker); %APPDATA%\\Microsoft\\Vault\\ ; %ProgramData%\\Microsoft\\Vault\\<GUID>\\ (system-wide vault); C:\\Windows\\System32\\config\\systemprofile\\AppData\\Roaming\\Microsoft\\Vault (SYSTEM profile vault)",
+        "purpose": "Stores encrypted credentials \u2014 usernames/passwords and, for Web Credentials, website login data \u2014 that applications and Internet Explorer/legacy Edge save via the Windows Credential Manager APIs so users are not re-prompted for authentication.",
+        "key_fields": [
+          "Vault Policy GUID (per-vault folder identifier)",
+          "Policy.vpol (DPAPI-protected vault encryption key, contains a GUID matching the vault folder)",
+          "*.vcrd (individual encrypted credential entry: target/resource name, username, encrypted secret, last-written timestamp)",
+          "*.vsch (schema file describing how to interpret a decrypted .vcrd entry)",
+          "Credentials locker blob files under %LOCALAPPDATA%\\Microsoft\\Credentials"
+        ],
+        "normal_baseline": "Vault and Credentials folders present per user profile with entries tied to legitimately saved RDP connections, mapped network drives, IIS/SQL, Microsoft 365, and browser (IE/legacy Edge) saved logins; .vcrd file counts stay low and grow only when a user opts to 'remember' credentials.",
+        "anomalies": [
+          "vaultcmd.exe /listcreds or /list enumeration immediately followed by process access to the Vault/Credentials folders",
+          "rundll32.exe keymgr.dll KRShowKeyMgr execution (Stored User Names and Passwords backup/restore UI abuse)",
+          "CredEnumerateA/CredEnumerateW API calls invoked from non-standard or unsigned processes",
+          "New .vcrd/.vpol files copied to an unexpected path or exfil staging directory",
+          "Vault access by a process running as a different user than the vault owner without a prior privilege-escalation event"
+        ],
+        "parsing_tools": [
+          "Mimikatz (vault::list, vault::cred, dpapi::cred)",
+          "Nirsoft VaultPasswordView",
+          "SharpDPAPI (triage/vaults commands)",
+          "dploot",
+          "vaultcmd.exe (native, listing only)"
+        ],
+        "attack_techniques": [
+          "T1555",
+          "T1555.004"
+        ],
+        "anti_forensic_notes": "Vault secrets are DPAPI-protected with per-user master keys, so copying .vcrd/.vpol files alone yields nothing without the corresponding master key or domain backup key; attackers commonly stage DPAPI master key theft together with vault file theft, and native tools (vaultcmd.exe, keymgr.dll) generate minimal process telemetry distinguishable from legitimate credential-manager use unless command-line auditing is enabled.",
+        "interpretation": "",
+        "related_artifacts": [
+          "stored-credentials",
+          "internet-explorer-file-urls",
+          "remote-desktop-protocol-rdp-usage",
+          "chrome-edge-browser-artifacts"
+        ]
+      },
+      {
+        "id": "lsa-secrets",
+        "name": "LSA Secrets",
+        "type": "registry",
+        "os_min": "Windows NT+ (Policy\\Secrets store present in the SECURITY hive since early Windows NT; AES-based hashedBootKey encryption confirmed added with Windows Vista/Server 2008, replacing the RC4 scheme used on NT/2000/XP/2003)",
+        "location": "HKEY_LOCAL_MACHINE\\SECURITY\\Policy\\Secrets (live registry, readable only by SYSTEM by default); on-disk backing file %SystemRoot%\\System32\\config\\SECURITY",
+        "purpose": "Stores sensitive secrets managed by the Local Security Authority \u2014 service account passwords, cached auto-logon credentials, the domain machine account password, DPAPI system-level key backup material, and other application-registered secrets \u2014 encrypted with a key derived from the SYSTEM boot key (SysKey).",
+        "key_fields": [
+          "$MACHINE.ACC (CurrVal/OldVal subkeys \u2014 domain computer account password, current/previous)",
+          "NL$KM (cached domain logon / DCC hash encryption key)",
+          "DPAPI_SYSTEM (SYSTEM and per-user DPAPI master key backup material)",
+          "DefaultPassword (autologon password when configured, e.g. via Sysinternals Autologon)",
+          "_SC_<ServiceName> (logon password for services configured to run as a named account)",
+          "CurrVal / OldVal / CupdTime / OupdTime / SecDesc (per-secret subkey structure)"
+        ],
+        "normal_baseline": "$MACHINE.ACC present on any domain-joined machine; NL$KM present when domain cached logons are enabled; _SC_<ServiceName> entries only for services deliberately configured with a named service account (not LocalSystem/NetworkService); DefaultPassword absent unless autologon was intentionally configured.",
+        "anomalies": [
+          "Remote or local access to the SECURITY hive/Policy\\Secrets outside scheduled system maintenance (reg save, Volume Shadow Copy hive extraction, remote registry)",
+          "Presence of DefaultPassword indicating autologon was configured (a stored, recoverable cleartext credential)",
+          "New or unexpected _SC_ entries for services not normally run under a named account",
+          "Command-line indicators of lsadump::secrets (Mimikatz), secretsdump.py, or reg save on SAM/SECURITY/SYSTEM hives",
+          "Use of the REG_OPTION_BACKUP_RESTORE flag via custom tooling to read Policy\\Secrets while bypassing normal ACL checks"
+        ],
+        "parsing_tools": [
+          "Mimikatz (lsadump::secrets)",
+          "Impacket secretsdump.py",
+          "Nirsoft LSASecretsView",
+          "SharpSecDump",
+          "reg.exe (hive export, combined with offline decryption tooling)"
+        ],
+        "attack_techniques": [
+          "T1003.004"
+        ],
+        "anti_forensic_notes": "Reading Policy\\Secrets live requires SYSTEM privileges, so attackers typically pivot through a SYSTEM-level context (PsExec, WMI, scheduled task) or export the SECURITY and SYSTEM hives (reg save / Volume Shadow Copy) to decrypt offline, leaving little live-process trace against the hive itself; because decryption requires SysKey from the SYSTEM hive plus the LSA key from SECURITY, an exported SECURITY hive alone is useless \u2014 analysts should always correlate SECURITY and SYSTEM hive access/exfiltration together.",
+        "interpretation": "",
+        "related_artifacts": [
+          "security-hive",
+          "sam-hive",
+          "system-hive",
+          "stored-credentials"
+        ]
+      },
+      {
+        "id": "windows-hello-ngc",
+        "name": "Windows Hello / NGC Container",
+        "type": "file",
+        "os_min": "Windows 10 (1507)+; Windows Hello for Business cloud/hybrid trust deployments require Windows 10 1511+",
+        "location": "C:\\Windows\\ServiceProfiles\\LocalService\\AppData\\Local\\Microsoft\\Ngc\\ (per-credential NGC container subfolders, ACL-restricted to SYSTEM/LocalService); supporting key protector material also relies on the user's DPAPI master keys",
+        "purpose": "Stores the Next Generation Credential (NGC) key containers backing Windows Hello and Windows Hello for Business \u2014 the private key material unlocked by a PIN or biometric (fingerprint/face) gesture that authenticates the user without a transmitted reusable password.",
+        "key_fields": [
+          "Per-credential GUID subfolder name (one per enrolled sign-in method)",
+          "Protector key blobs (PIN-derived or TPM-sealed)",
+          "Key attestation / AIK certificate references (Windows Hello for Business)",
+          "DPAPI-wrapped private key blob requiring PIN-derived unlock"
+        ],
+        "normal_baseline": "One NGC container subfolder per enrolled Windows Hello credential (PIN and/or biometric) per user on the device; contents are unusable outside the originating TPM and outside the SYSTEM/LocalService security context; subfolder count increases only when a user enrolls an additional sign-in method.",
+        "anomalies": [
+          "NGC folder contents copied off the device (the folder is never legitimately accessed or exported outside SYSTEM/LocalService)",
+          "New credential subfolder appearing with no corresponding Windows Hello enrollment event in the Security event log",
+          "PIN reset/repair activity (Ngc folder deletion and recreation) with no matching help-desk ticket or user-initiated reset",
+          "Evidence of NGC-targeting extraction tooling being staged or run (requires SYSTEM plus SAM/SECURITY/SYSTEM hive access), indicating offline credential-cracking preparation"
+        ],
+        "parsing_tools": [
+          "WINHELLO2hashcat (Banaanhangwagen, GitHub) with dpapick3, for offline PIN hash extraction",
+          "DPAPI forensic tooling (Mimikatz DPAPI module, dpapick) for the supporting master-key material"
+        ],
+        "attack_techniques": [],
+        "anti_forensic_notes": "The NGC container never holds a plaintext private key on disk \u2014 material is TPM-sealed or DPAPI-wrapped with the PIN \u2014 so deleting the folder (or performing a Windows Hello PIN/face/fingerprint reset) destroys the credential rather than concealing evidence of its use; an attacker with SYSTEM and access to the SAM/SECURITY/SYSTEM hives can still stage an offline PIN-cracking attempt without modifying the container itself, leaving no direct on-disk trace in the NGC folder.",
+        "interpretation": "",
+        "related_artifacts": [
+          "dpapi-masterkeys",
+          "lsa-secrets",
+          "credential-manager-vault",
+          "sam-hive",
+          "security-hive",
+          "authentication-events"
         ]
       }
     ],
@@ -725,6 +894,223 @@
           "shimcache",
           "prefetch",
           "userassist"
+        ]
+      },
+      {
+        "id": "powershell-scriptblock-transcripts",
+        "name": "PowerShell ScriptBlock Logging & Transcripts",
+        "type": "file",
+        "os_min": "PowerShell v5.0+ (native on Windows 10 / Server 2016+; back-ported to Windows 7 SP1+ / Server 2008 R2 SP1+ via Windows Management Framework 5.0/5.1); Module/Transcription logging exist earlier but full Script Block Logging requires v5.0",
+        "location": "Event channel: Microsoft-Windows-PowerShell/Operational (PowerShell 7: PowerShellCore/Operational); Transcript files: path set by HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\Transcription\\OutputDirectory (Start-Transcript without policy configuration defaults to the user's Documents folder); Policy registry keys: HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging, ...\\ScriptBlockLogging, ...\\Transcription",
+        "purpose": "Captures the actual content of PowerShell activity \u2014 full de-obfuscated script text via Script Block Logging (Event ID 4104), invoked module/cmdlet parameters via Module Logging (Event ID 4103), and complete session input/output via Transcription files \u2014 reconstructing exactly what commands and scripts ran and in what order, beyond what the general powershell-operational log channel records on its own.",
+        "key_fields": [
+          "EventID (4103 module logging / 4104 script block logging)",
+          "ScriptBlockText",
+          "ScriptBlockId",
+          "MessageNumber / MessageTotal (for scripts split across multiple 4104 events)",
+          "Path (source script file, if any)",
+          "ContextInfo: Host Application, User, Runspace ID",
+          "Transcript header: start time, username, machine name, PSVersion, command line",
+          "Transcript body: full command input/output text"
+        ],
+        "normal_baseline": "Routine admin/scripting activity: module imports, scheduled maintenance scripts, DSC/config management, signed internal automation; most 4104 events are Verbose/Information level and short; module logging fires for common modules (ActiveDirectory, Microsoft.PowerShell.*) during normal admin tasks.",
+        "anomalies": [
+          "4104 events flagged Warning (Level 3) containing suspicious keywords (-enc, DownloadString, Invoke-Expression/IEX, Net.WebClient, EncodedCommand, mimikatz)",
+          "Large base64-encoded or heavily obfuscated script blocks split across many MessageNumber parts",
+          "Script block content with no corresponding on-disk script file (fileless/in-memory execution)",
+          "Invocation with -Version 2 forcing the legacy PowerShell v2 engine to evade Script Block Logging",
+          "Transcript files missing despite policy being enabled, or appearing outside the configured OutputDirectory",
+          "Gaps or abrupt termination in transcript sequence/session continuity"
+        ],
+        "parsing_tools": [
+          "Event Viewer",
+          "Get-WinEvent",
+          "wevtutil",
+          "EvtxECmd (Eric Zimmerman)",
+          "Hayabusa",
+          "Chainsaw",
+          "DeepBlueCLI"
+        ],
+        "attack_techniques": [
+          "T1059.001"
+        ],
+        "anti_forensic_notes": "Adversaries can disable capture by clearing the EnableScriptBlockLogging, EnableModuleLogging, or EnableTranscripting registry values, run wevtutil cl to purge the Microsoft-Windows-PowerShell/Operational log, or force a PowerShell v2-engine downgrade (predates AMSI and Script Block Logging support) to bypass content capture entirely.",
+        "interpretation": "",
+        "related_artifacts": [
+          "powershell-operational",
+          "sysmon",
+          "security-eventlog",
+          "application-eventlog"
+        ]
+      },
+      {
+        "id": "wer-crash-dumps",
+        "name": "Windows Error Reporting (WER) Crash Dumps",
+        "type": "file",
+        "os_min": "Windows XP+ / Windows Server 2003+ (WER introduced); LocalDumps registry-configured user-mode dump collection requires Windows Vista SP1+ / Server 2008+",
+        "location": "%LOCALAPPDATA%\\Microsoft\\Windows\\WER\\ReportArchive; %LOCALAPPDATA%\\Microsoft\\Windows\\WER\\ReportQueue; %PROGRAMDATA%\\Microsoft\\Windows\\WER\\ReportArchive; %PROGRAMDATA%\\Microsoft\\Windows\\WER\\ReportQueue; per-crash Report.wer files and optional minidump (.dmp) files inside each report subfolder; configurable dump output under HKLM/HKCU\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps (default %LOCALAPPDATA%\\CrashDumps); Application event log, source \"Windows Error Reporting\"",
+        "purpose": "Records process crash, hang, and kernel-fault events with process metadata and, when configured, memory dump files \u2014 useful for reconstructing exploitation attempts, malware crashes, and post-crash behavior even after the offending binary is gone.",
+        "key_fields": [
+          "Report.wer: EventType (APPCRASH/AppHang/BEX/Kernel), AppPath, AppName, OriginalFilename",
+          "Sig[0-9] fault signature fields (faulting module, offset, exception code)",
+          "EventTime (FILETIME)",
+          "OsInfo / OS version",
+          "LoadedModule list",
+          "ReportIdentifier (GUID)",
+          "Associated minidump (.dmp) filename",
+          "Application log Event ID 1001 (WER_EL_BUCKET_LOG) with P1-P10 problem-signature fields"
+        ],
+        "normal_baseline": "Occasional Report.wer folders in ReportArchive for common application crashes (Office, browsers, Explorer); ReportQueue is normally near-empty except transiently while a report awaits upload; LocalDumps folder is typically absent unless explicitly configured by an admin or developer.",
+        "anomalies": [
+          "Report.wer entries for unsigned, unusual, or short-lived processes, or for security tooling/lsass.exe",
+          "WerFault.exe invoked against lsass.exe, consistent with the silent-process-exit ('LSASS shtinkering') credential-dumping technique",
+          "Minidump created for a process with no plausible legitimate crash cause",
+          "Repeated crashes of the same process/module immediately preceding successful code execution (exploitation attempt pattern)",
+          "WER artifact timestamps clustering around known exploitation or malware execution windows",
+          "Disabled=1 under the WER registry key, indicating deliberate suppression"
+        ],
+        "parsing_tools": [
+          "WinDbg",
+          "DumpChk",
+          "Event Viewer (Application log)",
+          "BlueScreenView"
+        ],
+        "attack_techniques": [
+          "T1003.001"
+        ],
+        "anti_forensic_notes": "WER can be disabled entirely via Disabled=1 under HKLM/HKCU\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting, or suppressed per-application via ExcludedApplications, preventing crash artifacts from ever being written; existing ReportArchive/ReportQueue folders and LocalDumps files can also simply be deleted post-incident.",
+        "interpretation": "",
+        "related_artifacts": [
+          "application-eventlog",
+          "system-eventlog",
+          "memory-process-list",
+          "memory-code-injection",
+          "amcache-hve",
+          "prefetch"
+        ]
+      },
+      {
+        "id": "print-spooler-artifacts",
+        "name": "Print Spooler Artifacts",
+        "type": "file",
+        "os_min": "Windows 2000+ (spool file structure); PrintService Admin/Operational Event Log channels require Windows Vista / Server 2008+ (Windows Event Log architecture)",
+        "location": "%SystemRoot%\\System32\\spool\\PRINTERS\\ (*.SPL spool data, *.SHD shadow/job-settings files, *.EMF per-page graphics); %SystemRoot%\\System32\\spool\\drivers\\ (installed print driver DLLs, e.g. x64\\3\\); Event log channels: Microsoft-Windows-PrintService/Admin (enabled by default) and Microsoft-Windows-PrintService/Operational (disabled by default); print processor persistence key: HKLM\\SYSTEM\\CurrentControlSet\\Control\\Print\\Environments\\<architecture>\\Print Processors\\<name>",
+        "purpose": "Captures print job submission metadata and, transiently, spooled document data, plus print-driver installation/load events \u2014 enabling reconstruction of what was printed and by whom, and detection of print-driver-based execution or persistence such as PrintNightmare (CVE-2021-34527) exploitation.",
+        "key_fields": [
+          "SHD file: document name (only if ShowJobTitleInEventLogs is enabled), submitting user, printer name, submission time, port, data type",
+          "SPL file: raw or EMF-formatted spooled print data",
+          "PrintService/Operational Event ID 307 (document printed): user, printer, page count, byte size, job ID",
+          "PrintService/Admin Event ID 808 (driver load failure) and 316 (driver installation)",
+          "Print Processors registry value: Driver (DLL name loaded by spoolsv.exe)"
+        ],
+        "normal_baseline": "Transient .SPL/.SHD/.EMF files that exist only for the duration of an active print job before automatic deletion on completion; PrintService/Admin log shows routine driver installs from trusted, signed sources; PrintService/Operational log is disabled by default and empty unless explicitly enabled via wevtutil or GPO.",
+        "anomalies": [
+          "Unexpected DLLs appearing under %SystemRoot%\\System32\\spool\\drivers\\x64\\3\\ shortly before a spoolsv.exe crash or a new SYSTEM-level process",
+          "spoolsv.exe spawning rundll32.exe or another unexpected child process",
+          "New or modified Print Processors registry key pointing to a non-standard DLL",
+          "PrintService/Admin Event ID 808 (driver load failure) or 316 (driver install) immediately preceding suspicious activity",
+          "Carved/orphaned .SPL or .SHD files recovered from unallocated space referencing unexpected document names or users",
+          "Remote RpcAddPrinterDriverEx calls to spoolsv.exe from unauthenticated or unexpected accounts, consistent with CVE-2021-34527 exploitation"
+        ],
+        "parsing_tools": [
+          "EnCase 'Print Spool - SHD & SPL Parser' EnScript",
+          "WinHex (community .SHD/.SPL templates)",
+          "Event Viewer",
+          "wevtutil"
+        ],
+        "attack_techniques": [
+          "T1547.012",
+          "T1068"
+        ],
+        "anti_forensic_notes": "SPL, SHD, and EMF files are deleted automatically by the spooler once a job completes, so they normally must be recovered via file carving from unallocated space; the PrintService/Operational log is disabled by default (must be manually enabled), so print-job history is frequently unavailable unless proactively configured, and document names are withheld from Event ID 307 unless ShowJobTitleInEventLogs is explicitly set.",
+        "interpretation": "",
+        "related_artifacts": [
+          "services-persistence",
+          "run-runonce-keys",
+          "system-eventlog",
+          "security-eventlog",
+          "recent-files"
+        ]
+      },
+      {
+        "id": "windows-recall",
+        "name": "Windows Recall (AI Explorer)",
+        "type": "file",
+        "os_min": "Windows 11 24H2 (build 26100.3915+), Copilot+ PC only (40+ TOPS NPU, Secured-core standard)",
+        "location": "%LOCALAPPDATA%\\CoreAIPlatform.00\\UKP\\{GUID}\\ukg.db (SQLite database); %LOCALAPPDATA%\\CoreAIPlatform.00\\UKP\\{GUID}\\ImageStore\\* (JPEG screenshot files, one per snapshot); SemanticTextStore.sidb / SemanticImageStore.sidb (vector index files) in the same UKP folder",
+        "purpose": "Periodically screenshots the user's active display, runs local OCR and semantic indexing on the images, and stores the results as searchable timeline 'snapshots' so the user can retrieve anything previously seen on screen using natural-language search.",
+        "key_fields": [
+          "WindowCapture table: WindowCreatedEvent/WindowChangedEvent/WindowCaptureEvent/WindowDestroyedEvent rows with timestamps",
+          "WindowCaptureTextIndex_content (OCR-extracted text from each snapshot)",
+          "App / AppDwellTime (process path, launch time, window dwell duration)",
+          "Web / WebDomainDwellTime (captured URLs and domains from supported browsers)",
+          "ImageToken linking a WindowCapture row to its JPEG in ImageStore",
+          "Exif.Photo.MakerNote tag (0x927c) inside each JPEG: window title, window bounds, capture timestamp, full path of the process that owned the window"
+        ],
+        "normal_baseline": "Present only where the user opted in on a Copilot+ PC and completed Windows Hello Enhanced Sign-in Security enrollment; ukg.db and ImageStore grow continuously during active use, bounded by the configured storage cap (default allocation scales with disk size, e.g. 25 GB on a 256 GB device) or the configured max retention duration (30/60/90/180 days on managed devices); oldest snapshots are purged first once a limit is hit.",
+        "anomalies": [
+          "ukg.db/ImageStore populated on a device where org policy (AllowRecallEnablement) should have removed the feature entirely",
+          "Snapshot OCR text containing credentials, secrets, or full documents that sensitive-information filtering should have excluded",
+          "Evidence of a parsing tool (e.g., TotalRecall) having been run against the store by someone other than the profile owner",
+          "WindowCapture gaps inconsistent with the configured retention/storage policy, suggesting selective deletion",
+          "Recall data surviving after the user believes they disabled/reset the feature"
+        ],
+        "parsing_tools": [
+          "TotalRecall (xaitax, GitHub)",
+          "Velociraptor Windows.System.Recall.WindowCaptureEvent / Windows.System.Recall.AllWindowEvents artifacts",
+          "DB Browser for SQLite (manual ukg.db inspection)",
+          "Recall Timeline (open-source EXIF-based timeline reconstruction tool)"
+        ],
+        "attack_techniques": [
+          "T1005"
+        ],
+        "anti_forensic_notes": "Turning off 'Save snapshots' or disabling the AllowRecallEnablement policy deletes all previously saved snapshots; Settings > Recall & Snapshots > Advanced Settings > Reset Recall purges ukg.db and ImageStore; running Disable-WindowsOptionalFeature -Online -FeatureName Recall -Remove removes the on-disk store entirely; app/website deny-list policies can pre-emptively prevent capture of chosen processes or sites so no artifact is ever created for them.",
+        "interpretation": "",
+        "related_artifacts": [
+          "windows-10-timeline",
+          "srum",
+          "dpapi-masterkeys",
+          "windows-search-database",
+          "clipboard-history"
+        ]
+      },
+      {
+        "id": "psreadline-console-history",
+        "name": "PSReadLine Console History",
+        "type": "file",
+        "os_min": "Windows PowerShell 5.0+ (PSReadLine bundled and loaded by default); also applies to PowerShell 7+",
+        "location": "%APPDATA%\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt (default for Windows PowerShell/powershell.exe host; a different interactive host writes $($Host.Name)_history.txt in the same folder)",
+        "purpose": "Persists the literal text of commands a user typed interactively at a PowerShell console prompt, across session restarts, independent of any audit/logging policy \u2014 distinct from Script Block Logging or Transcription which are policy-gated and capture executed script content rather than raw keystrokes.",
+        "key_fields": [
+          "One line per full raw command-line string as typed (no built-in timestamp)",
+          "Chronological ordering (oldest at top, newest appended at bottom)",
+          "No user, session ID, or exit-code metadata recorded"
+        ],
+        "normal_baseline": "Grows incrementally with routine interactive commands (navigation, module imports, admin cmdlets); capped at PSReadLine's MaximumHistoryCount (module default 4096 entries, oldest trimmed first); HistoryNoDuplicates (default True) suppresses only recall/search duplicates, not file writes; HistorySaveStyle defaults to SaveIncrementally, so entries are written as each command runs.",
+        "anomalies": [
+          "Plaintext credentials, API keys, or ConvertTo-SecureString -AsPlainText strings recorded",
+          "Encoded/obfuscated invocations (-EncodedCommand, base64 blobs, IEX/Invoke-Expression download cradles)",
+          "Living-off-the-land or offensive tooling commands (credential dumping, Defender tampering, lateral-movement cmdlets)",
+          "File missing or empty on a system with clear evidence of recent interactive PowerShell use elsewhere",
+          "File Modified timestamp far newer than expected activity, with truncated/short content \u2014 consistent with delete-then-recreate"
+        ],
+        "parsing_tools": [
+          "Any text/log viewer",
+          "KAPE (built-in target for ConsoleHost_history.txt)",
+          "Eric Zimmerman KapeFiles target definitions",
+          "Velociraptor Windows.System.Powershell.PSReadline artifact"
+        ],
+        "attack_techniques": [
+          "T1059.001",
+          "T1070.003"
+        ],
+        "anti_forensic_notes": "An adversary can delete the file directly (Remove-Item $env:APPDATA\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt), set -HistorySaveStyle SaveNothing to stop further writes for the session, or use an -AddToHistoryHandler script block to silently exclude specific commands (e.g., those matching a pattern) from ever being written, leaving no gap to notice; deleting mid-session causes PowerShell to silently recreate an empty file on the next command, producing a Created/Modified timestamp mismatch.",
+        "interpretation": "",
+        "related_artifacts": [
+          "powershell-operational",
+          "powershell-scriptblock-transcripts",
+          "commands-executed-in-run-dialog",
+          "memory-commandline-history"
         ]
       }
     ],
@@ -1489,6 +1875,40 @@
         "related_artifacts": [
           "chrome-edge-browser-artifacts"
         ]
+      },
+      {
+        "id": "notification-database",
+        "name": "Windows Notification Database",
+        "type": "file",
+        "os_min": "Windows 10 (Windows Push Notification service / Action Center)",
+        "location": "%LOCALAPPDATA%\\Microsoft\\Windows\\Notifications\\wpndatabase.db (per-user, SQLite) and its wpndatabase.db-wal write-ahead log; system-wide copy at C:\\Windows\\System32\\config\\systemprofile\\AppData\\Local\\Microsoft\\Windows\\Notifications\\wpndatabase.db; associated image cache folder wpnidm",
+        "purpose": "SQLite database storing toast notification metadata and payload content generated by installed apps (mail, chat, security software, etc.), often retaining evidence of user-facing alerts and message previews no longer present in the originating application.",
+        "key_fields": [
+          "Notification table: arrival time, expiry time, payload (toast content, may include message previews)",
+          "NotificationHandler table: app/AUMID that generated the notification",
+          "Primary/foreign keys linking handler to notification entries"
+        ],
+        "normal_baseline": "Continuous accumulation of routine toast entries from mail clients, calendar reminders, Windows Security/Defender alerts, and chat apps, expiring and being pruned on a rolling basis by the Windows Push Notification service.",
+        "anomalies": [
+          "Notification payloads referencing security-tool alerts that no longer have a corresponding surviving log entry in the tool itself, indicating the source log was deleted post-alert",
+          "Chat/email message content preserved in notification payloads that has since been deleted from the source application",
+          "Gaps in the notification timeline coinciding with other anti-forensic activity"
+        ],
+        "parsing_tools": [
+          "bring2lite",
+          "fqlite",
+          "wpn (TZWorks)",
+          "SQLite browser/CLI (DB Browser for SQLite, sqlite3)"
+        ],
+        "attack_techniques": [],
+        "anti_forensic_notes": "Because notification content is cached independently of the originating application, deleting an alert or message in the source app does not remove the already-recorded entry in wpndatabase.db; entries do eventually expire/get pruned, and the database (including its WAL file) can be carved for deleted rows using tools such as bring2lite or fqlite.",
+        "interpretation": "",
+        "related_artifacts": [
+          "defender-eventlog",
+          "teams-slack-cache",
+          "msg-eml-files",
+          "windows-10-timeline"
+        ]
       }
     ],
     "Deleted Items and File Existence": [
@@ -1530,7 +1950,7 @@
       },
       {
         "id": "search-wordwheelquery",
-        "name": "Search – WordWheelQuery",
+        "name": "Search \u2013 WordWheelQuery",
         "type": "registry",
         "os_min": "Windows 7",
         "location": "NTUSER.DAT: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\WordWheelQuery",
@@ -1993,6 +2413,92 @@
           "system-hive",
           "sysmon",
           "service-events"
+        ]
+      },
+      {
+        "id": "applocker-wdac-logs",
+        "name": "AppLocker / WDAC Event Logs",
+        "type": "file",
+        "os_min": "Windows 7 (AppLocker) / Windows 10 (WDAC)",
+        "location": "Applications and Services Logs\\Microsoft\\Windows\\AppLocker\\EXE and DLL; \\AppLocker\\MSI and Script; \\AppLocker\\Packaged app-Deployment; \\AppLocker\\Packaged app-Execution; Applications and Services Logs\\Microsoft\\Windows\\CodeIntegrity\\Operational",
+        "purpose": "Records allow/block decisions made by AppLocker and Windows Defender Application Control (WDAC) when executables, scripts, MSIs, packaged apps, DLLs, drivers, and COM objects are evaluated against application-control policy, in both audit and enforced modes.",
+        "key_fields": [
+          "Event ID",
+          "File name / full path",
+          "Policy name (e.g., EXE, DLL, MANAGEDINSTALLER)",
+          "Rule type (path/hash/publisher) and rule name",
+          "User/group SID",
+          "Enforcement mode (audit vs enforce)",
+          "Correlation ActivityID (links a block event to its signature event)",
+          "TotalSignatureCount / signature index"
+        ],
+        "normal_baseline": "Event 8001 (policy applied successfully) at each policy refresh/boot; 8002/8005 (allowed) or 3099 (policy loaded) entries matching known, whitelisted line-of-business and system binaries; low, predictable event volume tied to logons and software installs.",
+        "anomalies": [
+          "Bursts of 8003/8004 (EXE/DLL audit or enforced block) or 8006/8007 (script/MSI block) for files under %TEMP%, %APPDATA%, Downloads, or C:\\Users\\Public",
+          "3076/3077 (WDAC audit/enforced block) for unsigned or unexpected drivers and binaries",
+          "8036 (COM object blocked) indicating an attempted COM-based application-control bypass",
+          "Clustered 8000/8029/8040 error events on a single host suggesting active policy-evasion attempts",
+          "Gaps or truncation in the AppLocker or CodeIntegrity channels suggesting log clearing to hide blocked execution attempts"
+        ],
+        "parsing_tools": [
+          "Event Viewer",
+          "wevtutil",
+          "Get-WinEvent (PowerShell)"
+        ],
+        "attack_techniques": [
+          "T1562.001"
+        ],
+        "anti_forensic_notes": "App Control does not log successful allowed executions by default (only blocks and would-be blocks), so an attacker who stays within policy generates no record; disabling the Application Identity service (AppIDSvc) or clearing the AppLocker/CodeIntegrity event channels removes both future and historical evidence of blocked execution attempts.",
+        "interpretation": "",
+        "related_artifacts": [
+          "security-eventlog",
+          "sysmon",
+          "defender-eventlog",
+          "system-eventlog"
+        ]
+      },
+      {
+        "id": "defender-asr-events",
+        "name": "Windows Defender ASR (Attack Surface Reduction) Events",
+        "type": "file",
+        "os_min": "Windows 10 version 1709 (Fall Creators Update) or later for the ASR framework and most rules; specific rules require newer builds (e.g., version 1803 for the LSASS credential-theft rule, version 1903 for the WMI persistence rule); Windows Server 2016 (1803 Semi-Annual Channel) or later; requires Microsoft Defender Antivirus as the real-time engine",
+        "location": "Applications and Services Logs > Microsoft > Windows > Windows Defender > Operational (channel: Microsoft-Windows-Windows Defender/Operational), plus the companion Microsoft-Windows-Windows Defender/WHC channel",
+        "purpose": "Records when an individual Attack Surface Reduction rule evaluated and acted on an event, distinct from Windows Defender's general malware-detection log, capturing rule-level block/audit/warn-override/config-change activity for behaviors such as Office child-process creation, LSASS credential theft, and executable content delivered via email or webmail.",
+        "key_fields": [
+          "Event ID 1121 (rule fired in Block mode)",
+          "Event ID 1122 (rule fired in Audit mode)",
+          "Event ID 1129 (user overrode a Warn-mode block)",
+          "Event ID 5007 (ASR configuration/setting changed)",
+          "Rule GUID d4f940ab-401b-4efc-aadc-ad5f3c50688a = Block all Office applications from creating child processes",
+          "Rule GUID 9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2 = Block credential stealing from the Windows local security authority subsystem (LSASS)",
+          "Rule GUID be9ba2d9-53ea-4cdc-84e5-9b1eeee46550 = Block executable content from email client and webmail",
+          "Advanced Hunting ActionType (e.g., AsrOfficeChildProcessBlocked, AsrLsassCredentialTheftBlocked, AsrExecutableEmailContentBlocked)",
+          "Target process image path acted on by the rule"
+        ],
+        "normal_baseline": "In environments running rules in Audit mode, 1122 events are expected in volume, especially for the LSASS credential-theft rule, which is noisy by design and frequently fires on benign processes (e.g., browser update checks) without indicating compromise. In Block mode, sparse 1121 events tied to sanctioned admin tooling (PsExec, WMI) are typical in managed environments.",
+        "anomalies": [
+          "1121/1122 events against the LSASS-credential-theft rule (GUID 9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2) triggered by an unrecognized or unsigned process",
+          "Office child-process or code-injection rule firing immediately after a macro-enabled document was opened",
+          "1129 user-override events clustering on one host/user, indicating deliberate bypass of a Warn-mode block",
+          "5007 configuration-change events showing ASR rules disabled or downgraded from Block to Audit shortly before other suspicious activity",
+          "Executable-content-from-email rule blocking a payload immediately following a phishing email delivery"
+        ],
+        "parsing_tools": [
+          "Windows Event Viewer",
+          "Get-WinEvent (PowerShell) against Microsoft-Windows-Windows Defender/Operational",
+          "Microsoft Defender for Endpoint advanced hunting (DeviceEvents table, Asr* ActionTypes)",
+          "Windows Event Forwarding (WEF) for centralized collection"
+        ],
+        "attack_techniques": [
+          "T1562.001"
+        ],
+        "anti_forensic_notes": "Configuration changes to ASR rules generate their own 5007 event in the same Operational log, so an attacker who weakens or disables a rule leaves a corresponding tamper record alongside the rule-trigger history. Clearing or disabling the Windows Defender Operational log (or the AV engine entirely) removes both the trigger events and this tamper evidence together, which is itself a detectable event-log-clearing action.",
+        "interpretation": "",
+        "related_artifacts": [
+          "defender-eventlog",
+          "sysmon",
+          "security-eventlog",
+          "office-oalerts"
         ]
       }
     ],
@@ -2584,6 +3090,50 @@
           "jump-lists",
           "usrclass-dat-hive"
         ]
+      },
+      {
+        "id": "clipboard-history",
+        "name": "Clipboard History",
+        "type": "file",
+        "os_min": "Windows 10 version 1809 (October 2018 Update) for local Clipboard History (Win+V); Windows 10 version 1803+ for clipboard activity logged into ActivitiesCache.db; Cloud Clipboard sync uses the same infrastructure and requires a Microsoft account",
+        "location": "%LOCALAPPDATA%\\Microsoft\\Windows\\Clipboard\\HistoryData\\<GUID>\\ and %LOCALAPPDATA%\\Microsoft\\Windows\\Clipboard\\Pinned\\<GUID>\\ (per-entry Locale/Text/Bitmap payload files, DPAPI-NG protected); %LOCALAPPDATA%\\ConnectedDevicesPlatform\\<user>\\ActivitiesCache.db (Windows Timeline database, also records clipboard sync activity); HKCU\\Software\\Microsoft\\Clipboard (EnableClipboardHistory, EnableCloudClipboard DWORD values); HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System (AllowClipboardHistory policy DWORD)",
+        "purpose": "Retains multiple past clipboard entries (text, HTML, and small bitmaps) beyond the single most-recent item accessible via Win+V, and can sync entries to other signed-in devices through Cloud Clipboard, extending how long and how widely copied data remains exposed.",
+        "key_fields": [
+          "EnableClipboardHistory (HKCU DWORD)",
+          "EnableCloudClipboard (HKCU DWORD)",
+          "AllowClipboardHistory (HKLM policy DWORD)",
+          "HistoryData/<GUID> and Pinned/<GUID> subfolders",
+          "Locale/Text/Bitmap base64-named payload files per entry",
+          "StartTime / ExpirationTime (ActivitiesCache.db)",
+          "ClipboardPayload (base64-encoded content, ActivitiesCache.db)",
+          "Payload (source application of the copy, ActivitiesCache.db)",
+          "ActivityType (10 = resides in clipboard, 16 = copy/paste, ActivitiesCache.db)"
+        ],
+        "normal_baseline": "Feature is off by default. When enabled, up to 25 items are retained (text under 4 MB per entry, small bitmaps and HTML); unpinned items age out as new ones are copied, pinned items persist until manually unpinned, and cloud-synced items expire from the remote cache after roughly 12 hours.",
+        "anomalies": [
+          "EnableClipboardHistory or EnableCloudClipboard toggled on shortly before sensitive data is copied and off again afterward",
+          "Clipboard History enabled on a server or kiosk-type endpoint with no legitimate multi-device workflow",
+          "HistoryData/Pinned folders contain data while the registry shows history currently disabled, indicating recent use followed by disabling",
+          "Bulk ClipboardPayload rows in ActivitiesCache.db correlating with credential, key, or financial-data copy events",
+          "History folders emptied while other artifacts on the same account show an active session (manual anti-forensic wipe)"
+        ],
+        "parsing_tools": [
+          "Passcape Windows Clipboard History",
+          "Magnet AXIOM (ActivitiesCache.db clipboard parsing)",
+          "Velociraptor Windows.Forensics.Clipboard artifact",
+          "Nirsoft DataProtectionDecryptor (legacy DPAPI only; does not decrypt DPAPI-NG-protected history)"
+        ],
+        "attack_techniques": [
+          "T1115"
+        ],
+        "anti_forensic_notes": "Unpinning an item deletes its folder outright with no tombstone or Recycle Bin entry, so unpin timing cannot be reconstructed from the file system alone. Disabling Clipboard History after the fact does not purge previously written HistoryData/Pinned files, but toggling EnableClipboardHistory off before a sensitive copy prevents any entry from ever being written. Content is protected with DPAPI-NG, so offline decryption generally requires the user's credentials or domain key material.",
+        "interpretation": "",
+        "related_artifacts": [
+          "ntuser-dat-hive",
+          "dpapi-masterkeys",
+          "windows-10-timeline",
+          "windows-recall"
+        ]
       }
     ],
     "Filesystem Artifacts": [
@@ -2809,6 +3359,122 @@
           "usn-journal",
           "recycle-bin",
           "system-hive"
+        ]
+      },
+      {
+        "id": "ntfs-extend-streams",
+        "name": "NTFS $Extend Metadata Files",
+        "type": "file",
+        "os_min": "Windows 2000+ (NTFS 3.0, introduction of the $Extend directory)",
+        "location": "\\$Extend\\$ObjId (hidden NTFS metadata file, volume root); \\$Extend\\$Quota (hidden NTFS metadata file, volume root)",
+        "purpose": "Two of the metadata files inside NTFS's hidden $Extend system directory: $ObjId maintains a distributed link-tracking object-ID index so files/directories can be located after being moved or renamed, and $Quota records per-user disk quota usage/limits; both can support user-activity reconstruction independent of the $MFT.",
+        "key_fields": [
+          "$ObjId: Object ID (GUID) per file, Birth Volume ID, Birth Object ID, Birth Domain ID (via the $O index attribute)",
+          "$Quota: SID of quota owner, quota used, quota threshold/limit"
+        ],
+        "normal_baseline": "$ObjId entries exist for files/folders touched by Distributed Link Tracking-aware applications (e.g., Office documents, shell shortcuts) or reparse-point operations; $Quota is typically empty/unused unless disk quotas were explicitly enabled by an administrator.",
+        "anomalies": [
+          "$ObjId entry for a file that no longer exists on the volume, or whose current MFT record shows a different object ID, indicating it was moved/renamed/deleted after being tracked",
+          "Object ID entries matching known malicious file names/paths despite the file itself being absent from disk",
+          "Unexpected population of $Quota on a system where quotas were never administratively configured"
+        ],
+        "parsing_tools": [
+          "WinObjectIdParser (forensicmatt)",
+          "The Sleuth Kit (istat, fls) to locate/dump the $Extend directory's MFT records",
+          "MFTECmd (Eric Zimmerman) to parse the containing $MFT records",
+          "hex/binary editor for manual $O index attribute analysis"
+        ],
+        "attack_techniques": [],
+        "anti_forensic_notes": "Because $ObjId tracks object identity independently of file name/path, it can retain a record of a file's prior identity even after an attacker renames or relocates it to evade filename-based detection; deleting the $Extend files themselves requires raw disk access and is not a normal user-level operation.",
+        "interpretation": "",
+        "related_artifacts": [
+          "usn-journal",
+          "mft",
+          "ntfs-timestamp-rules",
+          "volume-shadow-copies"
+        ]
+      },
+      {
+        "id": "alternate-data-streams",
+        "name": "NTFS Alternate Data Streams (ADS)",
+        "type": "file",
+        "os_min": "Windows NT 3.1+ (NTFS)",
+        "location": "Any NTFS file or directory, addressed via filename:streamname syntax (e.g., dir /r, PowerShell Get-Item -Path file.txt -Stream *); enumerable through the $MFT's $DATA attribute entries carrying a named stream identifier",
+        "purpose": "General mechanism for attaching arbitrary named data streams to an NTFS file beyond its default unnamed data stream; used by adversaries to hide executable payloads, scripts, or other data from casual directory listings and to execute code directly from a stream.",
+        "key_fields": [
+          "Parent file path",
+          "Stream name",
+          "Stream size",
+          "Stream data/content",
+          "Associated $MFT record's $DATA attribute list"
+        ],
+        "normal_baseline": "Legitimate ADS usage is common and mostly benign, e.g. Zone.Identifier streams added by browsers/Outlook to downloaded files, or bookkeeping streams added by some applications; most files carry only the default stream plus at most a MOTW zone marker.",
+        "anomalies": [
+          "Non-Zone.Identifier named streams containing a PE executable header (MZ) or script content (PowerShell, VBScript, JScript)",
+          "Streams attached to files in Temp/Downloads/user-profile paths that are significantly larger than a typical MOTW marker",
+          "Process creation where the image path includes a colon-delimited stream name, indicating direct execution from an ADS",
+          "Sysmon Event ID 15 (FileCreateStreamHash) entries generated by non-browser, non-installer processes"
+        ],
+        "parsing_tools": [
+          "Sysinternals Streams (streams.exe)",
+          "dir /r (built-in cmd.exe)",
+          "PowerShell Get-Item -Stream *",
+          "Sysmon (Event ID 15, FileCreateStreamHash)",
+          "The Sleuth Kit (istat/icat)"
+        ],
+        "attack_techniques": [
+          "T1564.004"
+        ],
+        "anti_forensic_notes": "ADS content is invisible in Windows Explorer and standard directory listings without stream-aware tools; copying a file to a non-NTFS volume (FAT32, most removable media, many cloud-sync clients) silently strips all alternate streams, which attackers can exploit to both hide payloads and later destroy evidence of them.",
+        "interpretation": "",
+        "related_artifacts": [
+          "motw-zone-identifier",
+          "mft",
+          "sysmon",
+          "ntfs-extend-streams"
+        ]
+      },
+      {
+        "id": "wsl-artifacts",
+        "name": "WSL (Windows Subsystem for Linux) Artifacts",
+        "type": "file",
+        "os_min": "Windows 10 version 1607 (Anniversary Update) for WSL1 in beta, generally available at version 1709 (Fall Creators Update); WSL2 requires Windows 10 version 1903 build 18362.1049 or later (ARM64 requires version 2004 build 19041 or later)",
+        "location": "WSL2 per-distro virtual disk: %LOCALAPPDATA%\\Packages\\<PackageFamilyName>\\LocalState\\ext4.vhdx for classic Microsoft Store-installed distros (newer Store-model distros, e.g. Ubuntu 24.04+, have their VHDX managed internally by the WSL service and abstracted from a fixed AppData path); WSL1 root filesystem: %LOCALAPPDATA%\\Packages\\<PackageFamilyName>\\LocalState\\rootfs\\ (plain NTFS folder tree, no VHDX); Registry: HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Lxss\\<DistroGUID> (BasePath, DistributionName, Version, State, DefaultUid, Flags); live mounted view: \\\\wsl$\\<DistroName>\\ or \\\\wsl.localhost\\<DistroName>\\",
+        "purpose": "Identifies where WSL stores each Linux distribution's virtual disk/root filesystem and configuration, which matters because WSL is an increasingly used staging and execution surface for evading Windows-native EDR/AV \u2014 Linux-side files, processes, and network activity inside the ext4.vhdx or rootfs run largely outside the visibility of host-based Windows security tooling.",
+        "key_fields": [
+          "BasePath (registry, path to the distro's VHDX or root)",
+          "DistributionName (registry, e.g. Ubuntu-22.04)",
+          "Version (registry, 1 = WSL1, 2 = WSL2)",
+          "State (registry, install status)",
+          "DefaultUid, Flags (registry, per-distro config)",
+          "PackageFamilyName (Store package identifying the distro app)",
+          "ext4.vhdx (WSL2 virtual disk holding the full Linux filesystem)"
+        ],
+        "normal_baseline": "One Lxss subkey and one corresponding ext4.vhdx (WSL2) or rootfs folder (WSL1) per installed distro on a developer or admin workstation; the VHDX grows over time up to its configured maximum and is not typically present on standard end-user machines that never installed WSL.",
+        "anomalies": [
+          "Lxss registry key and/or ext4.vhdx/rootfs present on a system with no documented developer or administrative need for Linux tooling",
+          "Recently created or modified ext4.vhdx with no matching software-install history or change ticket",
+          "Distro BasePath pointing outside the normal Packages directory (e.g., a user-writable temp folder or non-standard drive), suggesting a manually imported distro used to avoid Store telemetry",
+          "Outbound network connections or process activity attributable to the host with no corresponding Windows-native process, consistent with activity occurring inside the WSL VM",
+          "wsl.exe or bash.exe invoked to launch scripts/binaries as an indirect execution path around application control"
+        ],
+        "parsing_tools": [
+          "FTK Imager (mount/extract ext4.vhdx)",
+          "TSK/Autopsy or a Linux-capable forensic boot environment (ext4 filesystem parsing)",
+          "Registry Explorer (Eric Zimmerman) for the Lxss registry structure",
+          "wsl.exe --list --verbose / wsl.exe --export (live triage of installed distros and version)"
+        ],
+        "attack_techniques": [
+          "T1202"
+        ],
+        "anti_forensic_notes": "Because ext4.vhdx is opaque to native Windows filesystem drivers, standard Windows-side triage (MFT parsing, native indexing, most EDR file-scanning) does not see inside it without mounting the VHDX and parsing ext4 directly. Uninstalling a distro removes its Lxss subkey and, depending on method, may leave the VHDX orphaned on disk (recoverable) or delete it outright; either way the registry key's own timestamps can outlive or contradict the VHDX's internal filesystem timestamps.",
+        "interpretation": "",
+        "related_artifacts": [
+          "amcache-hve",
+          "shimcache",
+          "prefetch",
+          "bam-dam",
+          "sysmon"
         ]
       }
     ],
@@ -3538,6 +4204,182 @@
           "sysmon",
           "system-boot-and-autostart-programs"
         ]
+      },
+      {
+        "id": "bits-jobs",
+        "name": "BITS Jobs",
+        "type": "file",
+        "os_min": "Windows XP",
+        "location": "%ALLUSERSPROFILE%\\Microsoft\\Network\\Downloader\\qmgr.db (ESE format, Windows 10+); qmgr0.dat / qmgr1.dat (legacy custom format, pre-Windows 10); Event log: Microsoft-Windows-Bits-Client/Operational",
+        "purpose": "Stores the queue-manager state of Background Intelligent Transfer Service (BITS) jobs used for asynchronous, throttled file transfers; abused by malware to stage downloads and to gain persistence via a command executed on job completion or error.",
+        "key_fields": [
+          "Job ID (GUID)",
+          "Job name",
+          "Job owner SID",
+          "Job type (download/upload)",
+          "Remote URL",
+          "Local file path",
+          "Job state",
+          "NotifyCmdLine (command executed on job completion/error)",
+          "Job creation/modification timestamps",
+          "Transferred byte counts"
+        ],
+        "normal_baseline": "Jobs created by Windows Update, Microsoft Store, OneDrive, and other legitimate updaters; short-lived, low in number, pointing to Microsoft or known vendor URLs.",
+        "anomalies": [
+          "NotifyCmdLine pointing to cmd.exe, powershell.exe, or another non-standard binary",
+          "Job downloading from a non-Microsoft, newly-registered, or suspicious domain",
+          "Long-lived job approaching the 90-day default lifetime with no legitimate owning application",
+          "Job created via bitsadmin.exe or PowerShell BITS cmdlets outside normal update windows",
+          "Unusually high job volume tied to a single non-standard process"
+        ],
+        "parsing_tools": [
+          "BitsParser (Mandiant/FireEye)",
+          "bits_parser (ANSSI-FR)",
+          "Invoke-BitsParser",
+          "ESEDatabaseView (NirSoft)",
+          "esentutl",
+          "Event Viewer"
+        ],
+        "attack_techniques": [
+          "T1197"
+        ],
+        "anti_forensic_notes": "Job records are removed from the database on completion or cancellation but may persist recoverably in unallocated ESE database pages for a time afterward; bitsadmin /reset or a BITS service restart clears active jobs, and the Bits-Client/Operational event log can be cleared or size-limited to roll evidence out of view.",
+        "interpretation": "",
+        "related_artifacts": [
+          "sysmon",
+          "prefetch",
+          "mft",
+          "usn-journal"
+        ]
+      },
+      {
+        "id": "com-hijacking",
+        "name": "COM Hijacking",
+        "type": "registry",
+        "os_min": "Windows XP",
+        "location": "HKEY_CURRENT_USER\\Software\\Classes\\CLSID\\{GUID}\\InprocServer32 (also \\LocalServer32, \\TreatAs); HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\CLSID\\{GUID}\\InprocServer32 (or WOW6432Node equivalent); HKEY_CLASSES_ROOT\\CLSID\\{GUID}",
+        "purpose": "Registry-based technique that overrides references to a Component Object Model (CLSID) object so a malicious DLL or script loads in place of, or ahead of, the legitimate component when a trusted process instantiates that COM object.",
+        "key_fields": [
+          "CLSID (GUID)",
+          "InprocServer32 default value (DLL path)",
+          "LocalServer32 default value (EXE path)",
+          "ThreadingModel",
+          "TreatAs value",
+          "ProgID mapping",
+          "Key last-write timestamp",
+          "Owning hive (HKCU vs HKLM)"
+        ],
+        "normal_baseline": "CLSID entries under HKLM point to legitimate, digitally signed DLLs/EXEs in %SystemRoot%\\System32 or Program Files; HKCU rarely contains CLSID overrides for well-known system CLSIDs.",
+        "anomalies": [
+          "InprocServer32/LocalServer32 pointing to a file in %AppData%, %Temp%, or another user-writable path",
+          "HKCU\\Software\\Classes\\CLSID entry duplicating a well-known system CLSID normally only defined in HKLM",
+          "Unsigned or newly-created DLL referenced by a CLSID belonging to a frequently-invoked shell/COM object",
+          "TreatAs key redirecting one CLSID to an unrelated CLSID",
+          "Registry key last-write time inconsistent with any known software install"
+        ],
+        "parsing_tools": [
+          "RegRipper (clsid.pl, inprocserver.pl plugins)",
+          "Registry Explorer (Eric Zimmerman)",
+          "Autoruns",
+          "Process Monitor"
+        ],
+        "attack_techniques": [
+          "T1546.015",
+          "T1112"
+        ],
+        "anti_forensic_notes": "HKCU-based hijacks require no administrative privileges and never touch HKLM, leaving no elevated-access trail; the override can be written and deleted around a single execution, and Autoruns does not surface generic COM hijacks, making registry key last-write time and HKCU-vs-HKLM hive comparison the primary detection lever.",
+        "interpretation": "",
+        "related_artifacts": [
+          "software-hive",
+          "ntuser-dat-hive",
+          "usrclass-dat-hive",
+          "run-runonce-keys",
+          "ifeo-appinit",
+          "sysmon"
+        ]
+      },
+      {
+        "id": "sticky-keys-backdoor",
+        "name": "Sticky Keys Backdoor",
+        "type": "registry",
+        "os_min": "Windows XP",
+        "location": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\sethc.exe (also \\utilman.exe, \\osk.exe, \\Magnify.exe, \\Narrator.exe, \\DisplaySwitch.exe, \\AtBroker.exe) \u2014 Debugger value",
+        "purpose": "Abuses the Image File Execution Options (IFEO) Debugger value for Windows accessibility binaries, which are launchable pre-authentication at the logon screen (locally or over RDP), so that cmd.exe or another program runs as SYSTEM instead of the legitimate accessibility tool.",
+        "key_fields": [
+          "Debugger (REG_SZ path to the substituted binary, e.g. cmd.exe)",
+          "Target accessibility executable (sethc.exe/utilman.exe/osk.exe/Magnify.exe/Narrator.exe/DisplaySwitch.exe/AtBroker.exe)",
+          "Key last-write timestamp",
+          "GlobalFlag value (if FLG_USE_DEBUGGER is set)"
+        ],
+        "normal_baseline": "No Debugger value exists under Image File Execution Options for any accessibility-tool executable on a clean system; these binaries run directly with no IFEO entry.",
+        "anomalies": [
+          "Debugger value present under IFEO for any accessibility-tool executable",
+          "Debugger value pointing to cmd.exe, powershell.exe, or another non-standard binary",
+          "Accessibility binary itself replaced or renamed on disk rather than redirected via IFEO (the older variant of the same technique)",
+          "IFEO key present in HKLM (system-wide, pre-auth) with no corresponding legitimate software install",
+          "Unexpected SYSTEM-level cmd.exe spawned from winlogon.exe or from the logon screen"
+        ],
+        "parsing_tools": [
+          "Registry Explorer (Eric Zimmerman)",
+          "RegRipper",
+          "Autoruns (Image Hijacks)",
+          "Event Viewer",
+          "Sysmon"
+        ],
+        "attack_techniques": [
+          "T1546.008",
+          "T1546.012"
+        ],
+        "anti_forensic_notes": "The modification lives in HKLM\\SOFTWARE, so it survives reboot and logoff, but a single add/delete of the Debugger value around the point of use leaves only the key's last-write timestamp as a marker unless Security-log object-access auditing (SACL, Event ID 4657) is enabled on the IFEO key; attackers commonly delete the Debugger value immediately after use to restore the key's normal appearance.",
+        "interpretation": "",
+        "related_artifacts": [
+          "ifeo-appinit",
+          "software-hive",
+          "rdp-eventlogs",
+          "remote-desktop-protocol-rdp-usage",
+          "security-eventlog",
+          "logon-event-types"
+        ]
+      },
+      {
+        "id": "appcompat-shim-database",
+        "name": "Application Compatibility Shim Database",
+        "type": "file",
+        "os_min": "Windows XP+ (Application Compatibility Infrastructure); sdbinst.exe and custom shim support remain present through current Windows 10/11",
+        "location": "C:\\Windows\\AppPatch\\Custom\\*.sdb (32-bit custom shim databases); C:\\Windows\\AppPatch\\Custom\\Custom64\\*.sdb (64-bit custom shim databases); registry: HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Custom and HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\InstalledSDB",
+        "purpose": "Holds custom Application Compatibility Database (.sdb) files installed via sdbinst.exe, each defining one or more 'shims' that intercept and patch a target executable's behavior at launch \u2014 a legitimate backward-compatibility mechanism that can be abused to redirect execution, inject DLLs, or disable protections for persistence.",
+        "key_fields": [
+          "Registry subkey name under Custom/InstalledSDB (SDB GUID, matches the installed .sdb filename)",
+          "DatabasePath value (full path to the installed .sdb file on disk)",
+          "DatabaseDescription / DatabaseType values",
+          "Internal .sdb records: target EXE matching criteria (name/size/checksum) and attached shim/fix names (e.g., InjectDLL, RedirectEXE, DisableNX, DisableSEH)"
+        ],
+        "normal_baseline": "A small number of vendor- or IT-deployed custom .sdb files registered through sdbinst.exe during legacy line-of-business software installs or OEM/Microsoft compatibility updates; each InstalledSDB/Custom registry entry corresponds 1:1 with a file present on disk.",
+        "anomalies": [
+          "sdbinst.exe execution with no corresponding legitimate installer activity in Prefetch/Amcache",
+          "New .sdb file appearing in AppPatch\\Custom (or Custom64) without a matching software deployment record",
+          "Shim entries referencing InjectDLL, RedirectEXE, DisableNX, or DisableSEH targeted at security tooling or common LOLBins",
+          "Registry Custom/InstalledSDB entries with no corresponding file on disk, or vice versa (partial cleanup)",
+          "A shim targeting a core system process such as services.exe (documented FIN7/CARBANAK pattern)"
+        ],
+        "parsing_tools": [
+          "python-sdb (Willi Ballenthin, GitHub)",
+          "Microsoft Application Compatibility Toolkit / Compatibility Administrator (the GUI counterpart to sdbinst.exe)",
+          "Manual binary/hex inspection of the proprietary .sdb format"
+        ],
+        "attack_techniques": [
+          "T1546.011"
+        ],
+        "anti_forensic_notes": "Running sdbinst.exe /u <GUID> cleanly removes both the on-disk .sdb file and its registry keys, leaving process-execution artifacts (Amcache, Prefetch) as the main residual evidence that sdbinst.exe ever ran; an attacker can also write the AppCompatFlags\\Custom/InstalledSDB registry keys and copy the .sdb file directly, bypassing sdbinst.exe entirely and evading process-creation-based detections for the installer itself.",
+        "interpretation": "",
+        "related_artifacts": [
+          "shimcache",
+          "amcache-hve",
+          "com-hijacking",
+          "ifeo-appinit",
+          "run-runonce-keys",
+          "services-persistence"
+        ]
       }
     ],
     "Registry Hives": [
@@ -3897,6 +4739,126 @@
           "computer-name",
           "system-eventlog",
           "system-hive"
+        ]
+      },
+      {
+        "id": "windows-update-history",
+        "name": "Windows Update History",
+        "type": "file",
+        "os_min": "Windows 8.1+ (ETW-based windowsupdate.log); DataStore.edb present since earlier Windows Update client versions",
+        "location": "C:\\Windows\\Logs\\WindowsUpdate\\*.etl (raw ETW trace files, Windows 8.1+; merged into readable form via Get-WindowsUpdateLog); legacy %WINDIR%\\WindowsUpdate.log (pre-8.1); %WINDIR%\\SoftwareDistribution\\DataStore\\DataStore.edb (ESE update history database); %WINDIR%\\SoftwareDistribution\\ReportingEvents.log",
+        "purpose": "Records Windows Update scan, download, and installation activity so an investigator can build a patch-level timeline for the host and determine whether a specific update/CVE was already installed at the time of an incident.",
+        "key_fields": [
+          "Timestamp",
+          "Component name (e.g., ProtocolTalker, DownloadManager, Handler, DataStore)",
+          "Update ID (GUID) and revision number",
+          "Revision ID",
+          "Local ID",
+          "Installation result/error code"
+        ],
+        "normal_baseline": "Periodic scan/download/install entries aligned with Patch Tuesday and scheduled maintenance windows, with consistent component sequences (AU, COMAPI, Handler) and no unexplained gaps.",
+        "anomalies": [
+          "Gaps in update history around the incident timeframe suggesting Windows Update service was disabled or logs tampered with",
+          "A known-exploited CVE's update missing or showing repeated failed installation despite otherwise current patch history",
+          "DataStore.edb modification time inconsistent with the surrounding update timeline",
+          "wuauserv stop/start events immediately bracketing suspicious activity"
+        ],
+        "parsing_tools": [
+          "Get-WindowsUpdateLog (PowerShell WindowsUpdate module)",
+          "ESEDatabaseView (NirSoft, for DataStore.edb)",
+          "WinUpdatesView (NirSoft)",
+          "esentutl (built-in ESE database utility)"
+        ],
+        "attack_techniques": [],
+        "anti_forensic_notes": "Update history in DataStore.edb can be wiped by stopping wuauserv and deleting the SoftwareDistribution folder; raw ETL trace files are rotated and not retained indefinitely, so delayed triage can lose ETW-level detail even after a WindowsUpdate.log snapshot exists.",
+        "interpretation": "",
+        "related_artifacts": [
+          "system-eventlog",
+          "services-persistence",
+          "operating-system-version"
+        ]
+      },
+      {
+        "id": "group-policy-logs",
+        "name": "Group Policy Application Logs",
+        "type": "file",
+        "os_min": "Windows Vista+ / Windows Server 2008+ (Microsoft-Windows-GroupPolicy/Operational evtx channel)",
+        "location": "Event log channel Microsoft-Windows-GroupPolicy/Operational (Applications and Services Logs > Microsoft > Windows > GroupPolicy > Operational); System.evtx (Group Policy service events, e.g. Event IDs 1002, 1006, 1030, 1053, 1058, 1097, 1129, 4016, 5016); gpresult /r or /h output (RSoP report); %WINDIR%\\debug\\usermode\\gpsvc.log (verbose debug log, enabled via HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Diagnostics\\GPSvcDebugLevel)",
+        "purpose": "Documents each instance of Group Policy processing (start, client-side extension processing, success, failure) on a host, enabling reconstruction of which GPOs applied and when, or detection of GPO-based tampering.",
+        "key_fields": [
+          "ActivityID (correlates all events for one processing instance)",
+          "Event ID",
+          "GPO name/GUID",
+          "Client-side extension (CSE) name",
+          "User vs. computer processing context",
+          "Error code/description"
+        ],
+        "normal_baseline": "Regular start/success event pairs at logon, logoff, and background refresh intervals for each linked GPO, consistent ActivityID correlation, and no recurring failure events (1002/1006/1030/1053/1058/1097/1129).",
+        "anomalies": [
+          "Unfamiliar GPO names/GUIDs applying outside normal change-management windows",
+          "Repeated Group Policy processing failures coinciding with suspicious activity, suggesting deliberate disruption of policy-based controls",
+          "A Scheduled Task or logon/logoff script CSE entry pushed via GPO shortly before malicious execution",
+          "GroupPolicy.evtx or gpsvc.log cleared/rotated near the incident window"
+        ],
+        "parsing_tools": [
+          "Event Viewer / wevtutil (export-log Microsoft-Windows-GroupPolicy/Operational)",
+          "gpresult /r or /h",
+          "Group Policy Management Console (GPMC)",
+          "Get-GPPermission (GroupPolicy PowerShell module)"
+        ],
+        "attack_techniques": [
+          "T1484.001",
+          "T1615"
+        ],
+        "anti_forensic_notes": "An attacker with domain rights can modify or delete a GPO directly in Active Directory/SYSVOL, leaving little endpoint-side trace beyond the next re-application event; clearing the local Microsoft-Windows-GroupPolicy/Operational log (wevtutil cl) removes the endpoint's processing history.",
+        "interpretation": "",
+        "related_artifacts": [
+          "system-eventlog",
+          "scheduled-tasks",
+          "run-runonce-keys",
+          "security-eventlog",
+          "wmi-event-subscription"
+        ]
+      },
+      {
+        "id": "bitlocker-artifacts",
+        "name": "BitLocker Artifacts",
+        "type": "file",
+        "os_min": "Windows Vista+ (Enterprise/Ultimate editions; BitLocker feature)",
+        "location": "Event log channels Microsoft-Windows-BitLocker-API/Management and Microsoft-Windows-BitLocker-API/Operational; registry key HKLM\\SOFTWARE\\Policies\\Microsoft\\FVE (BitLocker Group Policy configuration, including LogVerboseLevel); Active Directory msFVE-RecoveryInformation object (msFVE-RecoveryPassword attribute) on the computer object, viewable via the BitLocker Recovery Password Viewer RSAT snap-in; Entra ID (Azure AD) device BitLocker key escrow",
+        "purpose": "Establishes whether a volume was BitLocker-protected and when protection was enabled, suspended, or removed, and where its recovery key was escrowed, relevant both for data recovery and for confirming whether encryption was abused as an anti-forensic or ransomware mechanism.",
+        "key_fields": [
+          "Event ID and channel (Management vs. Operational)",
+          "Volume/protector GUID",
+          "Protector type (TPM, PIN, password, recovery key, network unlock)",
+          "Encryption/decryption state and percentage",
+          "Recovery key backup destination (AD DS, Entra ID, printed, saved to file)",
+          "FVE registry policy values (e.g., LogVerboseLevel, encryption method)"
+        ],
+        "normal_baseline": "BitLocker enabled once at deployment/imaging with a corresponding recovery-key backup event to AD/Entra ID logged shortly after; suspend/resume events correlating with routine firmware or OS updates; no unexpected full-volume decrypt or protector-removal events.",
+        "anomalies": [
+          "BitLocker suspended (manage-bde -protectors -disable) immediately before other suspicious activity, removing the authentication requirement on next boot",
+          "Volume encryption started outside imaging/patch windows or on a system that shouldn't be encrypted, consistent with BitLocker/ShrinkLocker-style ransomware abuse",
+          "Recovery password change/protector removal with no matching AD/Entra escrow record",
+          "FVE policy registry keys modified shortly before an incident"
+        ],
+        "parsing_tools": [
+          "manage-bde (built-in CLI)",
+          "Get-BitLockerVolume (BitLocker PowerShell module)",
+          "BitLocker Recovery Password Viewer (RSAT AD Users and Computers extension)",
+          "Elcomsoft Forensic Disk Decryptor",
+          "Event Viewer / wevtutil for BitLocker-API log export"
+        ],
+        "attack_techniques": [
+          "T1486"
+        ],
+        "anti_forensic_notes": "ShrinkLocker and similar malware abuse the legitimate BitLocker feature to encrypt volumes for extortion while deleting or rotating the local recovery key so it cannot be recovered from the endpoint, sometimes shrinking the partition to install its own boot components; suspending protection or disabling TPM-based unlock removes evidence of the intended recovery path.",
+        "interpretation": "",
+        "related_artifacts": [
+          "volume-shadow-copies",
+          "system-eventlog",
+          "mft",
+          "security-eventlog"
         ]
       }
     ]
