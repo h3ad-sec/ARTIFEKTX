@@ -1336,7 +1336,7 @@
           "DB Browser for SQLite",
           "BrowsingHistoryView (NirSoft)"
         ],
-        "extraction": "",
+        "extraction": "Firefox formhistory.sqlite and Chrome/Edge History (keyword_search table) are both SQLite databases opened in WAL mode and locked with SQLITE_BUSY while the browser process is running, so copying the raw file live risks a partial or torn read. Close the browser first, or acquire via a Volume Shadow Copy or an imaging tool such as FTK Imager; KAPE's Firefox.tkape target grabs formhistory.sqlite and Chrome.tkape/EdgeChromium.tkape grab History (both verified present in EricZimmerman/KapeFiles). Only the profile owner's normal file-read access is needed; admin rights are required only to reach another user's profile. Gotcha: always take the -wal and -shm sibling files with the main database, or the most recent autocomplete entries not yet checkpointed will be missing.",
         "attack_techniques": [
           "T1217"
         ],
@@ -1372,7 +1372,7 @@
           "Manual JSON review",
           "DB Browser for SQLite (Firefox places.sqlite)"
         ],
-        "extraction": "",
+        "extraction": "Firefox stores bookmarks inside places.sqlite \u2014 the same locked, WAL-mode file used for history, collected by KAPE's verified Firefox.tkape target \u2014 so it needs a browser-closed acquisition, VSS, or an imaging tool rather than a plain live copy. Chrome/Edge's Bookmarks file is plain JSON that Chrome rewrites atomically on each change, is not exclusively locked, and copies reliably live; it's collected by KAPE's Chrome.tkape/EdgeChromium.tkape targets. Only the profile owner's normal file access is required, admin only for another user's profile. Gotcha: for Firefox, grab places.sqlite-wal/-shm too, or very recently added/edited bookmarks can be absent from the copy.",
         "attack_techniques": [
           "T1217"
         ],
@@ -1407,7 +1407,7 @@
           "Hindsight",
           "BrowsingHistoryView (Nirsoft)"
         ],
-        "extraction": "",
+        "extraction": "Chrome/Edge write download records into the History SQLite database's downloads table, while Firefox uses downloads.sqlite in older versions (still a listed target in KAPE's Firefox.tkape) or places.sqlite in modern ones \u2014 all locked while the browser holds them open in WAL mode. Close the browser, use a Volume Shadow Copy, or an imaging tool (FTK Imager); KAPE's Chrome.tkape/EdgeChromium.tkape and Firefox.tkape targets (verified in EricZimmerman/KapeFiles) collect these files. Standard profile-owner file access is sufficient; admin is needed only for another user's profile. Gotcha: missing the -wal/-shm files for the live database drops the most recent download entries.",
         "attack_techniques": [],
         "anti_forensic_notes": "Downloads table entries can be cleared alongside general history clearing; the downloaded file itself, if kept, will separately carry Zone.Identifier MOTW evidence of its origin.",
         "interpretation": "This entry is downloads specifically; the browser's separate crash-recovery tab/window state is its own dedicated `session-restore` artifact, not part of this one. The two used to be combined here but were split to match the poster's own separate boxes.",
@@ -1444,7 +1444,7 @@
           "Hindsight (Chrome/Edge Preferences)",
           "Manual JSON review (text editor / JSON viewer)"
         ],
-        "extraction": "",
+        "extraction": "Firefox's prefs.js and Chrome/Edge's Preferences (JSON) are plain text/JSON, not SQLite, so they aren't exclusively locked the way history/cookie databases are and generally copy fine while the browser runs; both are collected by KAPE's Firefox.tkape and Chrome.tkape/EdgeChromium.tkape targets. Only the profile owner's normal read access is needed; admin rights only for another user's profile. Gotcha: these files are rewritten mainly on settings change or clean shutdown, so a live copy can reflect a slightly stale state if changes made in the current session haven't flushed yet.",
         "attack_techniques": [],
         "anti_forensic_notes": "Preferences/prefs.js is a live file rewritten frequently during normal use, so it reflects only the current/recent configuration; prior settings changes are not versioned unless captured through other means (backups, Volume Shadow Copies).",
         "interpretation": "Firefox's prefs.js exposes sync status, last sync time, and which artifact categories (history, passwords, bookmarks, etc.) are configured to sync. Useful for tracing data that may have propagated to another device. Chrome's per_host_zoom_levels, media_engagement, and site_engagement values are indirect but useful proxies for how much a user actually interacted with a given site, beyond a simple visit count. Edge preferences additionally carry account_info and clear_data_on_exit/sync settings.",
@@ -1478,7 +1478,7 @@
           "NirSoft ChromeCacheView (Chrome/Edge)",
           "NirSoft MZCacheView (Firefox)"
         ],
-        "extraction": "",
+        "extraction": "Firefox's cache2 folder and Chrome/Edge's Cache folder consist of many individual index/data-block files the browser keeps open while running; live copying usually works but can produce an inconsistent snapshot mid-write. Closing the browser, or acquiring via VSS/an imaging tool, gives a consistent copy; both locations are collected by KAPE's BrowserCache.tkape target (verified in EricZimmerman/KapeFiles) as well as the browser-specific targets. Only profile-owner file access is required, admin only for another user's profile. Gotcha: cache entries are continuously evicted and overwritten, so any delay between incident and acquisition directly reduces recoverable data.",
         "attack_techniques": [],
         "anti_forensic_notes": "Cache is typically cleared separately from History in browser \"clear data\" dialogs unless a user explicitly selects it, so an emptied History with an intact Cache (or vice versa) is common. Each should be checked independently.",
         "interpretation": "Cache provides a genuine snapshot in time of what a user was looking at, including the literal files rendered (images, scripts) rather than just a URL reference. Useful for confirming exactly what content a page displayed at a given moment. It is tied to the specific local user account whose profile holds it, and its two timestamps (first-saved vs. last-viewed) can separate a one-time visit from repeated return visits.",
@@ -1513,7 +1513,7 @@
           "DB Browser for SQLite",
           "Magnet AXIOM / Belkasoft (commercial)"
         ],
-        "extraction": "",
+        "extraction": "The Chromium profile folder (User Data\\Default) mixes plain files (Bookmarks, Preferences, Extensions) with SQLite databases (History, Cookies, Login Data, Web Data) held open in WAL mode while the browser runs, so a whole-folder live copy gets clean JSON files but SQLITE_BUSY/partial reads on the databases. KAPE's Chrome.tkape and EdgeChromium.tkape targets (verified in EricZimmerman/KapeFiles) are built to collect this full set including -wal/-shm siblings, and are the standard method; alternatively close the browser first or acquire via VSS/FTK Imager. Only the profile owner's normal file access is required; admin rights are needed to reach another user's AppData. Gotcha: pulling the SQLite files without their -wal/-shm companions silently drops the most recent, not-yet-checkpointed activity.",
         "attack_techniques": [],
         "anti_forensic_notes": "Clearing browsing history removes rows from the SQLite tables but does not necessarily overwrite the underlying file pages, so carving deleted SQLite records can sometimes recover cleared history.",
         "interpretation": "",
@@ -1551,7 +1551,7 @@
           "Hindsight",
           "NirSoft ChromeCookiesView / MZCookiesView"
         ],
-        "extraction": "",
+        "extraction": "Firefox's cookies.sqlite and Chrome/Edge's Network\\Cookies are both SQLite databases opened in WAL mode and held under an exclusive lock while the browser process runs \u2014 Firefox's cookies.sqlite lock has been documented as an issue for over a decade. Close the browser first, or acquire via Volume Shadow Copy or an imaging tool (FTK Imager); KAPE's Firefox.tkape and Chrome.tkape/EdgeChromium.tkape targets (verified in EricZimmerman/KapeFiles) collect these files. Only the profile owner's normal file-read access is needed; admin rights are required only to access another user's profile folder. Gotcha: copying the main SQLite file without its -wal and -shm files can silently drop the most recently set or modified cookies.",
         "attack_techniques": [
           "T1539"
         ],
@@ -1585,7 +1585,7 @@
           "Manual manifest.json review",
           "Hindsight (extension parsing)"
         ],
-        "extraction": "",
+        "extraction": "Chrome/Edge extension folders (User Data\\Default\\Extensions\\<id>\\<version>\\manifest.json plus the extension's other files) are plain files not held under an exclusive lock, so live copying while the browser runs is normally reliable; KAPE's ChromeExtensions.tkape and EdgeChromiumExtensions.tkape targets (verified in EricZimmerman/KapeFiles) collect these. Only the profile owner's normal file access is required; admin only for another user's profile. Gotcha: the version-numbered subfolder changes whenever an extension auto-updates, so a target extension's files can move or vanish between the incident and acquisition if an update runs in between.",
         "attack_techniques": [],
         "anti_forensic_notes": "Removing an extension deletes its folder; the Preferences JSON's extension history or sync data may retain remnants briefly after removal.",
         "interpretation": "",
@@ -1615,7 +1615,7 @@
           "BrowsingHistoryView (Nirsoft)",
           "DB Browser for SQLite"
         ],
-        "extraction": "",
+        "extraction": "The Firefox profile folder mixes plain files (prefs.js, extensions.json, bookmarkbackups) with several SQLite databases (places.sqlite, cookies.sqlite, formhistory.sqlite, etc.) that Firefox holds under an exclusive lock while running, so a raw live copy of the whole profile can return SQLITE_BUSY or an inconsistent read on the databases. KAPE's Firefox.tkape target (verified in EricZimmerman/KapeFiles \u2014 confirmed to collect all of the above plus key4.db/logins.json and sessionstore files) is the standard collection method; alternatively close Firefox first or use a Volume Shadow Copy/imaging tool. Only the profile owner's normal file access is required, admin rights only for another user's profile. Gotcha: always include each database's -wal/-shm sibling files, or the most recent activity across history, cookies, and form data is missing from the copy.",
         "attack_techniques": [],
         "anti_forensic_notes": "Deleting the whole profile folder removes all Firefox artifacts at once; profile folder can be copied off intact even after the browser is closed, as recommended by Mozilla for backups.",
         "interpretation": "",
@@ -1649,7 +1649,7 @@
           "DB Browser for SQLite",
           "Hindsight"
         ],
-        "extraction": "",
+        "extraction": "Firefox's places.sqlite and Chrome/Edge's History are both SQLite databases opened in WAL mode and exclusively locked while the browser process runs; a live copy typically returns SQLITE_BUSY or an inconsistent snapshot. Close the browser, use a Volume Shadow Copy, or an imaging tool such as FTK Imager; KAPE's Firefox.tkape and Chrome.tkape/EdgeChromium.tkape targets (verified in EricZimmerman/KapeFiles) collect both files along with their WAL/SHM companions. Only the profile owner's own file access is needed, admin rights required only for another user's profile. Gotcha: acquiring the database without its -wal and -shm files loses the most recent, not-yet-checkpointed browsing and download activity \u2014 one of the most common mistakes in browser triage.",
         "attack_techniques": [],
         "anti_forensic_notes": "Web browser artifacts are stored per local user account, so history for one account tells you nothing about another; clearing history removes rows from the SQLite tables but does not necessarily overwrite the underlying database pages, so carving deleted records can sometimes recover cleared history.",
         "interpretation": "Always check for multiple profiles in Chromium-based browsers before concluding history is complete. A single \"History\" file query against the wrong profile folder silently misses activity in another profile. This is the general browsing-history counterpart to the more specific `browser-downloads` (download manager metadata) and `media-history` (audio/video playback) entries.",
@@ -1683,7 +1683,7 @@
         "parsing_tools": [
           "ccl_chrome_indexeddb (CCL / obsidianforensics: includes a FileSystem API module)"
         ],
-        "extraction": "",
+        "extraction": "Chrome's File System API sandbox (User Data\\<Profile>\\File System\\) stores plain files/folders that aren't held under a database-style exclusive lock, so live copying is generally reliable, though closing the browser avoids catching a file mid-write. KAPE's ChromeFileSystem.tkape and EdgeFileSystem.tkape targets (both verified present in EricZimmerman/KapeFiles' Browsers folder) are the standard collection method. Only the profile owner's normal file access is required; admin rights only for another user's profile. Gotcha: the folder structure is keyed by an internal origin ID rather than domain name, so tying a recovered file back to the site that created it usually needs the accompanying LevelDB metadata, not just the raw file.",
         "attack_techniques": [],
         "anti_forensic_notes": "Clearing \"site data\" in browser settings removes File System storage for that origin; because it is a lesser-known storage mechanism, it is less commonly targeted for anti-forensic cleanup than history or cookies and can retain data longer as a result.",
         "interpretation": "A LevelDB database within the File System folder maps visited URLs/origins to the numbered subfolders that actually hold the stored files. Data splits between \"t\" (temporary, browser-managed, evictable) and \"p\" (permanent, explicitly requested by the site) storage. Content in permanent storage reflects a more deliberate site action and is generally more forensically interesting.",
@@ -1716,7 +1716,7 @@
           "ccl_chrome_indexeddb (CCL / obsidianforensics: LevelDB Local Storage parser)",
           "DB Browser for SQLite (Firefox webappstore.sqlite)"
         ],
-        "extraction": "",
+        "extraction": "Chrome's Local Storage uses a LevelDB backend, collected as part of KAPE's verified Chrome.tkape target (its own description explicitly lists collecting Local Storage LevelDB databases), while Firefox's equivalent (webappstore.sqlite) is collected by Firefox.tkape. LevelDB is a directory of .ldb/.log/MANIFEST/CURRENT files plus a LOCK file the browser holds open, so the whole directory \u2014 not individual files \u2014 must be copied intact, and doing so with the browser closed avoids a partial write mid-compaction. Only the profile owner's normal file access is required, admin only for another user's profile. Gotcha: grabbing only some .ldb/.log files without MANIFEST/CURRENT leaves an unparseable, incomplete LevelDB store.",
         "attack_techniques": [],
         "anti_forensic_notes": "Web Storage is cleared only when a user clears \"site data\" (not just cookies/history) or removes the profile, so it survives many routine cleanup actions and is less commonly targeted precisely because it is less well known than cookies.",
         "interpretation": "Chrome and Edge store Local Storage as LevelDB databases: a binary key-value store requiring a LevelDB-aware parser rather than a text editor, since keys can remain in unflushed .log files. Firefox uses SQLite (webappstore.sqlite). Legacy IE/EdgeHTML stored the equivalent data in XML files.",
@@ -1752,7 +1752,7 @@
         "parsing_tools": [
           "DB Browser for SQLite"
         ],
-        "extraction": "",
+        "extraction": "Chrome's Media History is a SQLite database under User Data\\<Profile>\\, collected as part of KAPE's verified Chrome.tkape target, and like Chrome's other profile databases it is opened in WAL mode and locked while the browser process runs. Close the browser first or acquire via VSS/an imaging tool for a consistent copy. Only the profile owner's normal file access is required, admin only for another user's profile. Gotcha: omitting the -wal/-shm sibling files drops the most recently recorded media playback.",
         "attack_techniques": [],
         "anti_forensic_notes": "Clearing browsing data through the standard browser history-clearing UI does not clear Media History, so surviving media playback records can corroborate or contradict a claim that all browsing history was wiped.",
         "interpretation": "Three primary tables link together: playbackSession (session-level playback events), origin (site-level aggregation), and playback (individual playback records). Join on their session/origin identifiers to reconstruct which site was played, when, and for how long. Because Media History is not cleared by normal history-clearing actions, its presence alongside an empty History file is itself significant.",
@@ -1788,7 +1788,7 @@
           "Manual JSON review (after jsonlz4/mozLz4 decompression, Firefox)",
           "Manual/hex review of Session_*/Tabs_* files (Chrome/Edge: no universal open-source parser)"
         ],
-        "extraction": "",
+        "extraction": "Firefox's sessionstore.jsonlz4 (collected by KAPE's Firefox.tkape target, which grabs sessionstore* files and the sessionstore-backups folder) is periodically rewritten by Firefox's session-store service rather than continuously held open, so a live copy is generally obtainable but can be a few minutes stale. Chrome/Edge's Session/Tabs files under the Sessions folder (SNSS format) are appended to while the browser runs and aren't exclusively locked the way the SQLite databases are, but closing the browser (or using VSS) gives the most complete, non-in-flux copy. Only the profile owner's normal file access is required, admin only for another user's profile. Gotcha: Firefox's file uses a custom 'mozLz40' header before the LZ4 stream, so a plain LZ4 decompressor fails unless that header is stripped first.",
         "attack_techniques": [],
         "anti_forensic_notes": "Because these files exist specifically to survive crashes, even a normal, clean browser shutdown can leave the prior session's data in \"Last Session\"/backup files; fully suppressing this evidence requires clearing both the live session files and profile-level backups (e.g., sessionstore-backups\\).",
         "interpretation": "Session restore can retain far more than URLs: the actual HTML/JavaScript/XML/form data present on a page, the referring site, transition type (typed, link, reload), window size, and which tabs were pinned. A richer point-in-time capture of browsing state than history alone, useful for reconstructing exactly what was on-screen at shutdown or crash time.",
@@ -1822,7 +1822,7 @@
           "firefox_decrypt (Firefox logins.json + key4.db)",
           "firepwd.py (Firefox/Thunderbird credential decryption)"
         ],
-        "extraction": "",
+        "extraction": "Firefox's logins.json is plain JSON (not continuously locked), but key4.db (the NSS key database used to decrypt it) is a SQLite file Firefox holds open while running; Chrome/Edge's Login Data is a SQLite database in WAL mode, exclusively locked while the browser is open. Both are collected by KAPE's verified Firefox.tkape and Chrome.tkape/EdgeChromium.tkape targets respectively; close the browser first or use a Volume Shadow Copy/imaging tool for a consistent copy of the locked SQLite files. Only the profile owner's normal file access is required to pull the files; admin rights are needed for another user's profile, and note that decrypting the values afterward still requires the same Windows user's DPAPI context. Gotcha: copying Login Data or key4.db without their -wal/-shm files can lose the most recently saved credential.",
         "attack_techniques": [
           "T1555.003"
         ],
@@ -2026,7 +2026,7 @@
           "extract-msg (open-source Python library for reading MSG/CFBF structure and MAPI properties)",
           "Any text editor (EML is plain text; headers are human-readable without a parser)"
         ],
-        "extraction": "",
+        "extraction": "These are standalone files that can exist anywhere on disk, so there's no single path to acquire \u2014 extraction means searching the filesystem (or a forensic image) by extension/signature, e.g. a generic file-mask collection in KAPE, or a keyword/extension search in FTK Imager or X-Ways. A file is not locked at all unless it's currently open in Outlook, another mail client, or an editor at collection time, in which case a normal copy can fail or grab a partial write and the app should be closed or the file pulled via VSS instead. Only read access to wherever the file resides is required; admin rights are needed to search another user's profile or protected system locations. Gotcha: because there's no fixed location, a scope limited to the default mail profile folder can easily miss copies saved to Desktop, Downloads, removable media, or network shares.",
         "attack_techniques": [
           "T1114.001"
         ],
@@ -2066,7 +2066,7 @@
           "MFCMAPI (Microsoft, open-source on GitHub - low-level MAPI property browser, can convert between MSG/EML and inspect PR_TRANSPORT_MESSAGE_HEADERS)",
           "Kernel/Aid4Mail-class commercial e-discovery viewers for bulk PST/OST processing"
         ],
-        "extraction": "",
+        "extraction": "Classic Outlook holds an exclusive lock on the .ost/.pst file for as long as it's open against that profile, so a live copy attempt fails outright while Outlook is running. Close Outlook first, or acquire via a Volume Shadow Copy or a locked-file-aware imaging tool (FTK Imager); KAPE's OutlookPSTOST.tkape target (verified in EricZimmerman/KapeFiles, authored by Eric Zimmerman and Chad Tilbury) collects PST/OST/NST files from %LOCALAPPDATA%\\Microsoft\\Outlook\\ and legacy/2013-2016 paths. Only the profile owner's normal file access is required; admin rights are needed for another user's profile. Gotcha: the target only checks well-known default locations \u2014 per the target's own notes, a user-configured custom data-file path (recorded under NTUSER.DAT\\Software\\Microsoft\\Office\\<ver>\\Outlook\\Search) will be missed entirely by a location-only collection.",
         "attack_techniques": [
           "T1114.001"
         ],
@@ -2105,7 +2105,7 @@
           "leveldb-dump / ccl_chrome_indexeddb (open-source LevelDB and Chromium IndexedDB record parsers)",
           "ChromeCacheViewer (Nirsoft, for the Chromium-format Cache_data attachment cache)"
         ],
-        "extraction": "",
+        "extraction": "Both apps store working data as LevelDB directories (Teams: IndexedDB and Local Storage\\leveldb; Slack: IndexedDB and Local Storage\\leveldb) that the running process holds open via a LOCK file, so the entire directory \u2014 not just the .ldb/.log files \u2014 must be copied together (including MANIFEST/CURRENT) to be usable, and closing the app first avoids catching an in-progress compaction. KAPE's MicrosoftTeams.tkape and Slack.tkape targets (both verified in EricZimmerman/KapeFiles) collect these, but they target the classic Teams 1.x install under %APPDATA%\\Microsoft\\Teams\\ \u2014 no verified KAPE target covers the new Teams 2.x MSIX path (%LOCALAPPDATA%\\Packages\\MSTeams_8wekyb3d8bbwe\\), so that path likely needs a manual/custom target or generic directory copy. Only the profile owner's normal file access is required; admin only for another user's profile. Gotcha: a partial LevelDB directory (missing MANIFEST or CURRENT) fails to open in most parsers even though the raw .ldb files are intact.",
         "attack_techniques": [
           "T1213.005"
         ],
@@ -2140,7 +2140,7 @@
           "wpn (TZWorks)",
           "SQLite browser/CLI (DB Browser for SQLite, sqlite3)"
         ],
-        "extraction": "",
+        "extraction": "wpndatabase.db is a SQLite database maintained by the Windows Notification Platform/Action Center rather than a single closeable application, so it's realistically always open during a live session; acquisition should go through a Volume Shadow Copy or a locked-file-capable imaging tool (FTK Imager) rather than assuming it can be closed like a browser. It's listed (filemask wpndatabase.db, alongside legacy appdb.dat) in KAPE's SQLiteDatabases.tkape compound target (verified in EricZimmerman/KapeFiles), though that entry does not itself enumerate -wal/-shm masks, so confirm those siblings are captured manually. Only the profile owner's normal file access is required; admin rights are needed for another user's profile. Gotcha: skipping the -wal file (when present) loses the newest, not-yet-checkpointed notification records \u2014 the same WAL-checkpoint risk documented for the browser SQLite artifacts.",
         "attack_techniques": [],
         "anti_forensic_notes": "Because notification content is cached independently of the originating application, deleting an alert or message in the source app does not remove the already-recorded entry in wpndatabase.db; entries do eventually expire/get pruned, and the database (including its WAL file) can be carved for deleted rows using tools such as bring2lite or fqlite.",
         "interpretation": "",
