@@ -162,6 +162,7 @@ body.light .os-tab.active{background:rgba(14,165,233,.1);}
 
 /* ── Secondary views (ATT&CK map, playbooks) ── */
 .secondary-view{flex:1;width:100%;max-width:1100px;margin:0 auto;padding:20px;}
+#attackMapView{max-width:none;}
 .secondary-view-intro{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;max-width:760px;}
 /* ATT&CK matrix — tactic columns, technique cells (same pattern as HYPOS's matrix view) */
 .atx-matrix-wrap{display:flex;flex-direction:column;gap:14px;}
@@ -246,14 +247,14 @@ body.light .os-tab.active{background:rgba(14,165,233,.1);}
 .vault-sidebar{width:190px;flex-shrink:0;padding:16px 0;border-right:1px solid var(--border-dim);}
 .vsb-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em;padding:0 16px 10px;}
 .vsb-nav{display:flex;flex-direction:column;gap:2px;padding:0 8px;}
-.filter-pill{font-family:var(--mono);font-size:10px;letter-spacing:.08em;display:flex;align-items:center;gap:8px;
-  width:100%;padding:7px 10px;background:transparent;color:var(--muted);border:1px solid transparent;border-radius:4px;
-  cursor:pointer;transition:all .14s;text-align:left;white-space:nowrap;}
+.filter-pill{font-family:var(--mono);font-size:10px;letter-spacing:.08em;display:flex;align-items:flex-start;gap:8px;
+  width:100%;max-width:100%;box-sizing:border-box;padding:7px 10px;background:transparent;color:var(--muted);
+  border:1px solid transparent;border-radius:4px;cursor:pointer;transition:all .14s;text-align:left;}
 .vsb-nav .filter-pill:hover{color:var(--text-dim);background:rgba(255,255,255,.03);}
 .filter-pill.active{color:var(--text);background:rgba(255,255,255,.05);border-color:var(--border);}
-.fp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.fp-name{flex:1;}
-.fp-count{font-size:9px;color:var(--muted-dim);}
+.fp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.fp-name{flex:1;min-width:0;white-space:normal;line-height:1.35;word-break:break-word;}
+.fp-count{font-size:9px;color:var(--muted-dim);white-space:nowrap;flex-shrink:0;padding-top:1px;}
 
 .mobile-filter{display:none;}
 @media(max-width:900px){
