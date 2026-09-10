@@ -259,13 +259,13 @@ body.light .os-tab.active{background:rgba(14,165,233,.1);}
 .mobile-filter{display:none;}
 @media(max-width:900px){
   .vault-sidebar{display:none;}
-  .mobile-filter{display:flex;overflow-x:auto;scrollbar-width:none;background:var(--panel);border-bottom:1px solid var(--border);
-    padding:0 14px;height:44px;align-items:stretch;gap:0;flex-shrink:0;}
-  .mobile-filter::-webkit-scrollbar{display:none;}
-  .mobile-filter .filter-pill{font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:0 14px;height:100%;
-    background:transparent;color:var(--muted);border:none;border-bottom:2px solid transparent;cursor:pointer;
-    transition:color .15s,border-color .15s;white-space:nowrap;flex-shrink:0;margin-bottom:-1px;}
-  .mobile-filter .filter-pill.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .mobile-filter{display:flex;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--border);
+    padding:10px 14px;gap:6px;flex-shrink:0;}
+  .mobile-filter .filter-pill{font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:6px 12px;
+    background:transparent;color:var(--muted);border:1px solid var(--border-dim);border-radius:20px;cursor:pointer;
+    transition:all .14s;width:auto;max-width:100%;box-sizing:border-box;}
+  .mobile-filter .filter-pill:hover{color:var(--text-dim);border-color:var(--muted-dim);}
+  .mobile-filter .filter-pill.active{color:var(--accent);border-color:var(--accent);background:rgba(0,212,255,.08);}
 }
 
 /* ── Grid + cards ── */
