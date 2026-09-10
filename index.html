@@ -220,6 +220,25 @@ body.light .os-tab.active{background:rgba(14,165,233,.1);}
 .playbook-step-btn:hover{text-decoration:underline;}
 .playbook-why{font-size:11.5px;color:var(--muted);line-height:1.5;}
 
+/* Order-of-volatility view */
+.vol-wrap{display:flex;flex-direction:column;gap:16px;}
+.vol-tier{background:var(--panel);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.vol-tier-hdr{padding:14px 18px;border-left:4px solid;background:var(--panel-alt);}
+.vol-tier-title{display:flex;align-items:center;gap:10px;margin-bottom:5px;flex-wrap:wrap;}
+.vol-tier-rank{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--border);
+  border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.vol-tier-label{font-family:'Exo 2',sans-serif;font-size:15px;font-weight:700;}
+.vol-tier-count{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:auto;white-space:nowrap;}
+.vol-tier-sub{font-size:12px;color:var(--muted);line-height:1.5;}
+.vol-tier-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--border-dim);}
+.vol-item{display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:var(--panel);border:none;
+  padding:10px 14px;cursor:pointer;text-align:left;transition:background .12s;}
+.vol-item:hover{background:rgba(0,212,255,.05);}
+.vol-item-name{font-family:'Exo 2',sans-serif;font-size:12.5px;color:var(--text-dim);}
+.vol-item:hover .vol-item-name{color:var(--accent);}
+.vol-item-group{font-family:var(--mono);font-size:8.5px;color:var(--muted-dim);letter-spacing:.05em;text-transform:uppercase;}
+.vol-tier-empty{padding:14px 18px;font-family:var(--mono);font-size:10px;color:var(--muted-dim);}
+
 /* ── Sidebar filter ── */
 .page-wrap{display:flex;flex:1;width:100%;max-width:1400px;margin:0 auto;}
 .page-wrap[hidden],.secondary-view[hidden]{display:none!important;}
@@ -262,7 +281,12 @@ body.light .os-tab.active{background:rgba(14,165,233,.1);}
 
 .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px;}
 .card-name{font-family:'Exo 2',sans-serif;font-size:14.5px;font-weight:600;color:var(--text);line-height:1.35;}
-.card-badges{display:flex;gap:5px;flex-shrink:0;}
+.card-badges{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.vol-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;cursor:help;}
+.vol-inline{display:flex;align-items:baseline;gap:8px;font-size:12.5px;flex-wrap:wrap;}
+.vol-inline .vol-dot{align-self:center;}
+.vol-inline-label{font-family:'Exo 2',sans-serif;font-weight:700;}
+.vol-inline-sub{color:var(--text-dim);line-height:1.5;}
 .type-badge{font-family:var(--mono);font-size:8px;letter-spacing:.1em;padding:2px 6px;border-radius:2px;
   border:1px solid var(--border);color:var(--muted);white-space:nowrap;text-transform:uppercase;}
 .type-badge.type-registry{color:var(--accent2);border-color:color-mix(in srgb, var(--accent2) 35%, transparent);}
@@ -461,6 +485,7 @@ body.light .footer-credit-pill .credit-name{color:#0A6EA8;}
     <button class="view-tab active" data-view="artifacts" onclick="setView('artifacts')">ARTIFACTS</button>
     <button class="view-tab" data-view="attack" onclick="setView('attack')">ATT&amp;CK MAP</button>
     <button class="view-tab" data-view="playbooks" onclick="setView('playbooks')">PLAYBOOKS</button>
+    <button class="view-tab" data-view="volatility" onclick="setView('volatility')">VOLATILITY</button>
   </div>
   <input class="filter-search" id="searchInput" type="text" placeholder="Search artifacts, paths, anomalies... ( / )" oninput="onSearch()" autocomplete="off" spellcheck="false" />
   <div class="result-count" id="resultCount"></div>
@@ -491,6 +516,13 @@ body.light .footer-credit-pill .credit-name{color:#0A6EA8;}
   <div class="secondary-view-inner">
     <div class="secondary-view-intro">Guided artifact sequences for common investigation scenarios. Each step links to the full artifact entry.</div>
     <div class="playbook-list" id="playbookList"></div>
+  </div>
+</div>
+
+<div class="secondary-view" id="volatilityView" hidden>
+  <div class="secondary-view-inner">
+    <div class="secondary-view-intro">Order of volatility (RFC 3227-style), adapted for Windows endpoint artifacts: what's lost first if you don't capture it now, down to what survives indefinitely on disk. Click an artifact to jump to its full entry.</div>
+    <div id="volatilityGrid"></div>
   </div>
 </div>
 
@@ -638,11 +670,12 @@ function buildCard(a){
   }).join('');
 
   var anomalyCount=(a.anomalies||[]).length;
+  var volMeta=VOLATILITY_META[a.volatility]||VOLATILITY_META.persistent;
 
   return '<div class="artifact-card'+(isOpen?' card-open':'')+'" id="card-'+a.id+'" style="--card-accent:'+color+'" onclick="'+(isOpen?'':'toggleCard(\''+a.id+'\')')+'" role="button" tabindex="0" aria-expanded="'+(isOpen?'true':'false')+'">'
     +'<div class="card-top">'
       +'<div class="card-name">'+escapeHtml(a.name)+'</div>'
-      +'<div class="card-badges"><span class="type-badge type-'+a.type+'">'+a.type+'</span></div>'
+      +'<div class="card-badges"><span class="vol-dot" style="background:'+volMeta.color+'" title="Volatility: '+volMeta.label+' — '+volMeta.sub+'"></span><span class="type-badge type-'+a.type+'">'+a.type+'</span></div>'
     +'</div>'
     +'<div class="card-desc">'+escapeHtml(a.purpose)+'</div>'
     +'<div class="card-footer">'
@@ -650,6 +683,7 @@ function buildCard(a){
       +(isOpen?'':'<button class="btn-view" onclick="event.stopPropagation();toggleCard(\''+a.id+'\')">VIEW DETAILS &#x2192;</button>')
     +'</div>'
     +'<div class="artifact-expanded'+(isOpen?' open':'')+'">'
+      +'<div class="detail-row"><div class="detail-label">VOLATILITY</div><div class="vol-inline"><span class="vol-dot" style="background:'+volMeta.color+'"></span><span class="vol-inline-label" style="color:'+volMeta.color+'">'+volMeta.label+'</span><span class="vol-inline-sub">'+escapeHtml(volMeta.sub)+'</span></div></div>'
       +'<div class="detail-row"><div class="detail-label">LOCATION</div><div class="detail-mono">'+escapeHtml(a.location)+'</div></div>'
       +'<div class="detail-row"><div class="detail-label">KEY FIELDS</div><ul class="field-list">'+keyFields+'</ul></div>'
       +'<div class="detail-row"><div class="detail-label">NORMAL BASELINE</div><div class="baseline-box">'+escapeHtml(a.normal_baseline)+'</div></div>'
@@ -774,13 +808,15 @@ function bootstrap(){
     WINDOWS_ARTIFACTS=flattenCategories(data.categories);
     renderAttackMap();
     renderPlaybooks();
-  }).catch(function(){ /* ATT&CK Map / Playbooks just stay empty if this fails; main grid load is independent */ });
+    renderVolatility();
+  }).catch(function(){ /* ATT&CK Map / Playbooks / Volatility just stay empty if this fails; main grid load is independent */ });
 }
 
 /* ── View switching ── */
+var VIEW_IDS={artifacts:'artifactsView',attack:'attackMapView',playbooks:'playbooksView',volatility:'volatilityView'};
 function setView(v){
-  ['artifacts','attack','playbooks'].forEach(function(name){
-    document.getElementById(name==='artifacts'?'artifactsView':name==='attack'?'attackMapView':'playbooksView').hidden = (name!==v);
+  Object.keys(VIEW_IDS).forEach(function(name){
+    document.getElementById(VIEW_IDS[name]).hidden = (name!==v);
   });
   document.querySelectorAll('.view-tab').forEach(function(t){t.classList.toggle('active', t.dataset.view===v);});
   var mobileFilter=document.getElementById('mobileFilter');
@@ -1063,6 +1099,57 @@ var PLAYBOOKS=[
       {id:'logon-event-types',why:'Confirm the Logon Type (10 = RDP) matches what\'s expected for this account.'},
       {id:'authentication-events',why:'Determine whether credentials were authenticated locally or by a domain controller.'}
     ]
+  },
+  {
+    name:'Ransomware / Impact Investigation',
+    summary:'Reconstruct the pre-encryption sabotage steps and confirm execution once impact is already visible.',
+    steps:[
+      {id:'services-persistence',why:'Check for AV/backup-agent services stopped or disabled immediately before impact (T1489 Service Stop).'},
+      {id:'defender-eventlog',why:'Look for Defender being disabled or tampered with just before the encryption began.'},
+      {id:'volume-shadow-copies',why:'vssadmin/wmic shadow deletion is a near-universal ransomware precursor; check whether shadows were deleted or simply never existed.'},
+      {id:'bitlocker-artifacts',why:'Some ransomware (e.g. ShrinkLocker-style) abuses BitLocker itself as the encryption mechanism rather than a custom payload.'},
+      {id:'system-eventlog',why:'Service Control Manager events (7036/7040) corroborate what was stopped, disabled, or newly installed.'},
+      {id:'prefetch',why:'Confirms the encryptor binary actually ran, and how many times.'},
+      {id:'amcache-hve',why:'Recovers the binary\'s hash/path even if it deleted itself after execution.'}
+    ]
+  },
+  {
+    name:'Credential Theft & Lateral Movement',
+    summary:'Trace credential-access tooling on the source host and confirm where those credentials were used next.',
+    steps:[
+      {id:'sysinternals-eula-keys',why:'A ProcDump or PsExec EulaAccepted key is a reliable marker that credential-dumping tooling ran on this host.'},
+      {id:'lsa-secrets',why:'Check for SYSTEM-level access to the SECURITY hive, the source of service-account and cached-domain credentials.'},
+      {id:'dpapi-masterkeys',why:'Master key theft (paired with the domain backup key) unlocks every DPAPI-protected secret on the host.'},
+      {id:'credential-manager-vault',why:'Saved RDP/network credentials an attacker could reuse to pivot elsewhere.'},
+      {id:'kerberos-ticket-cache',why:'Look for forged or reused tickets (Golden/Silver Ticket, Pass-the-Ticket) if a memory capture was taken in time.'},
+      {id:'remote-desktop-protocol-rdp-usage',why:'Confirm which accounts and destinations the stolen credentials were actually used against.'},
+      {id:'security-eventlog',why:'Correlate 4624/4625/4648 logon events against the timeline established above.'}
+    ]
+  },
+  {
+    name:'Phishing / Initial Access',
+    summary:'Reconstruct the lure-to-execution chain from a suspected malicious email or download.',
+    steps:[
+      {id:'msg-eml-files',why:'Recover the original message: sender, headers, and any embedded link or attachment.'},
+      {id:'motw-zone-identifier',why:'Confirm the attachment carried the Mark-of-the-Web zone flag expected from an internet-sourced file.'},
+      {id:'office-trust-records',why:'Check whether the user actually clicked through "Enable Content" to run a malicious macro.'},
+      {id:'office-oalerts',why:'Protected View and other Office security prompts shown to the user around the same time.'},
+      {id:'browser-downloads',why:'If the lure was a drive-by/download rather than an attachment, confirm what was fetched and from where.'},
+      {id:'windows-recall',why:'On a Copilot+ PC with Recall enabled, this can show exactly what the user saw on screen at the moment of the click.'},
+      {id:'prefetch',why:'Confirms whether a dropped payload actually executed after the lure was opened.'}
+    ]
+  },
+  {
+    name:'Cloud Account Compromise',
+    summary:'Determine whether a cloud-linked account (Microsoft 365/Entra, sync clients) was accessed or abused from this host.',
+    steps:[
+      {id:'cloud-account-details',why:'Identify which cloud/Microsoft account is actually linked to this Windows profile.'},
+      {id:'authentication-events',why:'Distinguish local authentication from cloud/domain-backed sign-in for the activity window.'},
+      {id:'windows-hello-ngc',why:'Check whether a new Windows Hello credential was enrolled, a common attacker persistence move on a compromised cloud-joined device.'},
+      {id:'vpn-client-artifacts',why:'Confirm whether access came through a corporate VPN profile or an unrecognized one.'},
+      {id:'network-history',why:'Cross-check which networks this device connected from around the time of suspicious cloud activity.'},
+      {id:'onedrive',why:'Look for bulk sync/upload activity consistent with data staged for exfiltration via the linked cloud account.'}
+    ]
   }
 ];
 function renderPlaybooks(){
@@ -1083,6 +1170,47 @@ function renderPlaybooks(){
   }).join('');
 }
 
+/* ── Order of volatility (RFC 3227-inspired, adapted for Windows endpoint artifacts) ── */
+var VOLATILITY_META={
+  volatile:{label:'Volatile',sub:'Live memory only — lost on reboot, logoff, or process exit. Capture live or via memory dump before it is gone.',color:'#ef4444'},
+  ephemeral:{label:'Ephemeral',sub:'Written to disk or registry, but auto-rotated, capacity-capped, or pruned on a short cycle by normal system/app behavior.',color:'#f59e0b'},
+  persistent:{label:'Persistent',sub:'Standard durable disk/registry evidence. Survives reboot and remains until deliberately deleted.',color:'#3b82f6'},
+  archival:{label:'Archival',sub:'Backup-oriented or long-retention by design. May persist indefinitely absent deliberate action.',color:'#10b981'}
+};
+var VOLATILITY_ORDER=['volatile','ephemeral','persistent','archival'];
+
+function renderVolatility(){
+  var container=document.getElementById('volatilityGrid');
+  if(!container) return;
+  var byTier={volatile:[],ephemeral:[],persistent:[],archival:[]};
+  WINDOWS_ARTIFACTS.forEach(function(a){
+    var t=VOLATILITY_META[a.volatility]?a.volatility:'persistent';
+    byTier[t].push(a);
+  });
+  container.className='vol-wrap';
+  container.innerHTML=VOLATILITY_ORDER.map(function(tier,idx){
+    var meta=VOLATILITY_META[tier];
+    var items=byTier[tier].slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+    var rows=items.map(function(a){
+      return '<button class="vol-item" onclick="jumpTo(\''+a.id+'\')">'
+        +'<span class="vol-item-name">'+escapeHtml(a.name)+'</span>'
+        +'<span class="vol-item-group">'+escapeHtml(a.group||'')+'</span>'
+      +'</button>';
+    }).join('');
+    return '<div class="vol-tier">'
+      +'<div class="vol-tier-hdr" style="border-left-color:'+meta.color+'">'
+        +'<div class="vol-tier-title">'
+          +'<span class="vol-tier-rank">'+(idx+1)+'</span>'
+          +'<span class="vol-tier-label" style="color:'+meta.color+'">'+meta.label+'</span>'
+          +'<span class="vol-tier-count">'+items.length+' artifact'+(items.length===1?'':'s')+'</span>'
+        +'</div>'
+        +'<div class="vol-tier-sub">'+escapeHtml(meta.sub)+'</div>'
+      +'</div>'
+      +(items.length?'<div class="vol-tier-items">'+rows+'</div>':'<div class="vol-tier-empty">No artifacts in this tier.</div>')
+    +'</div>';
+  }).join('');
+}
+
 /* ── Copy as Markdown ── */
 function copyMarkdown(id){
   var a=allArtifacts.filter(function(x){return x.id===id;})[0];
@@ -1091,6 +1219,8 @@ function copyMarkdown(id){
   lines.push('## '+a.name);
   lines.push('');
   lines.push('**Type:** '+a.type+'  |  **OS Min:** '+(a.os_min||''));
+  lines.push('');
+  lines.push('**Volatility:** '+((VOLATILITY_META[a.volatility]||VOLATILITY_META.persistent).label));
   lines.push('');
   lines.push('**Location:** `'+a.location+'`');
   lines.push('');
