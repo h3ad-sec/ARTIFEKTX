@@ -163,14 +163,46 @@ body.light .os-tab.active{background:rgba(14,165,233,.1);}
 /* ── Secondary views (ATT&CK map, playbooks) ── */
 .secondary-view{flex:1;width:100%;max-width:1100px;margin:0 auto;padding:20px;}
 .secondary-view-intro{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;max-width:760px;}
-.attack-map-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
-.attack-tech-block{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent2);
-  border-radius:6px;padding:14px;}
-.attack-tech-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.attack-tech-id{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent2);text-decoration:none;}
-.attack-tech-id:hover{opacity:1;text-decoration:underline;}
-.attack-tech-count{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.06em;}
-.attack-tech-artifacts{display:flex;flex-wrap:wrap;gap:6px;}
+/* ATT&CK matrix — tactic columns, technique cells (same pattern as HYPOS's matrix view) */
+.atx-matrix-wrap{display:flex;flex-direction:column;gap:14px;}
+.atx-matrix-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px 14px;background:var(--panel);border:1px solid var(--border);border-radius:6px;}
+.atx-matrix-stats{display:flex;flex-wrap:wrap;gap:16px;}
+.atx-matrix-stat-item{display:flex;flex-direction:column;gap:2px;}
+.atx-matrix-stat-val{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--text);}
+.atx-matrix-stat-lbl{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;}
+.atx-matrix-legend{font-family:var(--mono);font-size:9.5px;color:var(--muted);}
+.atx-matrix-scroll{overflow-x:auto;padding-bottom:6px;}
+.atx-matrix-grid{display:grid;grid-auto-flow:column;grid-auto-columns:172px;gap:8px;align-items:start;}
+.atx-matrix-col{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.atx-matrix-tactic-hdr{padding:9px 9px 8px;border-radius:5px 5px 0 0;display:flex;flex-direction:column;gap:2px;}
+.atx-matrix-tactic-name{font-family:'Exo 2',sans-serif;font-size:10.5px;font-weight:700;color:var(--text);
+  letter-spacing:.02em;line-height:1.25;}
+.atx-matrix-tactic-cnt{font-family:var(--mono);font-size:8.5px;color:var(--muted);}
+.atx-matrix-cell{background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:9px;cursor:pointer;
+  transition:border-color .14s,background .14s,box-shadow .14s;}
+.atx-matrix-cell:hover{border-color:var(--accent);background:rgba(0,212,255,.04);}
+.atx-matrix-cell.open{border-color:var(--accent);box-shadow:0 0 0 1px rgba(0,212,255,.15);}
+.atx-matrix-cell-name{font-size:11px;color:var(--text-dim);line-height:1.35;margin-bottom:6px;}
+.atx-matrix-cell-meta{display:flex;align-items:center;justify-content:space-between;gap:4px;}
+.atx-matrix-cell-id{font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--accent2);}
+.atx-matrix-cell-right{display:flex;align-items:center;gap:5px;}
+.atx-matrix-cell-count{font-family:var(--mono);font-size:8.5px;color:var(--accent2);background:var(--bg);
+  border-radius:8px;padding:1px 6px;opacity:.75;}
+.atx-matrix-cell-caret{font-size:8px;color:var(--muted-dim);transition:transform .18s;display:inline-block;}
+.atx-matrix-cell.open .atx-matrix-cell-caret{transform:rotate(90deg);color:var(--accent);}
+.atx-matrix-cell-artifacts{display:flex;flex-direction:column;gap:2px;margin-top:0;max-height:0;overflow:hidden;
+  opacity:0;transition:max-height .2s ease,opacity .15s ease,margin-top .2s ease;}
+.atx-matrix-cell-artifacts.open{margin-top:8px;padding-top:8px;border-top:1px solid var(--border-dim);
+  max-height:400px;opacity:1;}
+.atx-matrix-artifact-link{display:block;width:100%;text-align:left;background:transparent;border:none;
+  padding:5px 6px;border-radius:3px;font-family:'Exo 2',sans-serif;font-size:10.5px;line-height:1.3;
+  color:var(--text-dim);cursor:pointer;transition:background .12s,color .12s;white-space:normal;
+  overflow-wrap:break-word;}
+.atx-matrix-artifact-link:hover{background:rgba(0,212,255,.08);color:var(--accent);}
+.atx-matrix-artifact-link::before{content:'\2192\a0';color:var(--muted-dim);}
+.atx-matrix-empty{font-family:var(--mono);font-size:9px;color:var(--muted-dim);padding:8px;text-align:center;
+  border:1px dashed var(--border-dim);border-radius:5px;}
 
 .playbook-list{display:flex;flex-direction:column;gap:16px;}
 .playbook-card{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);
@@ -451,8 +483,8 @@ body.light .footer-credit-pill .credit-name{color:#0A6EA8;}
 
 <div class="secondary-view" id="attackMapView" hidden>
   <div class="secondary-view-inner">
-    <div class="secondary-view-intro">Every ATT&amp;CK technique cited across the corpus, with the artifacts that give evidence for it. Click an artifact to jump to its full entry.</div>
-    <div class="attack-map-grid" id="attackMapGrid"></div>
+    <div class="secondary-view-intro">Every ATT&amp;CK technique cited across the corpus, laid out as a tactic matrix (Navigator-style). A technique appears once per tactic it maps to. Click a cell to jump to its artifacts.</div>
+    <div id="attackMapGrid"></div>
   </div>
 </div>
 
@@ -611,9 +643,7 @@ function groupColor(g){
 }
 
 function attackChip(id){
-  var m=id.match(/^T(\d{4})(?:\.(\d{3}))?$/);
-  var url='https://attack.mitre.org/techniques/'+ (m? 'T'+m[1]+(m[2]?'/'+m[2]:'') : id) +'/';
-  return '<a class="attack-chip" href="'+url+'" target="_blank" rel="noopener">'+escapeHtml(id)+'</a>';
+  return '<a class="attack-chip" href="'+attackUrl(id)+'" target="_blank" rel="noopener">'+escapeHtml(id)+'</a>';
 }
 
 function buildCard(a){
@@ -781,7 +811,128 @@ function setView(v){
   syncStickyOffsets();
 }
 
-/* ── ATT&CK cross-reference view ── */
+/* ── ATT&CK cross-reference view: MITRE Navigator-style matrix (tactic columns, technique cells) ──
+   Same TACTIC_META/order as HYPOS, current live attack.mitre.org taxonomy (15 tactics — Defense
+   Evasion split into "Stealth" (TA0005, renamed) and "Defense Impairment" (TA0112, new)), verified
+   per-technique against the live site rather than assumed from the pre-split 14-tactic list. */
+var TACTIC_META={
+  'reconnaissance':{label:'Reconnaissance',color:'#8b5cf6'},
+  'resource-development':{label:'Resource Development',color:'#78716c'},
+  'initial-access':{label:'Initial Access',color:'#ff6b35'},
+  'execution':{label:'Execution',color:'#f59e0b'},
+  'persistence':{label:'Persistence',color:'#a855f7'},
+  'privilege-escalation':{label:'Privilege Escalation',color:'#ec4899'},
+  'stealth':{label:'Stealth',color:'#6366f1'},
+  'defense-impairment':{label:'Defense Impairment',color:'#9333ea'},
+  'credential-access':{label:'Credential Access',color:'#00ff9f'},
+  'discovery':{label:'Discovery',color:'#3b82f6'},
+  'lateral-movement':{label:'Lateral Movement',color:'#00c8ff'},
+  'collection':{label:'Collection',color:'#10b981'},
+  'command-and-control':{label:'Command and Control',color:'#ff3b5c'},
+  'exfiltration':{label:'Exfiltration',color:'#ffd60a'},
+  'impact':{label:'Impact',color:'#ef4444'},
+  'unmapped':{label:'Unmapped',color:'#7d8fb3'}
+};
+var TACTIC_ORDER=['reconnaissance','resource-development','initial-access','execution','persistence',
+  'privilege-escalation','stealth','defense-impairment','credential-access','discovery',
+  'lateral-movement','collection','command-and-control','exfiltration','impact'];
+var TECHNIQUE_META={
+  'T1003.001':{name:'OS Credential Dumping: LSASS Memory',tactics:['credential-access']},
+  'T1003.002':{name:'OS Credential Dumping: Security Account Manager',tactics:['credential-access']},
+  'T1003.004':{name:'OS Credential Dumping: LSA Secrets',tactics:['credential-access']},
+  'T1003.005':{name:'OS Credential Dumping: Cached Domain Credentials',tactics:['credential-access']},
+  'T1005':{name:'Data from Local System',tactics:['collection']},
+  'T1014':{name:'Rootkit',tactics:['stealth']},
+  'T1016':{name:'System Network Configuration Discovery',tactics:['discovery']},
+  'T1016.002':{name:'System Network Configuration Discovery: Wi-Fi Discovery',tactics:['discovery']},
+  'T1021':{name:'Remote Services',tactics:['lateral-movement']},
+  'T1021.001':{name:'Remote Services: Remote Desktop Protocol',tactics:['lateral-movement']},
+  'T1021.002':{name:'Remote Services: SMB/Windows Admin Shares',tactics:['lateral-movement']},
+  'T1027':{name:'Obfuscated Files or Information',tactics:['stealth']},
+  'T1039':{name:'Data from Network Shared Drive',tactics:['collection']},
+  'T1047':{name:'Windows Management Instrumentation',tactics:['execution']},
+  'T1049':{name:'System Network Connections Discovery',tactics:['discovery']},
+  'T1052.001':{name:'Exfiltration Over Physical Medium: Exfiltration over USB',tactics:['exfiltration']},
+  'T1053.005':{name:'Scheduled Task/Job: Scheduled Task',tactics:['execution','persistence','privilege-escalation']},
+  'T1055':{name:'Process Injection',tactics:['stealth','privilege-escalation']},
+  'T1055.012':{name:'Process Injection: Process Hollowing',tactics:['stealth','privilege-escalation']},
+  'T1057':{name:'Process Discovery',tactics:['discovery']},
+  'T1059':{name:'Command and Scripting Interpreter',tactics:['execution']},
+  'T1059.001':{name:'Command and Scripting Interpreter: PowerShell',tactics:['execution']},
+  'T1068':{name:'Exploitation for Privilege Escalation',tactics:['privilege-escalation']},
+  'T1070.001':{name:'Indicator Removal: Clear Windows Event Logs',tactics:['defense-impairment']},
+  'T1070.003':{name:'Indicator Removal: Clear Command History',tactics:['stealth']},
+  'T1070.004':{name:'Indicator Removal: File Deletion',tactics:['stealth']},
+  'T1070.006':{name:'Indicator Removal: Timestomp',tactics:['stealth']},
+  'T1071':{name:'Application Layer Protocol',tactics:['command-and-control']},
+  'T1071.004':{name:'Application Layer Protocol: DNS',tactics:['command-and-control']},
+  'T1078':{name:'Valid Accounts',tactics:['stealth','persistence','privilege-escalation','initial-access']},
+  'T1078.004':{name:'Valid Accounts: Cloud Accounts',tactics:['stealth','persistence','privilege-escalation','initial-access']},
+  'T1082':{name:'System Information Discovery',tactics:['discovery']},
+  'T1083':{name:'File and Directory Discovery',tactics:['discovery']},
+  'T1087.001':{name:'Account Discovery: Local Account',tactics:['discovery']},
+  'T1091':{name:'Replication Through Removable Media',tactics:['lateral-movement','initial-access']},
+  'T1098':{name:'Account Manipulation',tactics:['persistence','privilege-escalation']},
+  'T1110':{name:'Brute Force',tactics:['credential-access']},
+  'T1110.003':{name:'Brute Force: Password Spraying',tactics:['credential-access']},
+  'T1112':{name:'Modify Registry',tactics:['defense-impairment','persistence']},
+  'T1114.001':{name:'Email Collection: Local Email Collection',tactics:['collection']},
+  'T1115':{name:'Clipboard Data',tactics:['collection']},
+  'T1123':{name:'Audio Capture',tactics:['collection']},
+  'T1124':{name:'System Time Discovery',tactics:['discovery']},
+  'T1125':{name:'Video Capture',tactics:['collection']},
+  'T1133':{name:'External Remote Services',tactics:['persistence','initial-access']},
+  'T1135':{name:'Network Share Discovery',tactics:['discovery']},
+  'T1136.001':{name:'Create Account: Local Account',tactics:['persistence']},
+  'T1140':{name:'Deobfuscate/Decode Files or Information',tactics:['stealth']},
+  'T1197':{name:'BITS Jobs',tactics:['stealth','persistence','execution']},
+  'T1200':{name:'Hardware Additions',tactics:['initial-access']},
+  'T1202':{name:'Indirect Command Execution',tactics:['stealth']},
+  'T1204':{name:'User Execution',tactics:['execution']},
+  'T1204.002':{name:'User Execution: Malicious File',tactics:['execution']},
+  'T1213.005':{name:'Data from Information Repositories: Messaging Applications',tactics:['collection']},
+  'T1217':{name:'Browser Information Discovery',tactics:['discovery']},
+  'T1484.001':{name:'Domain or Tenant Policy Modification: Group Policy Modification',tactics:['defense-impairment','privilege-escalation']},
+  'T1486':{name:'Data Encrypted for Impact',tactics:['impact']},
+  'T1489':{name:'Service Stop',tactics:['impact']},
+  'T1490':{name:'Inhibit System Recovery',tactics:['impact']},
+  'T1539':{name:'Steal Web Session Cookie',tactics:['credential-access']},
+  'T1543.003':{name:'Create or Modify System Process: Windows Service',tactics:['persistence','privilege-escalation']},
+  'T1546.003':{name:'Event Triggered Execution: Windows Management Instrumentation Event Subscription',tactics:['privilege-escalation','persistence']},
+  'T1546.008':{name:'Event Triggered Execution: Accessibility Features',tactics:['privilege-escalation','persistence']},
+  'T1546.011':{name:'Event Triggered Execution: Application Shimming',tactics:['privilege-escalation','persistence']},
+  'T1546.012':{name:'Event Triggered Execution: Image File Execution Options Injection',tactics:['privilege-escalation','persistence']},
+  'T1546.015':{name:'Event Triggered Execution: Component Object Model Hijacking',tactics:['privilege-escalation','persistence']},
+  'T1547.001':{name:'Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder',tactics:['persistence','privilege-escalation']},
+  'T1547.012':{name:'Boot or Logon Autostart Execution: Print Processors',tactics:['persistence','privilege-escalation']},
+  'T1550.003':{name:'Use Alternate Authentication Material: Pass the Ticket',tactics:['lateral-movement']},
+  'T1553.005':{name:'Subvert Trust Controls: Mark-of-the-Web Bypass',tactics:['defense-impairment']},
+  'T1555':{name:'Credentials from Password Stores',tactics:['credential-access']},
+  'T1555.003':{name:'Credentials from Password Stores: Credentials from Web Browsers',tactics:['credential-access']},
+  'T1555.004':{name:'Credentials from Password Stores: Windows Credential Manager',tactics:['credential-access']},
+  'T1556.006':{name:'Modify Authentication Process: Multi-Factor Authentication',tactics:['defense-impairment','persistence','credential-access']},
+  'T1557.002':{name:'Adversary-in-the-Middle: ARP Cache Poisoning',tactics:['credential-access','collection']},
+  'T1558':{name:'Steal or Forge Kerberos Tickets',tactics:['credential-access']},
+  'T1558.001':{name:'Steal or Forge Kerberos Tickets: Golden Ticket',tactics:['credential-access']},
+  'T1558.002':{name:'Steal or Forge Kerberos Tickets: Silver Ticket',tactics:['credential-access']},
+  'T1558.003':{name:'Steal or Forge Kerberos Tickets: Kerberoasting',tactics:['credential-access']},
+  'T1558.004':{name:'Steal or Forge Kerberos Tickets: AS-REP Roasting',tactics:['credential-access']},
+  'T1562.001':{name:'Disable or Modify Tools',tactics:['defense-impairment']},
+  'T1562.002':{name:'Disable or Modify Windows Event Log',tactics:['defense-impairment']},
+  'T1562.004':{name:'Disable or Modify System Firewall',tactics:['defense-impairment']},
+  'T1564.004':{name:'Hide Artifacts: NTFS File Attributes',tactics:['stealth']},
+  'T1567.002':{name:'Exfiltration Over Web Service: Exfiltration to Cloud Storage',tactics:['exfiltration']},
+  'T1569.002':{name:'System Services: Service Execution',tactics:['execution']},
+  'T1570':{name:'Lateral Tool Transfer',tactics:['lateral-movement']},
+  'T1614':{name:'System Location Discovery',tactics:['discovery']},
+  'T1615':{name:'Group Policy Discovery',tactics:['discovery']}
+};
+
+function attackUrl(id){
+  var m=id.match(/^T(\d{4})(?:\.(\d{3}))?$/);
+  return 'https://attack.mitre.org/techniques/'+ (m? 'T'+m[1]+(m[2]?'/'+m[2]:'') : id) +'/';
+}
+
 function renderAttackMap(){
   var container=document.getElementById('attackMapGrid');
   if(!container) return;
@@ -792,26 +943,79 @@ function renderAttackMap(){
       byTech[t].push(a);
     });
   });
-  var techIds=Object.keys(byTech).sort(function(a,b){
+  var techIds=Object.keys(byTech);
+  if(!techIds.length){
+    container.innerHTML='<div class="state-panel"><div class="state-desc">No ATT&amp;CK techniques indexed yet.</div></div>';
+    return;
+  }
+  techIds.sort(function(a,b){
     var pa=a.match(/^T(\d+)(?:\.(\d+))?$/), pb=b.match(/^T(\d+)(?:\.(\d+))?$/);
     if(!pa||!pb) return a.localeCompare(b);
     var na=parseInt(pa[1],10), nb=parseInt(pb[1],10);
     if(na!==nb) return na-nb;
     return (parseInt(pa[2]||'0',10))-(parseInt(pb[2]||'0',10));
   });
-  if(!techIds.length){
-    container.innerHTML='<div class="state-panel"><div class="state-desc">No ATT&amp;CK techniques indexed yet.</div></div>';
-    return;
-  }
-  container.innerHTML=techIds.map(function(t){
-    var chips=byTech[t].map(function(a){
-      return '<button class="related-chip" onclick="jumpTo(\''+a.id+'\')">'+escapeHtml(a.name)+'</button>';
-    }).join('');
-    return '<div class="attack-tech-block">'
-      +'<div class="attack-tech-header">'+attackChip(t).replace('attack-chip','attack-tech-id')+'<span class="attack-tech-count">'+byTech[t].length+' artifact'+(byTech[t].length===1?'':'s')+'</span></div>'
-      +'<div class="attack-tech-artifacts">'+chips+'</div>'
+
+  var byTactic={};
+  var totalCells=0;
+  techIds.forEach(function(id){
+    var meta=TECHNIQUE_META[id];
+    var tactics=(meta&&meta.tactics&&meta.tactics.length)?meta.tactics:['unmapped'];
+    tactics.forEach(function(slug){
+      if(!byTactic[slug]) byTactic[slug]=[];
+      byTactic[slug].push(id);
+      totalCells++;
+    });
+  });
+  var order=TACTIC_ORDER.concat((byTactic['unmapped']&&byTactic['unmapped'].length)?['unmapped']:[]);
+  var tacticsCovered=order.filter(function(s){return byTactic[s]&&byTactic[s].length>0;}).length;
+
+  var barHtml='<div class="atx-matrix-bar">'
+    +'<div class="atx-matrix-stats">'
+      +'<div class="atx-matrix-stat-item"><span class="atx-matrix-stat-val">'+techIds.length+'</span><span class="atx-matrix-stat-lbl">Techniques</span></div>'
+      +'<div class="atx-matrix-stat-item"><span class="atx-matrix-stat-val">'+tacticsCovered+'</span><span class="atx-matrix-stat-lbl">Tactics Covered</span></div>'
+      +'<div class="atx-matrix-stat-item"><span class="atx-matrix-stat-val">'+totalCells+'</span><span class="atx-matrix-stat-lbl">Matrix Cells</span></div>'
+    +'</div>'
+    +'<div class="atx-matrix-legend">Click a cell to see which artifacts cite it</div>'
+  +'</div>';
+
+  var colsHtml=order.map(function(slug){
+    var meta=TACTIC_META[slug]||{label:slug,color:'#7d8fb3'};
+    var ids=byTactic[slug]||[];
+    var cellsHtml=ids.length? ids.map(function(id){
+      var techMeta=TECHNIQUE_META[id]||{name:id};
+      var artifacts=byTech[id]||[];
+      var links=artifacts.map(function(a){
+        return '<button class="atx-matrix-artifact-link" onclick="event.stopPropagation();jumpTo(\''+a.id+'\')">'+escapeHtml(a.name)+'</button>';
+      }).join('');
+      return '<div class="atx-matrix-cell" onclick="toggleMatrixCell(this)">'
+        +'<div class="atx-matrix-cell-name">'+escapeHtml(techMeta.name)+'</div>'
+        +'<div class="atx-matrix-cell-meta">'
+          +'<a class="atx-matrix-cell-id" href="'+attackUrl(id)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+escapeHtml(id)+'</a>'
+          +'<span class="atx-matrix-cell-right"><span class="atx-matrix-cell-count">'+artifacts.length+'</span><span class="atx-matrix-cell-caret">▸</span></span>'
+        +'</div>'
+        +'<div class="atx-matrix-cell-artifacts">'+links+'</div>'
+      +'</div>';
+    }).join('') : '<div class="atx-matrix-empty">—</div>';
+    return '<div class="atx-matrix-col">'
+      +'<div class="atx-matrix-tactic-hdr" style="border-top:2px solid '+meta.color+';background:'+meta.color+'18">'
+        +'<span class="atx-matrix-tactic-name">'+escapeHtml(meta.label)+'</span>'
+        +'<span class="atx-matrix-tactic-cnt">'+ids.length+' technique'+(ids.length===1?'':'s')+'</span>'
+      +'</div>'
+      +cellsHtml
     +'</div>';
   }).join('');
+
+  container.className='atx-matrix-wrap';
+  container.innerHTML=barHtml+'<div class="atx-matrix-scroll"><div class="atx-matrix-grid">'+colsHtml+'</div></div>';
+}
+
+function toggleMatrixCell(el){
+  var box=el.querySelector('.atx-matrix-cell-artifacts');
+  if(!box) return;
+  var opening=!el.classList.contains('open');
+  el.classList.toggle('open',opening);
+  box.classList.toggle('open',opening);
 }
 
 /* ── Investigation playbooks ── */
