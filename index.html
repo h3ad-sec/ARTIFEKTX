@@ -305,23 +305,30 @@ body.light .btn-view{border-color:rgba(2,132,199,.3);}
 body.light .btn-view:hover{background:rgba(2,132,199,.07);}
 
 /* ── Expanded detail ── */
-.artifact-expanded{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-dim);}
+.artifact-expanded{display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border-dim);}
 .artifact-expanded.open{display:block;}
-.detail-row{margin-bottom:14px;}
-.detail-label{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;
-  margin-bottom:6px;padding-left:8px;border-left:2px solid var(--card-accent,var(--accent));}
-.detail-text{font-size:13.5px;color:var(--text-dim);line-height:1.65;}
+.detail-row{margin-bottom:16px;}
+.detail-pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:16px;}
+.detail-pair .detail-row{margin-bottom:0;display:flex;flex-direction:column;}
+.detail-pair .info-box,.detail-pair .tool-list{flex:1;}
+.detail-label{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;
+  margin-bottom:7px;padding-left:8px;border-left:2px solid var(--card-accent,var(--accent));}
+.detail-text{font-size:13.5px;color:var(--text-dim);line-height:1.7;max-width:70ch;}
 .detail-mono{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);background:#030810;border:1px solid var(--border-dim);
   border-radius:4px;padding:9px 12px;word-break:break-word;}
 body.light .detail-mono{background:#f1f5fb;border-color:var(--border);}
-.field-list{display:flex;flex-direction:column;gap:5px;}
-.field-list li{font-size:13px;color:var(--text-dim);line-height:1.55;padding-left:14px;position:relative;}
+.field-list{display:flex;flex-direction:column;gap:6px;}
+.field-list li{font-size:13px;color:var(--text-dim);line-height:1.6;padding-left:14px;position:relative;}
 .field-list li::before{content:'›';position:absolute;left:0;color:var(--card-accent,var(--muted));}
-.anomaly-box{background:rgba(245,158,11,.06);border-left:2px solid var(--status-partial);border-radius:4px;padding:10px 14px;}
-.anomaly-box li{font-size:13px;color:var(--text-dim);line-height:1.6;padding-left:14px;position:relative;margin-bottom:5px;}
+.info-box{border-radius:5px;padding:11px 14px;font-size:13px;line-height:1.65;}
+.anomaly-box{background:rgba(245,158,11,.06);border-left:3px solid var(--status-partial);}
+.anomaly-box li{font-size:13px;color:var(--text-dim);line-height:1.6;padding-left:14px;position:relative;margin-bottom:6px;}
 .anomaly-box li:last-child{margin-bottom:0;}
 .anomaly-box li::before{content:'⚠';position:absolute;left:0;color:var(--status-partial);font-size:10px;}
-.baseline-box{background:var(--panel-alt);border:1px solid var(--border-dim);border-radius:4px;padding:10px 14px;font-size:13px;color:var(--text-dim);line-height:1.6;}
+.baseline-box{background:var(--panel-alt);border-left:3px solid var(--accent2);color:var(--text-dim);}
+.extract-box{background:rgba(20,184,166,.06);border-left:3px solid #14b8a6;color:var(--text-dim);}
+.forensic-box{background:rgba(244,63,94,.06);border-left:3px solid #f43f5e;color:var(--text-dim);}
+.interp-box{background:rgba(167,139,250,.07);border-left:3px solid #a78bfa;color:var(--text-dim);}
 .chip-row{display:flex;flex-wrap:wrap;gap:6px;}
 .attack-chip{font-family:var(--mono);font-size:9px;color:var(--accent2);background:color-mix(in srgb, var(--accent2) 10%, transparent);
   border:1px solid color-mix(in srgb, var(--accent2) 25%, transparent);border-radius:2px;padding:3px 9px;letter-spacing:.05em;text-decoration:none;}
@@ -685,17 +692,25 @@ function buildCard(a){
       +(isOpen?'':'<button class="btn-view" onclick="event.stopPropagation();toggleCard(\''+a.id+'\')">VIEW DETAILS &#x2192;</button>')
     +'</div>'
     +'<div class="artifact-expanded'+(isOpen?' open':'')+'">'
-      +'<div class="detail-row"><div class="detail-label">VOLATILITY</div><div class="vol-inline"><span class="vol-dot" style="background:'+volMeta.color+'"></span><span class="vol-inline-label" style="color:'+volMeta.color+'">'+volMeta.label+'</span><span class="vol-inline-sub">'+escapeHtml(volMeta.sub)+'</span></div></div>'
-      +'<div class="detail-row"><div class="detail-label">LOCATION</div><div class="detail-mono">'+escapeHtml(a.location)+'</div></div>'
+      +'<div class="detail-pair">'
+        +'<div class="detail-row"><div class="detail-label">VOLATILITY</div><div class="vol-inline"><span class="vol-dot" style="background:'+volMeta.color+'"></span><span class="vol-inline-label" style="color:'+volMeta.color+'">'+volMeta.label+'</span><span class="vol-inline-sub">'+escapeHtml(volMeta.sub)+'</span></div></div>'
+        +'<div class="detail-row"><div class="detail-label">LOCATION</div><div class="detail-mono">'+escapeHtml(a.location)+'</div></div>'
+      +'</div>'
       +'<div class="detail-row"><div class="detail-label">KEY FIELDS</div><ul class="field-list">'+keyFields+'</ul></div>'
-      +'<div class="detail-row"><div class="detail-label">NORMAL BASELINE</div><div class="baseline-box">'+escapeHtml(a.normal_baseline)+'</div></div>'
-      +'<div class="detail-row"><div class="detail-label">ANOMALIES TO FLAG</div><ul class="anomaly-box">'+anomalies+'</ul></div>'
-      +(tools?'<div class="detail-row"><div class="detail-label">PARSING TOOLS</div><div class="tool-list">'+tools+'</div></div>':'')
-      +(a.extraction?'<div class="detail-row"><div class="detail-label">HOW TO EXTRACT</div><div class="detail-text">'+escapeHtml(a.extraction)+'</div></div>':'')
-      +(attackChips?'<div class="detail-row"><div class="detail-label">ATT&amp;CK TECHNIQUES</div><div class="chip-row">'+attackChips+'</div></div>':'')
-      +'<div class="detail-row"><div class="detail-label">ANTI-FORENSIC NOTES</div><div class="detail-text">'+escapeHtml(a.anti_forensic_notes)+'</div></div>'
-      +(a.interpretation?'<div class="detail-row"><div class="detail-label">INTERPRETATION</div><div class="detail-text">'+escapeHtml(a.interpretation)+'</div></div>':'')
-      +(related?'<div class="detail-row"><div class="detail-label">RELATED ARTIFACTS</div><div class="chip-row">'+related+'</div></div>':'')
+      +'<div class="detail-pair">'
+        +'<div class="detail-row"><div class="detail-label">NORMAL BASELINE</div><div class="info-box baseline-box">'+escapeHtml(a.normal_baseline)+'</div></div>'
+        +'<div class="detail-row"><div class="detail-label">ANOMALIES TO FLAG</div><ul class="info-box anomaly-box">'+anomalies+'</ul></div>'
+      +'</div>'
+      +((tools||a.extraction)?'<div class="detail-pair">'
+        +(tools?'<div class="detail-row"><div class="detail-label">PARSING TOOLS</div><div class="tool-list">'+tools+'</div></div>':'')
+        +(a.extraction?'<div class="detail-row"><div class="detail-label">HOW TO EXTRACT</div><div class="info-box extract-box">'+escapeHtml(a.extraction)+'</div></div>':'')
+      +'</div>':'')
+      +'<div class="detail-row"><div class="detail-label">ANTI-FORENSIC NOTES</div><div class="info-box forensic-box">'+escapeHtml(a.anti_forensic_notes)+'</div></div>'
+      +(a.interpretation?'<div class="detail-row"><div class="detail-label">INTERPRETATION</div><div class="info-box interp-box">'+escapeHtml(a.interpretation)+'</div></div>':'')
+      +((attackChips||related)?'<div class="detail-pair">'
+        +(attackChips?'<div class="detail-row"><div class="detail-label">ATT&amp;CK TECHNIQUES</div><div class="chip-row">'+attackChips+'</div></div>':'')
+        +(related?'<div class="detail-row"><div class="detail-label">RELATED ARTIFACTS</div><div class="chip-row">'+related+'</div></div>':'')
+      +'</div>':'')
       +'<div class="expanded-actions"><button class="btn-hide" onclick="event.stopPropagation();toggleCard(\''+a.id+'\')">COLLAPSE</button><button class="btn-copy-md" id="copy-'+a.id+'" onclick="event.stopPropagation();copyMarkdown(\''+a.id+'\')">COPY MD</button></div>'
     +'</div>'
   +'</div>';
