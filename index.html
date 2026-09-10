@@ -267,6 +267,14 @@ body.light .os-tab.active{background:rgba(14,165,233,.1);}
   .mobile-filter .filter-pill:hover{color:var(--text-dim);border-color:var(--muted-dim);}
   .mobile-filter .filter-pill.active{color:var(--accent);border-color:var(--accent);background:rgba(0,212,255,.08);}
 }
+@media(max-width:480px){
+  .mobile-filter{padding:8px 10px;gap:5px;}
+  .mobile-filter .filter-pill{font-size:9px;letter-spacing:.04em;padding:5px 9px;gap:5px;}
+  .mobile-filter .fp-dot{width:5px;height:5px;}
+}
+@media(max-width:360px){
+  .mobile-filter .filter-pill{font-size:8.5px;padding:4px 8px;}
+}
 
 /* ── Grid + cards ── */
 .main-content{flex:1;padding:16px 20px 48px;min-width:0;}
