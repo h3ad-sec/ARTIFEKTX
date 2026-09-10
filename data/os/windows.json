@@ -29,7 +29,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "Security.evtx is held open by the Event Log service, so a plain file copy fails while Windows is running; export it live with reg-free wevtutil epl Security security.evtx from an elevated administrator prompt (the Security channel's ACL restricts read/clear access to Administrators and SYSTEM by default). KAPE's EventLogs target (Targets/Windows/EventLogs.tkape) collects all .evtx files under System32\\winevt\\Logs\\ automatically, using KAPE's raw-disk-read fallback for the locked file. Offline, pull it from a mounted image, VSS snapshot, or Windows.old without needing elevation. Gotcha: Security is a fixed-size ring buffer -- older events get overwritten, so capture before reboot or log rotation.",
         "attack_techniques": [
           "T1110.003",
           "T1078",
@@ -66,7 +66,7 @@
           "RegRipper (H. Carvey)",
           "Registry Explorer (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "SAM is a live system hive locked by the OS; a direct file copy of C:\\Windows\\System32\\config\\SAM fails. The standard live method is reg save HKLM\\SAM sam.hiv from an elevated administrator command prompt -- this works via backup-privilege semantics even without a full SYSTEM shell. KAPE's RegistryHivesSystem target (part of the RegistryHives compound target) collects SAM plus its .LOG* transaction files and RegBack copy using KAPE's own raw-disk-read bypass for locked hives. Gotcha: always capture the paired SYSTEM hive alongside SAM -- most parsers (e.g. Registry Explorer) need it to resolve the bootkey for any encrypted SAM fields.",
         "attack_techniques": [
           "T1078.004"
         ],
@@ -104,7 +104,7 @@
           "RegRipper (H. Carvey)",
           "Registry Explorer (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "Same hive and acquisition path as Cloud Account Details: SAM is locked live, so use reg save HKLM\\SAM sam.hiv from an elevated administrator prompt, or collect via KAPE's RegistryHivesSystem target (raw-disk bypass handles the lock). No SYSTEM-level account is required for the reg save itself on a default-configured admin token. Gotcha: capture the SYSTEM hive alongside it -- while the F-value's login/password-change timestamps are stored in plaintext, most SAM-parsing tooling still expects the paired SYSTEM hive to fully resolve the account record.",
         "attack_techniques": [
           "T1078"
         ],
@@ -148,7 +148,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "Same artifact file as Authentication Events: Security.evtx, locked by the Event Log service. Export live with wevtutil epl Security security.evtx from an elevated administrator prompt, or collect via KAPE's EventLogs target. No additional access beyond Security-channel read rights (Administrators/SYSTEM by default) is needed to pull the Logon Type field, since it's embedded in each 4624/4625 event -- parsing that field is a separate step. Gotcha: same ring-buffer overwrite risk as the base Security log, so acquire before rotation.",
         "attack_techniques": [
           "T1078",
           "T1021"
@@ -186,7 +186,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "Primary evidence is in Security.evtx (4624 with Logon Type 10, plus 4778/4779); acquire the same way as Authentication Events -- wevtutil epl Security security.evtx elevated, or KAPE's EventLogs target, since the file is locked live. For a fuller picture, the same EventLogs target also grabs the Microsoft-Windows-TerminalServices-RemoteConnectionManager and -LocalSessionManager Operational logs (events 1149, 21, 22, 25), which sit in separate .evtx files under the same winevt\\Logs\\ path and require the same elevated/administrator read access. Gotcha: 1149 only confirms the client passed NLA authentication, not that a desktop session was established -- don't treat it alone as proof of an interactive RDP logon.",
         "attack_techniques": [
           "T1021.001"
         ],
@@ -226,7 +226,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "System.evtx (Event IDs 7034/7035/7036/7040/7045) is locked live; export with wevtutil epl System system.evtx from an elevated prompt, or collect via KAPE's EventLogs target, which pulls all .evtx files including System.evtx in one pass. On Windows 10+, the corresponding Security.evtx event (4697, service install) requires the same elevated Security-channel access described for Authentication Events. Gotcha: 7045 only fires at install time, not on every subsequent start/stop -- pair it with 7036 to see actual runtime state changes.",
         "attack_techniques": [
           "T1543.003",
           "T1489"
@@ -266,7 +266,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "Security.evtx (Event IDs 4624/4625), same locked-live file as the other Security-log artifacts; export with wevtutil epl Security security.evtx from an elevated administrator prompt, or via KAPE's EventLogs target. Read access to the Security channel is restricted to Administrators and SYSTEM by default. Gotcha: high logon volume environments roll this log quickly -- acquire before the fixed-size buffer overwrites the events you need.",
         "attack_techniques": [
           "T1078",
           "T1110"
@@ -305,7 +305,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
-        "extraction": "",
+        "extraction": "ProfileList lives in the SOFTWARE hive (HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList). Live, query or export it directly against the running registry with reg query / reg export from an elevated administrator prompt -- SOFTWARE doesn't carry the same restrictive ACL as SAM/SECURITY, so no backup-privilege workaround is needed for the live key itself. For the on-disk hive file, KAPE's RegistryHivesSystem target collects SOFTWARE (plus RegBack and Windows.old copies) using its raw-disk bypass since the hive file itself is locked while mounted. Gotcha: ProfileImagePath entries can point to profiles for accounts later deleted -- cross-reference the SID against SAM before assuming the account still exists.",
         "attack_techniques": [
           "T1078",
           "T1087.001"
@@ -358,7 +358,7 @@
           "dploot",
           "Impacket secretsdump.py (retrieves DPAPI_SYSTEM key material)"
         ],
-        "extraction": "",
+        "extraction": "No dedicated KAPE target exists for per-user DPAPI masterkeys under %AppData%\\Roaming\\Microsoft\\Protect\\<SID>\\ -- verified against KapeFiles' Targets/Apps and Targets/Windows directories, where the only DPAPI-adjacent target is Windows/WindowsHello.tkape, which collects only the SYSTEM account's own masterkey (System32\\Microsoft\\Protect\\S-1-5-18\\User\\) plus NGC data, not arbitrary user masterkeys. These per-user files are not exclusively locked, so a live acquisition is typically a direct file copy by an administrator or the owning user (default NTFS ACL restricts read to SYSTEM and the profile owner). Gotcha: capture the paired SAM/SYSTEM hives too -- offline DPAPI decryption of a masterkey requires the domain/local backup key or the user's password/hash, not the masterkey file alone.",
         "attack_techniques": [
           "T1555",
           "T1555.003",
@@ -403,7 +403,7 @@
           "dploot",
           "vaultcmd.exe (native, listing only)"
         ],
-        "extraction": "",
+        "extraction": "No dedicated KAPE target for %LOCALAPPDATA%\\Microsoft\\Vault\\<GUID>\\ was found in KapeFiles (checked Targets/Apps and Targets/Windows directly). The .vcrd credential files and Policy.vpol key file are not exclusively locked, so live acquisition is a direct copy by an administrator or the owning user; default ACL restricts the folder to SYSTEM and the profile owner. Gotcha: always capture Policy.vpol alongside the .vcrd files in the same GUID folder -- it holds the encryption key blob, and the credential files are meaningless in isolation without it.",
         "attack_techniques": [
           "T1555",
           "T1555.004"
@@ -448,7 +448,7 @@
           "SharpSecDump",
           "reg.exe (hive export, combined with offline decryption tooling)"
         ],
-        "extraction": "",
+        "extraction": "HKLM\\SECURITY\\Policy\\Secrets is ACL-restricted to SYSTEM; even an elevated local Administrator cannot browse it in Regedit. The standard live extraction is reg save HKLM\\SECURITY security.hiv from an elevated administrator prompt -- this succeeds despite the ACL because reg save invokes backup-privilege semantics, the same mechanism used for SAM/SYSTEM. KAPE's RegistryHivesSystem target collects the SECURITY hive file the same way via its raw-disk bypass. Gotcha: LSA secrets are encrypted with a key derived from the SYSTEM hive's bootkey, so SECURITY is forensically useless without the paired SYSTEM hive for offline decryption (e.g., via secretsdump-style tooling).",
         "attack_techniques": [
           "T1003.004"
         ],
@@ -486,7 +486,7 @@
           "WINHELLO2hashcat (Banaanhangwagen, GitHub) with dpapick3, for offline PIN hash extraction",
           "DPAPI forensic tooling (Mimikatz DPAPI module, dpapick) for the supporting master-key material"
         ],
-        "extraction": "",
+        "extraction": "C:\\Windows\\ServiceProfiles\\LocalService\\AppData\\Local\\Microsoft\\Ngc\\ carries an ACL limited to SYSTEM and LocalService -- a standard elevated Administrator gets Access Denied browsing it directly. KAPE's dedicated WindowsHello target (Targets/Windows/WindowsHello.tkape, by Kevin Pagano) collects this NGC folder along with the SYSTEM DPAPI masterkey and Crypto\\Keys; to guarantee access to the ACL-restricted folder, KAPE (or a manual robocopy) should be run as SYSTEM, e.g. via psexec -s, which is the documented approach for full-access KAPE collections. Gotcha: the target's own documentation notes KAPE deduplication should be disabled when collecting this target, since the cryptographic key files it also grabs must all be preserved intact for later PIN-cracking analysis.",
         "attack_techniques": [],
         "anti_forensic_notes": "The NGC container never holds a plaintext private key on disk \u2014 material is TPM-sealed or DPAPI-wrapped with the PIN \u2014 so deleting the folder (or performing a Windows Hello PIN/face/fingerprint reset) destroys the credential rather than concealing evidence of its use; an attacker with SYSTEM and access to the SAM/SECURITY/SYSTEM hives can still stage an offline PIN-cracking attempt without modifying the container itself, leaving no direct on-disk trace in the NGC folder.",
         "interpretation": "",
@@ -525,7 +525,7 @@
           "BMC-Tools (ANSSI-FR)",
           "RdpCacheStitcher (BSI - German Federal Office for Information Security)"
         ],
-        "extraction": "",
+        "extraction": "%LOCALAPPDATA%\\Microsoft\\Terminal Server Client\\Cache\\ is not locked or exclusively held, so it can be copied directly while Windows is running by an administrator or the profile owner. KAPE's dedicated RDPCache target (Targets/Windows/RDPCache.tkape, by Hadar Yudovich) collects this path plus the Windows.old and legacy Documents and Settings equivalents in one pass. No elevated or SYSTEM-level access is required beyond normal read permission on the user's own profile folder. Gotcha: cache files are named generically (Cache0000.bin, etc.) and get overwritten/reused over time -- capture promptly, since older bitmap tiles are the first to be recycled.",
         "attack_techniques": [
           "T1021.001"
         ],
@@ -567,7 +567,7 @@
           "Mimikatz (sekurlsa::tickets, kerberos::list, kerberos::ptt)",
           "Rubeus"
         ],
-        "extraction": "",
+        "extraction": "Kerberos tickets exist only in LSASS process memory, not on disk or in the registry -- there is no file or hive to copy. The standard forensic method is a full physical memory acquisition using a dedicated memory imager (e.g., Magnet RAM Capture, FTK Imager, or WinPmem), not a targeted LSASS process dump. These tools require running elevated as a local administrator, since they load a kernel-mode driver to read physical memory. Gotcha: this evidence is fully volatile -- it is lost on reboot or logoff, and putting the machine to sleep/hibernate instead of imaging live will compress/alter the memory image format, so RAM acquisition must happen before either.",
         "attack_techniques": [
           "T1558",
           "T1558.001",
@@ -619,7 +619,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (amcache.pl plugin)"
         ],
-        "extraction": "",
+        "extraction": "Amcache.hve is locked while Windows runs (open handle held by the OS), so a plain copy fails; live acquisition needs a lock-bypassing tool such as FTK Imager, or KAPE's verified Amcache target (Targets/Windows/Amcache.tkape), which also grabs the Amcache.hve.LOG* transaction files needed to reconstruct uncommitted entries. Local administrator access is sufficient \u2014 SYSTEM is not required. Offline acquisition (mounted image, WinRE, VSS snapshot) has no lock and copies directly.",
         "attack_techniques": [],
         "anti_forensic_notes": "Deleting the binary from disk does not remove its Amcache record: the inventory snapshot persists in the hive until the next Compatibility Appraiser scheduled-task run, and the prior entry is often still recoverable from the Amcache.hve.LOG1/.LOG2 transaction logs even after that. An investigator who collects only the .hve file (not its .LOG1/.LOG2 companions) on a system that wasn't cleanly shut down can miss the most recent writes. Wiping or replacing Amcache.hve outright, or disabling the Microsoft Compatibility Appraiser task, stops new entries from being recorded going forward but is itself an unusual, noteworthy action to find during triage.",
         "interpretation": "",
@@ -653,7 +653,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (bam.pl plugin)"
         ],
-        "extraction": "",
+        "extraction": "BAM/DAM live inside the SYSTEM hive (Services\\bam, and pre-1809 also Services\\dam), so capture it the same way as any SYSTEM hive data: live via reg save HKLM\\SYSTEM, or offline hive copy -- no standalone KAPE target for BAM alone was found in KapeFiles, but it's included whenever the full hive is pulled via KAPE's RegistryHivesSystem target. The well-known gotcha: the bam\\UserSettings\\{SID} subkey's ACL denies read access even to local administrators -- actually reading it requires the SYSTEM account (e.g., PsExec -s, or loading the exported hive offline), not just an elevated admin session.",
         "attack_techniques": [],
         "anti_forensic_notes": "BAM/DAM entries are automatically purged roughly 7 days after the recorded activity, and an entry is removed once its associated executable no longer exists at its original location, and again on the next reboot, so this artifact has a naturally short retention window even with no attacker interference. It only records executables launched from local storage; programs run from removable media or network shares are not captured. Because the data lives in the live SYSTEM hive rather than a separate log, wiping it requires direct registry-key deletion (an unusual, detectable action) rather than simple file deletion.",
         "interpretation": "",
@@ -689,7 +689,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
-        "extraction": "",
+        "extraction": "The ConsentStore registry key exists in both HKLM\\SOFTWARE and per-user hives while Windows runs; live capture is reg save HKLM\\SOFTWARE (or offline SOFTWARE/NTUSER hive copy), and local administrator access is sufficient. Note: KAPE's CapabilityAccessManager.tkape target (verified in KapeFiles) does NOT collect this registry key -- it collects a separate, newer artifact, C:\\ProgramData\\Microsoft\\Windows\\CapabilityAccessManager\\CapabilityAccessManager.db (a SQLite DB), so the registry key itself must come from a full SOFTWARE/NTUSER hive pull (KAPE's RegistryHivesSystem/RegistryHivesUser) or manual reg save. Gotcha: unlike the DB, the registry key only ever retains the most recent access timestamp per app -- it's overwritten on each new use.",
         "attack_techniques": [
           "T1123",
           "T1125"
@@ -727,7 +727,7 @@
           "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
           "RegRipper (runmru.pl plugin)"
         ],
-        "extraction": "",
+        "extraction": "RunMRU lives in NTUSER.DAT, which is locked while a user session is loaded, so live copy needs a lock-bypassing tool or reg save HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU for the logged-on user's own hive (standard user rights suffice for their own hive; local administrator is needed for another user's). No standalone \"RunMRU\" KAPE target exists -- it's captured by pulling the whole hive via KAPE's verified RegistryHivesUser target. Offline (dead NTUSER.DAT copy) has no lock; note that a logged-off user's activity is only visible via their dead hive file, not HKEY_CURRENT_USER.",
         "attack_techniques": [
           "T1059"
         ],
@@ -763,7 +763,7 @@
           "TZWorks jmp",
           "Velociraptor (windows.forensics.jumplists artifact)"
         ],
-        "extraction": "",
+        "extraction": "Jump list files under AutomaticDestinations/CustomDestinations are ordinary files, generally not OS-locked (explorer.exe may briefly hold one open), so live copy usually succeeds directly. KAPE has two verified targets: JumpLists.tkape (AutomaticDestinations + CustomDestinations only) and the broader LNKFilesAndJumpLists.tkape (adds Recent, Office Recent, Start Menu, Desktop LNKs). Standard user access covers the user's own profile; local administrator is needed for other users. Gotcha: AutomaticDestinations filenames are just an AppID hash with no extension -- don't let collection scripts filter them out as junk.",
         "attack_techniques": [],
         "anti_forensic_notes": "The referenced file does not need to still exist for the Jump List entry to remain, aiding recovery after deletion; can be individually pruned via 'Remove from this list'.",
         "interpretation": "A Jump List entry is created the first time an application is used by that user account. It does NOT record whether an application is currently pinned to the taskbar, so it cannot be used to determine pinned-app status. Best used in combination with Prefetch, LNK files, RecentDocs, and Shellbags to strengthen an activity timeline rather than relied on alone.",
@@ -796,7 +796,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
-        "extraction": "",
+        "extraction": "Same lock situation as RunMRU -- inside NTUSER.DAT, always open for a logged-on session. Live capture via reg save HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\LastVisitedPidlMRU or a full-hive lock-bypass copy; offline via direct NTUSER.DAT copy. No dedicated KAPE target for this specific key exists -- it's captured by pulling the whole hive with KAPE's verified RegistryHivesUser target; standard user access covers the user's own hive, local administrator for others. Gotcha: values are binary MRUListEx-ordered PIDLs, not plain paths, so preserve the full binary value rather than a partial reg export.",
         "attack_techniques": [],
         "anti_forensic_notes": "Like other ComDlg32 MRU keys, entries are only written once the dialog interaction completes, so activity in a dialog left open (or a process killed before the dialog closes) may not be captured. Entries persist after the referenced folder is renamed or deleted, so the recorded path can outlive the location it names.",
         "interpretation": "This key yields two distinct pieces of evidence in one place: which applications the user actually ran through a file dialog, and the last filesystem location each application touched - not necessarily the same as where the current file resides. Because the PIDL/path often points at directories with no other UI presence, this is a common source for identifying hidden or otherwise-unadvertised directories the user (or a GUI-driven malicious application) has visited.",
@@ -836,7 +836,7 @@
           "TZWorks Windows Prefetch Parser (pf)",
           "Velociraptor (windows.forensics.prefetch artifact)"
         ],
-        "extraction": "",
+        "extraction": "Locked by the OS while Windows is running (open handle from the Prefetcher), so a plain copy of C:\\Windows\\Prefetch\\*.pf fails; live acquisition needs a lock-bypassing tool such as FTK Imager or KAPE's verified Prefetch target (Targets/Windows/Prefetch.tkape), requiring only local administrator access, not SYSTEM. Offline acquisition (mounted image, WinRE, VSS snapshot) has no lock and copies directly. Gotcha: Prefetch is off by default on SSD-boot systems in some configurations (EnablePrefetcher under Session Manager\\Memory Management\\PrefetchParameters, though SysMain/Superfetch service state is the actual controlling factor in modern Windows) -- verify service state rather than assuming absence means anti-forensic tampering.",
         "attack_techniques": [
           "T1070.004"
         ],
@@ -874,7 +874,7 @@
           "AppCompatCacheParser (Eric Zimmerman)",
           "ShimCacheParser (Mandiant)"
         ],
-        "extraction": "",
+        "extraction": "AppCompatCache is a single value inside the SYSTEM hive (Session Manager\\AppCompatCache), so it's captured the same way as any SYSTEM hive data: live via reg save HKLM\\SYSTEM, or offline hive copy. No standalone \"Shimcache\" KAPE target exists (verified against KapeFiles); it's collected as part of the full SYSTEM hive via KAPE's RegistryHivesSystem target. Local administrator is sufficient for the reg save; SYSTEM is not required. Gotcha (per the original Mandiant ShimCache research): the in-memory cache is only serialized to the registry on clean shutdown, so an abrupt power-off can lose the most recent entries -- live memory analysis may be needed to catch what hasn't hit disk yet.",
         "attack_techniques": [],
         "anti_forensic_notes": "Critical version-dependent caveat: Shimcache reliability as proof of execution has changed across Windows releases. On Windows XP/2003 there is no execution flag at all, so presence alone was historically treated as a rough proxy for execution. On Windows Vista, 7, Server 2008, and Server 2012 a Process Execution Flag was added that distinguishes actual execution (TRUE) from mere presence, e.g. directory browsing (FALSE), though Mandiant notes the flag's true internal semantics were never officially documented by Microsoft. On Windows 8 and later the execution-flag behavior changed again and is widely reported as unreliable/removed, meaning an entry can exist for a file that was never executed. Because of this, Shimcache should never be used alone to prove execution on modern Windows. Always corroborate with Prefetch, Amcache, or BAM/DAM. The cache itself lives in memory and is only flushed to the registry hive periodically (typically at shutdown), so a hard power-off can lose recent updates, and clearing/rebuilding it requires kernel-level access rather than a simple deletion.",
         "interpretation": "",
@@ -910,7 +910,7 @@
           "KAPE + SRUM module",
           "Velociraptor (windows.forensics.srum artifact)"
         ],
-        "extraction": "",
+        "extraction": "SRUDB.dat is an ESE database exclusively locked by the SRUM service (svchost) while Windows runs, so a live file copy fails with a sharing violation; acquisition needs a lock-bypass tool (FTK Imager) or KAPE's verified SRUM target (Targets/Windows/SRUM.tkape), which also pulls the SOFTWARE hive needed to resolve SRUM's embedded network-profile GUIDs. Requires local administrator access to System32\\sru. Offline (mounted image, VSS, WinRE) copies directly. Gotcha: SRUM commits to disk roughly hourly and on clean shutdown, so the on-disk database can lag up to an hour behind actual system activity.",
         "attack_techniques": [],
         "anti_forensic_notes": "SRUDB.dat can be deleted directly and Windows will recreate an empty one at next write, so a suspiciously short-lived SRUM history around an incident is itself a signal.",
         "interpretation": "Entries are written into the database in periodic (roughly hourly) blocks rather than at the moment activity occurs, so the exact time an action happened cannot be pinned down from SRUM alone. Treat its timestamps as approximate. SRUDB.dat is also not guaranteed to be flushed to disk on every shutdown, so the most recent activity before a crash or abrupt power-off may be missing entirely. Parsing the SOFTWARE hive alongside SRUDB.dat (most tools accept both together) is required to resolve the raw table GUIDs into human-readable field names.",
@@ -943,7 +943,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
-        "extraction": "",
+        "extraction": "FeatureUsage lives in NTUSER.DAT, same lock behavior as RunMRU; live capture via reg save HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FeatureUsage or a full-hive bypass copy, offline via direct file copy. No dedicated KAPE target for FeatureUsage specifically was found -- it's captured by collecting the whole NTUSER.DAT via KAPE's verified RegistryHivesUser target. Standard user access covers the user's own profile; local administrator for others. Gotcha: most FeatureUsage subkeys store REG_DWORD counters rather than timestamps, so pair the data with the key's own Last Write Time to estimate recency.",
         "attack_techniques": [
           "T1204"
         ],
@@ -983,7 +983,7 @@
           "Didier Stevens's userassist.py",
           "Velociraptor Windows.Registry.UserAssist artifact"
         ],
-        "extraction": "",
+        "extraction": "Same NTUSER.DAT lock situation as RunMRU; live via reg save HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist (or full-hive bypass copy), offline via direct hive copy. No standalone \"UserAssist\" KAPE target exists in KapeFiles (verified) -- it's collected as part of the full NTUSER.DAT hive via KAPE's RegistryHivesUser target. Standard user access is sufficient for the user's own hive; local administrator for others. Gotcha: value names and run counts are ROT13-obfuscated in the raw hive -- that's a parsing-stage issue, but don't mistake a raw reg export showing no plaintext program names for an empty artifact.",
         "attack_techniques": [
           "T1204"
         ],
@@ -1021,7 +1021,7 @@
           "DB Browser for SQLite",
           "WxTCmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "ActivitiesCache.db is a SQLite database under ConnectedDevicesPlatform, generally not OS-locked at rest but can be held open by the shell experience host while active; live copy usually succeeds directly, and VSS or a lock-bypass tool covers the locked case. KAPE has a verified target, WindowsTimeline.tkape, which recursively collects ActivitiesCache.db and its sibling files from each user's ConnectedDevicesPlatform folder. Standard user access covers their own profile; local administrator for others. Gotcha: also grab the accompanying -wal file -- recent, uncommitted activity records can sit only in the write-ahead log until a checkpoint occurs.",
         "attack_techniques": [],
         "anti_forensic_notes": "ActivitiesCache.db is an ordinary SQLite file the current user account can delete or overwrite outright; Windows will simply recreate an empty database on next use, so a short-lived or newly-created file where a long history is expected is itself notable. Microsoft later deprecated the Timeline user interface, but the underlying ConnectedDevicesPlatform database and its population can continue running in the background on affected builds, so the absence of the visible Timeline UI does not mean the database stopped recording.",
         "interpretation": "Because the database captures full application paths, per-item content opened inside the application, and visited URLs together with start/end times, it is one of the few artifacts that ties 'what' (specific document or URL), 'how long' (session duration), and 'in what application' together in one place. Records populated by this feature persist in ActivitiesCache.db even on systems where the Timeline feature was later removed from the Windows 10 UI in a late-Win10 update, so absence of the visible feature does not mean absence of the underlying data - always check for the database file regardless of the build's UI state.",
@@ -1068,7 +1068,7 @@
           "Chainsaw",
           "DeepBlueCLI"
         ],
-        "extraction": "",
+        "extraction": "Two distinct sources: the Microsoft-Windows-PowerShell/Operational.evtx event channel is held open by the Event Log service, so live copy needs wevtutil epl or a lock-bypass tool -- KAPE's verified EventLogs.tkape target collects all .evtx files including this channel, requiring local administrator access. Separately, transcript .txt files (when Start-Transcript or the transcription GPO is enabled) are plain text files under user profile paths, generally unlocked between sessions and copyable with standard user access to that profile; KAPE's verified PowerShellTranscripts.tkape target covers the known default/observed transcript locations. Gotcha: transcript output path is policy-configurable, so a custom path outside PowerShellTranscripts.tkape's known list will be missed -- check the Transcription GPO setting on the box first.",
         "attack_techniques": [
           "T1059.001"
         ],
@@ -1114,7 +1114,7 @@
           "Event Viewer (Application log)",
           "BlueScreenView"
         ],
-        "extraction": "",
+        "extraction": "WER report files and crash dumps under ReportArchive are ordinary files not held open once WER finishes writing, so live copy generally succeeds with standard user access to the user's own %LOCALAPPDATA% (local administrator needed for other users' profiles or the ProgramData-wide WER folder). KAPE has a verified WER.tkape target that collects both the ProgramData and per-user WER folders plus loose .dmp files. Offline copy has no lock concerns. Gotcha: WER report folders are automatically pruned/capped over time, so a missing report for a known crash doesn't rule it out -- corroborate with the Application event log's Windows Error Reporting source.",
         "attack_techniques": [
           "T1003.001"
         ],
@@ -1159,7 +1159,7 @@
           "Event Viewer",
           "wevtutil"
         ],
-        "extraction": "",
+        "extraction": ".SPL/.SHD files under System32\\spool\\PRINTERS are typically deleted by the spooler once a job completes, so live acquisition only catches currently queued/held jobs, and a live copy of what remains is usually unlocked and copyable with local administrator access to that system folder. No dedicated KAPE target for this path was found in KapeFiles (verified); the standard approach is a manual/scripted folder copy live, or file carving from unallocated space on a disk image offline for already-deleted jobs, since KAPE's live filesystem collection cannot recover deleted spool files. Gotcha: files only persist if \"Keep printed documents\" is enabled on the printer or the job was never dequeued -- most systems will have little or nothing to collect live.",
         "attack_techniques": [
           "T1547.012",
           "T1068"
@@ -1204,7 +1204,7 @@
           "DB Browser for SQLite (manual ukg.db inspection)",
           "Recall Timeline (open-source EXIF-based timeline reconstruction tool)"
         ],
-        "extraction": "",
+        "extraction": "ukg.db and related files under CoreAIPlatform.00\\UKP\\{GUID} can be actively written to by the Recall service while enabled, so treat it as potentially locked -- live copy may need a lock-bypass tool. KAPE has a verified target, WindowsCopilotRecall.tkape, which recursively collects the entire CoreAIPlatform.00\\UKP folder. Requires local administrator access to the folder; note the data is further protected by Windows Hello/DPAPI-backed encryption tied to the user account, so decryption after collection needs the user's credentials, not just file access. Gotcha: Recall is off by default and only present on Copilot+ hardware with the feature enabled -- confirm it was active before spending time on this collection.",
         "attack_techniques": [
           "T1005"
         ],
@@ -1245,7 +1245,7 @@
           "Eric Zimmerman KapeFiles target definitions",
           "Velociraptor Windows.System.Powershell.PSReadline artifact"
         ],
-        "extraction": "",
+        "extraction": "ConsoleHost_history.txt is a plain text file under the user's AppData\\Roaming profile, not locked at rest (PSReadLine releases the handle after each session write), so live copy succeeds directly with standard user access to the user's own profile (local administrator needed for another user's profile). No dedicated KAPE target for this specific file was found in KapeFiles (verified); it's collected via broad filesystem collection or a targeted manual/robocopy of the PSReadLine folder. Offline copy is straightforward. Gotcha: PSReadLine caps history at 4096 entries by default and can be cleared per session (Clear-History or SetPSReadLineOption) -- a short or missing file doesn't mean no PowerShell activity occurred.",
         "attack_techniques": [
           "T1059.001",
           "T1070.003"
@@ -1288,7 +1288,7 @@
           "regrippy (Airbus CERT \u2014 sysinternals plugin)",
           "Velociraptor (Windows.Registry.Sysinternals.Eulacheck artifact)"
         ],
-        "extraction": "",
+        "extraction": "EulaAccepted values live under HKCU\\Software\\Sysinternals\\<ToolName>, inside the user's hive, so the same NTUSER.DAT lock rules apply; live capture via reg save/reg query of that subtree for a logged-on user, offline via direct NTUSER.DAT copy for logged-off profiles. No dedicated KAPE target for this specific key was found in KapeFiles (verified) -- it's captured by pulling the whole NTUSER.DAT hive via KAPE's verified RegistryHivesUser target. Standard user access covers their own hive; local administrator for others or a HKEY_USERS-wide sweep. Gotcha: the key only proves the EULA prompt was accepted (tool ran at least once) -- it doesn't record execution count or last-run time, so pair it with the key's own Last Write Time for an approximate first-run date.",
         "attack_techniques": [
           "T1569.002",
           "T1570",
@@ -1862,7 +1862,7 @@
           "Generic SQLite browser (e.g. DB Browser for SQLite) for sync.db, streemsfs.db, and metrics.db",
           "Generic text/log viewer for Box_Streem logs"
         ],
-        "extraction": "",
+        "extraction": "%USERPROFILE%\\Box is a reparse point into Box Drive's virtual filesystem, not a normal folder of local files -- files may exist only as cloud placeholders unless hydrated. KAPE has two dedicated targets verified in KapeFiles/Targets/Apps: BoxDrive_Metadata.tkape (app config/sync-state data) and BoxDrive_UserFiles.tkape (the reparse-point content itself). Live acquisition needs no special privilege beyond normal read access to the user's profile, administrator or the owning user. Gotcha: copying the reparse point does not download cloud-only content -- KAPE (like OneDrive's equivalent target) will capture placeholder metadata rather than file bytes for anything not already synced locally, so confirm whether files are hydrated before treating a Box copy as complete.",
         "attack_techniques": [
           "T1567.002"
         ],
@@ -1904,7 +1904,7 @@
           "DPAPI decryption tooling (requires the original user context/master key) for legacy filecache.dbx and config.dbx",
           "Generic JSON viewer for info.json"
         ],
-        "extraction": "",
+        "extraction": "%USERPROFILE%\\Dropbox is generally a normal synced folder (not virtualized like Box/OneDrive by default), so live acquisition is a straightforward file copy needing only standard read access to the profile, administrator or owning user. KAPE has dedicated targets verified in KapeFiles/Targets/Apps: Dropbox_Metadata.tkape (host_id, config.dbx and sync database) and Dropbox_UserFiles.tkape (the synced file content). Gotcha: the metadata target's config database contains the account's host_id/access token equivalent, which is separately sensitive and should be handled with the same care as other credential material even though it's just a file copy.",
         "attack_techniques": [
           "T1567.002"
         ],
@@ -1941,7 +1941,7 @@
           "Generic SQLite browser (e.g. DB Browser for SQLite) for metadata_sqlite_db table structure",
           "No verified dedicated public parser for the protobuf-encoded fields inside metadata_sqlite_db - manual protobuf decoding or a purpose-built parser is typically required to fully interpret those columns"
         ],
-        "extraction": "",
+        "extraction": "Per the artifact's defined location, this is the registry value NTUSER\\Software\\Google\\DriveFS\\Share\\, which lives inside the user's NTUSER.DAT hive, not the AppData folder that KAPE's GoogleDrive_Metadata.tkape target collects (that target only grabs C:\\Users\\%user%\\AppData\\Local\\Google\\DriveFS\\, a different, file-based artifact). NTUSER.DAT is locked while its owner is logged on (same as any loaded hive); live acquisition of the specific value is reg query HKU\\<SID>\\Software\\Google\\DriveFS\\Share for the currently logged-on user, requiring at minimum that user's own access (no elevation needed for one's own HKCU) or administrator access via reg load against another user's on-disk hive copy. KAPE's RegistryHivesUser target collects the NTUSER.DAT file itself via its raw-disk bypass for the lock. Gotcha: don't collect only the AppData\\Local\\Google\\DriveFS metadata target expecting to find this value -- it's a separate registry-based artifact that requires hive acquisition, not a file-system target.",
         "attack_techniques": [
           "T1567.002"
         ],
@@ -1980,7 +1980,7 @@
           "Generic text/log viewer for SyncDiagnostics.log and odl trace logs (plain-text/structured log format)",
           "Registry viewer (e.g. Registry Explorer) for NTUSER OneDrive Accounts keys"
         ],
-        "extraction": "",
+        "extraction": "%USERPROFILE%\\OneDrive* is not exclusively locked, so live acquisition is a direct copy needing only standard read access to the profile (administrator or the owning user). KAPE has a dedicated OneDrive_UserFiles.tkape target (verified in KapeFiles/Targets/Apps, by Chad Tilbury) plus OneDrive_Metadata.tkape for the app's sync-state/config data. Gotcha: the OneDrive_UserFiles target's own comment explicitly warns that Files On-Demand placeholders will be collected as cloud-only stubs, not full content, and that pulling them can trigger cloud downloads -- confirm scope of authority for cloud collection or isolate the host from the network before running it.",
         "attack_techniques": [
           "T1567.002"
         ],
@@ -2179,7 +2179,7 @@
           "RBCmd (Eric Zimmerman)",
           "Autopsy"
         ],
-        "extraction": "",
+        "extraction": "The $Recycle.Bin folder is a hidden system folder and is not held open by the OS, so live copy of $I/$R pairs works with a plain file copy once hidden/system files are shown; however each per-SID subfolder is ACL'd to that user plus Administrators, so pulling another user's Recycle Bin requires local administrator rights. KAPE ships two verified targets for this: RecycleBin_InfoFiles.tkape (the $I metadata) and RecycleBin_DataFiles.tkape (the original $R content), both under the FileSystem category. From a mounted image or VSS snapshot the folder copies directly with no lock or privilege issue.",
         "attack_techniques": [
           "T1070.004"
         ],
@@ -2215,7 +2215,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
-        "extraction": "",
+        "extraction": "The live NTUSER.DAT file is locked for the entire session the user is logged on, but the key itself is reachable without touching that file via reg export \"HKU\\<SID>\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\WordWheelQuery\" wwq.reg against the mounted live hive; a standard user can export their own loaded hive, but reaching another user's HKU\\<SID> requires administrator. KAPE's RegistryHivesUser.tkape target instead grabs the whole NTUSER.DAT plus its .LOG transaction files using KAPE's raw-disk-read fallback, which bypasses the file lock entirely. Offline, from an image, NTUSER.DAT copies directly and is parsed with a registry viewer or RegRipper.",
         "attack_techniques": [
           "T1083"
         ],
@@ -2250,7 +2250,7 @@
           "Thumbcache Viewer (thumbcacheviewer / thumbsviewer.github.io)",
           "Magnet AXIOM"
         ],
-        "extraction": "",
+        "extraction": "While Explorer.exe is running, thumbcache_*.db files under AppData\\Local\\Microsoft\\Windows\\Explorer are typically held open, so a plain copy can fail with a sharing violation. KAPE's verified ThumbCache.tkape target (category Thumbcache) handles this via KAPE's built-in raw-disk-read fallback for locked files, requiring only standard user access to the user's own profile (administrator for another user's). From an image or VSS snapshot the files copy directly with no lock concerns.",
         "attack_techniques": [
           "T1083"
         ],
@@ -2287,7 +2287,7 @@
           "Thumbs Viewer (thumbsviewer.github.io)",
           "vinetto"
         ],
-        "extraction": "",
+        "extraction": "Thumbs.db is a plain per-folder hidden file rather than a centrally cached database, so it usually copies live with a normal file copy once hidden/system files are shown, and only standard read access to the folder/share is needed. It can be briefly locked if that exact folder is open in Explorer with thumbnail view active at the moment of collection. Gotcha: Thumbs.db only appears on paths where Thumbcache isn't used -- network shares, removable media, or when disabled by policy -- so its absence does not mean thumbnails were never generated.",
         "attack_techniques": [
           "T1083"
         ],
@@ -2324,7 +2324,7 @@
           "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
           "RegRipper"
         ],
-        "extraction": "",
+        "extraction": "Same lock situation as WordWheelQuery: the live NTUSER.DAT file is locked while the user is logged on, so the standard live method is reg export \"HKU\\<SID>\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TypedPaths\" file.reg against the mounted hive rather than a raw file copy, and a user can export their own hive without elevation. KAPE's RegistryHivesUser.tkape target collects the entire hive (with transaction logs) via raw-disk read instead. Offline, NTUSER.DAT is copied directly from an image with no lock or privilege issue.",
         "attack_techniques": [
           "T1135"
         ],
@@ -2360,7 +2360,7 @@
           "ESEDatabaseView (NirSoft)",
           "libesedb / esedbexport (Joachim Metz)"
         ],
-        "extraction": "",
+        "extraction": "The database is locked by the Windows Search / SearchIndexer service while it runs; live acquisition either stops the service (net stop wsearch) first or uses a tool that can read locked files. KAPE's WindowsIndexSearch.tkape target collects it via KAPE's raw-disk-read fallback without needing the service stopped. Path and format are OS-dependent: Vista through Windows 10 use the ESE database C:\\ProgramData\\Microsoft\\Search\\Data\\Applications\\Windows\\Windows.edb, while Windows 11 replaced it with two SQLite databases, Windows.db and Windows-gather.db, in the same ProgramData folder -- confirm the build before assuming file format. The ProgramData\\Microsoft\\Search folder is a protected system location, so administrator access is typically needed regardless of method.",
         "attack_techniques": [
           "T1083"
         ],
@@ -2397,7 +2397,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "Application.evtx is held open by the Event Log service, so wevtutil epl Application application.evtx (run elevated) is the standard live method -- it works through the Event Log service API rather than a raw file copy, so the lock isn't an obstacle. Default ACLs grant BUILTIN\\Users read access to this channel, but hardened baselines commonly restrict it, so an administrator prompt is the safe assumption in practice. KAPE's EventLogs.tkape target collects the entire winevt\\Logs directory (*.evtx wildcard) via its raw-disk-read bypass, which includes this file. Offline, from an image or VSS snapshot, the file copies directly with no lock or elevation needed.",
         "attack_techniques": [],
         "anti_forensic_notes": "Lower signal-to-noise than Security/System logs for security investigations; useful mainly to corroborate AV/EDR crash-based defense evasion.",
         "interpretation": "",
@@ -2428,7 +2428,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "The live file is held open by the Event Log service; the standard method is wevtutil epl \"Microsoft-Windows-Windows Defender/Operational\" defender.evtx from an elevated prompt (this channel name is confirmed in Microsoft's own Defender documentation). KAPE has a dedicated Antivirus/WindowsDefender.tkape target that pulls Microsoft-Windows-Windows Defender*.evtx directly from winevt\\Logs, and it's also captured wholesale by the general EventLogs.tkape wildcard target. Offline acquisition from an image copies the file directly with no lock or extra privilege beyond normal read access.",
         "attack_techniques": [],
         "anti_forensic_notes": "A detected-and-quarantined threat still generates a 1116/1117 record even if the file itself is gone, making this log valuable when malware self-deletes; excluded paths configured via GPO produce no detection at all.",
         "interpretation": "",
@@ -2465,7 +2465,7 @@
           "EvtxECmd (Eric Zimmerman)",
           "Hayabusa"
         ],
-        "extraction": "",
+        "extraction": "The live file is held open by the Event Log service; the verified channel name is Microsoft-Windows-PowerShell/Operational, exported live with wevtutil epl \"Microsoft-Windows-PowerShell/Operational\" psoperational.evtx from an elevated prompt. It is captured automatically by KAPE's EventLogs.tkape target, which pulls the whole winevt\\Logs directory via *.evtx wildcard using KAPE's raw-disk-read bypass for in-use files. Offline, from an image or VSS snapshot, the file copies directly with normal read access.",
         "attack_techniques": [
           "T1059.001",
           "T1027",
@@ -2505,7 +2505,7 @@
           "EvtxECmd (Eric Zimmerman)",
           "PowerShell Get-WinEvent -FilterHashtable"
         ],
-        "extraction": "",
+        "extraction": "No single log covers RDP; KAPE ships a dedicated, verified EventLogs-RDP.tkape target (v1.1, built per SANS 'Hunt Evil' guidance) that pulls System.evtx, Security.evtx, Microsoft-Windows-TerminalServices-RDPClient%4Operational.evtx, Microsoft-Windows-RemoteDesktopServices-RdpCoreTS%4Operational.evtx, Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx, and Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx. Each can also be exported live individually with wevtutil epl <channel> <output.evtx> from an elevated prompt since all are held open by the Event Log service. Security specifically also requires the 'Manage auditing and security log' right, not just admin group membership by default; offline, all files copy directly from an image with no lock.",
         "attack_techniques": [
           "T1021.001"
         ],
@@ -2561,7 +2561,7 @@
           "EvtxECmd (Eric Zimmerman)",
           "Hayabusa"
         ],
-        "extraction": "",
+        "extraction": "The live Security.evtx file is held open by the Event Log service and cannot be copied directly with a plain file copy; the standard live method is wevtutil epl Security security.evtx, run from an elevated administrator prompt (Security specifically also requires the 'Manage auditing and security log' user right, not just local admin group membership by default). KAPE's verified EventLogs target collects it automatically. Offline acquisition from a mounted image, WinRE, or VSS snapshot copies the file directly with no lock or extra privilege beyond normal read access.",
         "attack_techniques": [
           "T1078",
           "T1136.001",
@@ -2618,7 +2618,7 @@
           "EvtxECmd (Eric Zimmerman)",
           "Hayabusa"
         ],
-        "extraction": "",
+        "extraction": "Sysmon is a Sysinternals tool that must be separately installed -- there is no native Windows equivalent -- and once installed it logs to the channel Microsoft-Windows-Sysmon/Operational, stored as Microsoft-Windows-Sysmon%4Operational.evtx inside the standard winevt\\Logs directory alongside every other event log. Live export uses wevtutil epl \"Microsoft-Windows-Sysmon/Operational\" sysmon.evtx from an elevated prompt; the file is held open by the Event Log service like any other channel. No dedicated Sysmon-named target was found in KapeFiles, but KAPE's general EventLogs.tkape target collects it anyway since that target wildcards *.evtx over the whole winevt\\Logs directory. Offline, from an image, the file copies directly with normal read access, and its absence entirely on a host means Sysmon was never installed there.",
         "attack_techniques": [
           "T1055",
           "T1003.001",
@@ -2667,7 +2667,7 @@
           "EvtxECmd (Eric Zimmerman)",
           "Hayabusa"
         ],
-        "extraction": "",
+        "extraction": "System.evtx is held open by the Event Log service; the standard live method is wevtutil epl System system.evtx from an elevated prompt, going through the Event Log API rather than a raw copy. Default ACLs grant BUILTIN\\Users read on this channel, but many environments restrict it, so plan for administrator access. KAPE's EventLogs.tkape target collects it as part of its winevt\\Logs *.evtx wildcard. Offline, from an image or VSS snapshot, the file copies directly with normal read access.",
         "attack_techniques": [
           "T1543.003",
           "T1569.002",
@@ -2713,7 +2713,7 @@
           "wevtutil",
           "Get-WinEvent (PowerShell)"
         ],
-        "extraction": "",
+        "extraction": "These are separate channels under Applications and Services Logs\\Microsoft\\Windows\\AppLocker (EXE and DLL; MSI and Script; Packaged app-Deployment; Packaged app-Execution) plus the CodeIntegrity/WDAC operational log, each stored as its own %4-encoded .evtx file (e.g. Microsoft-Windows-AppLocker%4EXE and DLL.evtx) in the standard winevt\\Logs directory. Live export uses wevtutil epl \"Microsoft-Windows-AppLocker/EXE and DLL\" output.evtx (or the equivalent channel name) from an elevated prompt; all are picked up wholesale by KAPE's EventLogs.tkape wildcard target with no AppLocker-specific KAPE target needed. Gotcha: these channels only populate once AppLocker or WDAC policies are actually deployed and enforced/audited on the endpoint, so an empty or missing log does not prove nothing executed. Offline, the files copy directly from an image with normal read access.",
         "attack_techniques": [
           "T1562.001"
         ],
@@ -2759,7 +2759,7 @@
           "Microsoft Defender for Endpoint advanced hunting (DeviceEvents table, Asr* ActionTypes)",
           "Windows Event Forwarding (WEF) for centralized collection"
         ],
-        "extraction": "",
+        "extraction": "ASR (Attack Surface Reduction) events are not a separate log -- Microsoft's own documentation confirms event IDs 1121 (block) and 1122 (audit) are written to the same Microsoft-Windows-Windows Defender/Operational channel used for general Defender events, so acquisition is identical: wevtutil epl \"Microsoft-Windows-Windows Defender/Operational\" defender.evtx from an elevated prompt, or KAPE's Antivirus/WindowsDefender.tkape target (also caught by the general EventLogs.tkape wildcard). Gotcha: event 1122 (audit-mode) only appears if the relevant ASR rule was actually configured in Audit mode -- if ASR rules were never enabled, this file will contain no ASR events regardless of collection method. Offline, the file copies directly from an image with normal read access.",
         "attack_techniques": [
           "T1562.001"
         ],
@@ -2802,7 +2802,7 @@
           "KAPE",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "setupapi.dev.log is a plain append-only text log, not exclusively locked, so it typically copies live with a normal file copy; standard user read access to %SystemRoot%\\inf is usually sufficient, though administrator is safer on hardened builds. KAPE's verified USBDevicesLogs.tkape target (category USBDevices) collects it via a wildcard (setupapi.*.log) that also catches dated rotated variants like setupapi.dev.20221214_093731.log. Gotcha: on Windows 8+ the log rotates once it hits a size threshold, so timestamps for older device connections may only exist in a rotated file, not the current setupapi.dev.log -- collect all matching files, not just the primary one. On Windows XP the equivalent is C:\\Windows\\setupapi.log, also collected by the same target.",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -2840,7 +2840,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
-        "extraction": "",
+        "extraction": "The live SYSTEM hive file is always open/locked by the OS, but reg export HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USBSTOR file.reg works live against the mounted hive through the registry API, bypassing that file lock. Microsoft's default ACL on the Enum tree grants read-only access broadly (commonly documented as Everyone/BUILTIN\\Users), so a standard user can typically export this specific key; capturing the full SYSTEM hive with reg save HKLM\\SYSTEM instead requires administrator and the backup privilege. KAPE's RegistryHivesSystem.tkape target collects the entire SYSTEM hive (plus RegBack and transaction logs) via KAPE's raw-disk-read bypass, run elevated. Offline, from an image, the hive file copies directly with normal read access.",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -2885,7 +2885,7 @@
           "USB Detective (commercial - parses setupapi.dev.log alongside registry USB artifacts into a unified device timeline)",
           "KAPE (Eric Zimmerman - collects setupapi.dev.log via built-in USB-related collection targets for offline review)"
         ],
-        "extraction": "",
+        "extraction": "Same file and method as Connection Timestamps: setupapi.dev.log is a plain text log that is not exclusively locked, so it copies live with a normal file copy under standard user or administrator read access to %SystemRoot%\\inf. KAPE's USBDevicesLogs.tkape target collects it (and its rotated dated variants, e.g. setupapi.dev.<timestamp>.log) via a wildcard pattern. Gotcha: collect every rotated copy present, since Windows 8+ rotates this log once it reaches a size limit and older device-install history moves into the rotated files. Offline, from an image, all matching files copy directly with no lock issue.",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -2928,7 +2928,7 @@
           "Nirsoft USBDeview",
           "RegRipper (usbstor.pl, usb.pl plugins)"
         ],
-        "extraction": "",
+        "extraction": "Both Enum\\USBSTOR and the parent Enum\\USB key live inside the always-open SYSTEM hive; reg export HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USBSTOR file.reg (and the equivalent for \\Enum\\USB) works live via the registry API despite the file-level lock, and is typically readable by a standard user given the permissive default ACL on the Enum tree. KAPE's RegistryHivesSystem.tkape target collects the whole SYSTEM hive (plus RegBack and .LOG transaction files) via its raw-disk-read bypass, which is the more complete option since it preserves everything for offline parsing. Capturing the entire hive with reg save requires administrator and SeBackupPrivilege. Offline, from an image, the hive copies directly with normal read access.",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -2968,7 +2968,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "System.evtx is held open by the Event Log service; live export is wevtutil epl System system.evtx from an elevated prompt, and it's collected wholesale by KAPE's EventLogs.tkape wildcard target. Event IDs 20001 (device install start) and 20003 (driver install completion), source UserPnp, are confirmed as documented System log Plug-and-Play events. Gotcha: on modern Windows builds, the more complete USB insert/remove timeline (including a reliable disconnect signal) comes from a separate channel, Microsoft-Windows-DriverFrameworks-UserMode/Operational (its own .evtx file, events 2100/2102/2003), which is not the same file as System.evtx and should be collected alongside it. Offline, both files copy directly from an image with normal read access.",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -3009,7 +3009,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
-        "extraction": "",
+        "extraction": "This correlates two always-open hives: SYSTEM\\MountedDevices (drive-letter-to-device mapping) and, per user, NTUSER.DAT's Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MountPoints2 (which user mounted which device). Both are exported live via the registry API -- reg export HKLM\\SYSTEM\\MountedDevices file.reg and reg export \"HKU\\<SID>\\...\\MountPoints2\" file.reg -- bypassing the underlying file locks; MountedDevices under HKLM typically needs administrator, while a user can export their own MountPoints2 without elevation. KAPE's RegistryHivesSystem.tkape and RegistryHivesUser.tkape targets collect the full hives (with transaction logs) via raw-disk read for complete offline correlation. Offline, from an image, both hive files copy directly with normal read access.",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -3049,7 +3049,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "The EMDMgmt key lives in the SOFTWARE hive, which like SYSTEM is always open on a running system; reg export \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\EMDMgmt\" file.reg works live via the registry API despite the file lock, and HKLM\\SOFTWARE subkeys are generally readable by a standard user (full-hive reg save needs administrator and backup privilege). KAPE's RegistryHivesSystem.tkape target collects the entire SOFTWARE hive (along with SAM, SECURITY, and SYSTEM) via raw-disk read. Gotcha: EMDMgmt (originally the ReadyBoost 'external memory device' check) is only populated for devices Windows evaluated for ReadyBoost eligibility, not every USB device connected, so its absence doesn't rule out prior device use -- treat USBSTOR as the primary source and EMDMgmt as corroborating evidence. Offline, from an image, the hive copies directly with normal read access.",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -3094,7 +3094,7 @@
           "IEHistoryView (NirSoft) - for legacy index.dat/History.IE5",
           "BrowsingHistoryView (NirSoft)"
         ],
-        "extraction": "",
+        "extraction": "WebCacheV01.dat is an ESE database held open by the OS while Windows runs, so a plain file copy fails with a sharing violation. KAPE's \"IE 11 Metadata\" target (verified in KapeFiles at Targets/Browsers/InternetExplorer.tkape) collects the entire %LOCALAPPDATA%\\Microsoft\\Windows\\WebCache\\ folder using KAPE's raw file-copy capability; FTK Imager or a Volume Shadow Copy pull are the alternatives. Reading another user's profile requires local administrator rights. Gotcha: because it's a live ESE database, an unclean shutdown can leave it in a dirty state that needs repair before parsing.",
         "attack_techniques": [
           "T1083",
           "T1039"
@@ -3132,7 +3132,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
-        "extraction": "",
+        "extraction": "This value lives inside the user's NTUSER.DAT hive. If the user is logged on, the hive file is locked, but the specific value still reads live via reg query \"HKU\\<SID>\\Software\\Microsoft\\Office\\<Ver>\\Word\\Reading Locations\" since the registry API bypasses the file-copy lock. If the user is logged off, NTUSER.DAT is unlocked and copyable directly, or collectable with KAPE's RegistryHivesUser target (verified: Targets/Windows/RegistryHivesUser.tkape), which raw-copies NTUSER.DAT and its transaction logs. Reading another user's hive requires administrator; gotcha: the key only populates after a document with reading-location tracking has actually been opened, so its absence doesn't rule out Word use.",
         "attack_techniques": [],
         "anti_forensic_notes": "This key only tracks documents opened long or interactively enough for Word to record a reading position, so a document opened only briefly may leave no entry here even though it does elsewhere (File MRU, Trust Records). Deleting the key removes reading-position history without affecting the separate File MRU list, so the two should be checked independently rather than assumed to rise and fall together.",
         "interpretation": "Cross-referencing the Date (last-closed) value here against the last-opened time recorded in the corresponding Office File MRU entry for the same document lets an analyst calculate an approximate session duration - how long the user actually had the document open - which neither artifact provides on its own.",
@@ -3165,7 +3165,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "OAlerts.evtx is a standard Windows Event Log channel, readable live via wevtutil epl Microsoft-Office-Alerts/Operational <out>.evtx or Get-WinEvent, or copied directly from %SystemRoot%\\System32\\winevt\\Logs\\ since evtx files permit concurrent read access. It's swept up by KAPE's generic EventLogs target (verified: Targets/Windows/EventLogs.tkape, which grabs all *.evtx under winevt\\Logs). Exporting another user's log requires administrator or Event Log Readers membership. Gotcha: this channel only fills when Office's alert-logging feature actually fires (macro warnings, repair prompts), so it's often empty even on active systems.",
         "attack_techniques": [],
         "anti_forensic_notes": "As a standard Windows Event Log, OAlerts.evtx can be cleared wholesale via wevtutil or the Event Viewer UI, which itself generates a Security log clear-event (Event ID 1102) - correlating the two logs can reveal deliberate clearing. Because every Office application shares the single Event ID 300, the dialog message text is required to distinguish alert types; the ID alone is not diagnostic.",
         "interpretation": "All Office alert types share the same generic Event ID 300, so filtering on ID alone returns every kind of Office warning - the program name and message fields must be read together to determine what specific action (unsaved close, format warning, etc.) triggered a given entry.",
@@ -3198,7 +3198,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
-        "extraction": "",
+        "extraction": "This File MRU key lives inside NTUSER.DAT. Live, it's readable/exportable via reg query/reg export against the loaded HKU\\<SID> hive even while the user is logged on and the hive file itself is locked; offline, NTUSER.DAT can be copied directly or pulled with KAPE's RegistryHivesUser target (verified: Targets/Windows/RegistryHivesUser.tkape). Administrator is required for another user's hive. Gotcha: File MRU is versioned per Office application and version, so a full sweep needs every <App>\\File MRU subkey, not just one.",
         "attack_techniques": [],
         "anti_forensic_notes": "Because full path and a last-opened time are recorded directly in the value data (unlike the OS RecentDocs key, which requires MRUListEx ordering to establish sequence), this list is comparatively easy to read but just as easy to clear wholesale by deleting the File MRU subkey - removing the entire per-application history at once rather than one entry at a time.",
         "interpretation": "Unlike the general RecentDocs registry key, each Office application's File MRU stores the complete file path and an explicit last-opened time per entry rather than relying on binary MRUListEx ordering, making it a more directly readable and often more precise source for reconstructing when a specific document was opened in a specific Office application. On Microsoft 365 installs, checking the correct account-specific subkey (LiveId_#### vs AD_####) matters, since separate signed-in identities keep independent lists.",
@@ -3233,7 +3233,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
-        "extraction": "",
+        "extraction": "Same acquisition path as the other NTUSER.DAT-resident Office keys: live via reg query/reg export against the loaded HKU\\<SID> hive (registry API access isn't blocked by the file lock that stops a raw hive copy), or offline by copying NTUSER.DAT directly, or with KAPE's RegistryHivesUser target (verified: Targets/Windows/RegistryHivesUser.tkape). Administrator is required for another user's profile. Gotcha: Trusted Documents entries are removed if the user clears them or if Office's trust cache is reset, so this is a point-in-time record, not a durable audit trail.",
         "attack_techniques": [
           "T1204.002"
         ],
@@ -3270,7 +3270,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
-        "extraction": "",
+        "extraction": "ComDlg32\\OpenSaveMRU sits in NTUSER.DAT, so the same rule applies: live reg query/reg export reads it through the registry API without needing the hive file unlocked, and offline it's covered by direct NTUSER.DAT copy or KAPE's RegistryHivesUser target (verified: Targets/Windows/RegistryHivesUser.tkape). Administrator is required to read another user's loaded hive. Gotcha: this key has largely been superseded by OpenSavePidlMRU on Vista+, which stores binary shell item IDs rather than plain paths, so don't assume OpenSaveMRU alone is complete on modern Windows.",
         "attack_techniques": [
           "T1204.002"
         ],
@@ -3311,7 +3311,7 @@
           "KAPE: e.g. kape.exe --msource source-volume --mdest output-folder --module RECmd_UserActivity --mef csv",
           "Velociraptor (windows.registry.recentdocs artifact)"
         ],
-        "extraction": "",
+        "extraction": "RecentDocs is another NTUSER.DAT key: live reg query/reg export works against the loaded hive without touching the locked file, and offline collection is a direct NTUSER.DAT copy or KAPE's RegistryHivesUser target (verified: Targets/Windows/RegistryHivesUser.tkape). Reading another user's profile needs administrator. Gotcha: RecentDocs entries can be cleared via Explorer's \"Clear recent files\" or Group Policy, and the value order (MRUListEx) -- not just presence -- is what encodes recency, so a naive dump loses the timeline.",
         "attack_techniques": [
           "T1083"
         ],
@@ -3348,7 +3348,7 @@
           "Eric Zimmerman's ShellBags Explorer / SBECmd (github.com/EricZimmerman)",
           "Magnet AXIOM"
         ],
-        "extraction": "",
+        "extraction": "ShellBags span two hives: BagMRU/Bags under NTUSER.DAT (Software\\Microsoft\\Windows\\ShellNoRoam) and the larger set under UsrClass.dat (%LOCALAPPDATA%\\Microsoft\\Windows\\UsrClass.dat); both are locked hive files while the user is logged on. KAPE's RegistryHivesUser target (verified: Targets/Windows/RegistryHivesUser.tkape, documented as intended for shellbag analysis) raw-copies both NTUSER.DAT and UsrClass.dat plus their .LOG transaction files. Offline (user logged off), both files can be copied directly with no special tooling. Administrator is required for another user's session; gotcha: UsrClass.dat is often missed because analysts remember NTUSER.DAT but forget the separate UsrClass.dat location.",
         "attack_techniques": [
           "T1083"
         ],
@@ -3385,7 +3385,7 @@
           "TZWorks lp",
           "Velociraptor (windows.forensics.lnk artifact)"
         ],
-        "extraction": "",
+        "extraction": "LNK files under Recent, Desktop, and Start Menu are ordinary files that aren't typically held under a persistent OS lock, so a normal live copy usually succeeds. KAPE's LNKFilesAndJumpLists target (verified: Targets/Windows/LNKFilesAndJumpLists.tkape) collects exactly these locations -- %AppData%\\...\\Recent\\, Office Recent, Start Menu Programs, Desktop -- plus any surviving copies under System Volume Information restore points. A standard user can copy their own files; administrator is required for another profile. Gotcha: opening a .lnk file with a shell that resolves its target can itself update the target's own timestamps, so review tools should parse the LNK, not double-click it.",
         "attack_techniques": [],
         "anti_forensic_notes": "Persists after the target file is deleted, preserving path and volume evidence; the TrackerDataBlock MAC address can help attribute the originating machine when a file was moved across systems.",
         "interpretation": "A LNK file is created whenever a file or folder is created or opened, and Windows also creates LNK files for the parent and grandparent folders in the same operation, so the mere existence of a LNK file does not by itself prove the target file was actually opened, nor whether its contents were modified. Always interpret alongside other artifacts (Jump Lists, MRU keys) rather than in isolation.",
@@ -3427,7 +3427,7 @@
           "Velociraptor Windows.Forensics.Clipboard artifact",
           "Nirsoft DataProtectionDecryptor (legacy DPAPI only; does not decrypt DPAPI-NG-protected history)"
         ],
-        "extraction": "",
+        "extraction": "Uncertain -- verify: no dedicated KAPE target for native Windows Clipboard History was found (only a third-party ClipboardMaster.tkape target exists in KapeFiles, for a different application). The HistoryData files under %LOCALAPPDATA%\\Microsoft\\Windows\\Clipboard\\HistoryData\\<GUID>\\ are not backed by a persistent exclusive lock the way a registry hive or ESE database is, so a standard live file copy generally works; administrator is required only to access another user's profile. Extraction here is a generic file-collection step (FTK Imager, KAPE's ad-hoc file/folder collection, or manual copy), not a named forensic target. Gotcha: Clipboard History is off by default and is cleared on reboot unless items are pinned, so an empty/missing folder does not mean no clipboard activity occurred.",
         "attack_techniques": [
           "T1115"
         ],
@@ -3468,7 +3468,7 @@
           "MFTECmd (Eric Zimmerman, $LogFile support via the -f option)",
           "NTFS Log Tracker"
         ],
-        "extraction": "",
+        "extraction": "$LogFile cannot be opened or copied through normal file APIs while the volume is mounted -- Windows denies handle-based access to this NTFS metadata file entirely, live or not. KAPE's $LogFile target (verified: Targets/Windows/$LogFile.tkape, FileMask $LogFile at path C:\\) uses KAPE's built-in raw volume-level read to pull it; FTK Imager, dc3dd against the raw volume, or a full disk/volume image are the manual equivalents. This always requires local administrator. Gotcha: $LogFile is a circular transaction log that gets overwritten quickly on active volumes, so it should be collected before other imaging steps that generate additional disk I/O.",
         "attack_techniques": [
           "T1070.006",
           "T1070.004"
@@ -3508,7 +3508,7 @@
           "analyzeMFT (David Kovar)",
           "NTFS Log Tracker"
         ],
-        "extraction": "",
+        "extraction": "$MFT cannot be opened or copied through normal file APIs while the volume is mounted -- Windows blocks direct handle-based access to it as live metadata. KAPE's $MFT target (verified: Targets/Windows/$MFT.tkape, FileMask $MFT at path C:\\) performs a raw volume-level read to extract it; FTK Imager or The Sleuth Kit's icat against the raw volume are the equivalents outside KAPE. Raw volume access always requires local administrator. Gotcha: a copy tool that respects normal OS file locking will simply fail or silently return an empty/zero-byte result rather than an obvious error.",
         "attack_techniques": [
           "T1070.006"
         ],
@@ -3546,7 +3546,7 @@
           "PowerShell Get-Item -Stream Zone.Identifier",
           "dir /r (legacy) or forensic ADS-aware tools (FTK Imager, X-Ways)"
         ],
-        "extraction": "",
+        "extraction": "The Zone.Identifier ADS is readable live through normal file APIs -- PowerShell's Get-Item -Path <file> -Stream Zone.Identifier (or Get-Content -Stream) reads it with standard user rights if the caller can read the base file, and dir /r lists its presence. For forensic preservation use a tool verified to retain data streams (PowerShell, robocopy, or a forensic imager) rather than assuming any copy utility does -- plain copy and many AV/EDR quarantine actions are known to strip ADS entirely and silently produce a clean-looking copy. Administrator is only needed to read another user's files. Gotcha: absence of the stream on a suspicious downloaded file can itself be evidence that MOTW was deliberately stripped or that the delivery mechanism (e.g., certain scripted downloads) never applies it.",
         "attack_techniques": [
           "T1553.005"
         ],
@@ -3586,7 +3586,7 @@
           "The Sleuth Kit (istat)",
           "Registry Explorer / any $MFT-capable forensic suite"
         ],
-        "extraction": "",
+        "extraction": "This isn't a collectible artifact on its own -- it's a behavioral matrix you validate by comparing $STANDARD_INFORMATION and $FILE_NAME timestamps from within actual MFT records, both of which only exist inside the $MFT file itself. Extraction is therefore identical to the $MFT procedure: raw volume-level read via KAPE's $MFT target (verified: Targets/Windows/$MFT.tkape) or a forensic imager, since normal file APIs (dir, Get-Item, Explorer) only ever expose $STANDARD_INFORMATION and never $FILE_NAME timestamps. Administrator is required, as with any raw volume access. Gotcha: don't rely on a live directory listing to check these rules -- it structurally cannot see the $FILE_NAME timestamp half of the comparison.",
         "attack_techniques": [
           "T1070.006"
         ],
@@ -3624,7 +3624,7 @@
           "MFTECmd (Eric Zimmerman)",
           "NTFS Log Tracker"
         ],
-        "extraction": "",
+        "extraction": "$UsnJrnl:$J is accessible two ways. Live and without raw access, fsutil usn queryjournal <volume> and fsutil usn readjournal <volume> (verified: Microsoft Learn fsutil-usn) query journal metadata and read journal records directly through the OS, requiring administrator but no raw disk imaging. For a full byte-for-byte capture suitable for offline journal parsers, KAPE's $J target (verified: Targets/Windows/$J.tkape, path C:\\$Extend\\, FileMask $UsnJrnl:$J and $UsnJrnl:$Max, handled as alternate data streams) performs a raw copy -- KapeFiles discussion threads note this target can hit NotSupportedException/UnauthorizedAccessException on some systems, in which case FTK Imager or a full volume image is the fallback. Administrator is required either way. Gotcha: the journal is a finite circular buffer that a busy volume can roll over within hours, so it should be prioritized early in triage.",
         "attack_techniques": [
           "T1070.006",
           "T1070.004"
@@ -3665,7 +3665,7 @@
           "Arsenal Image Mounter",
           "libvshadow / vshadowmount (libyal)"
         ],
-        "extraction": "",
+        "extraction": "Live technique: vssadmin list shadows enumerates existing shadow copies (administrator required), and each one is reachable at \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy<N>\\ -- a read-only device path that ordinary tools (robocopy, xcopy, FTK Imager) can copy files from directly, even though it's invisible in Explorer. vssadmin create shadow can generate a fresh copy first if needed. KAPE also supports a --vss switch to additionally sweep matching targets across all existing shadow copies during a normal collection run. All of this requires local administrator. Gotcha: vssadmin only lists/creates/deletes shadows, it cannot browse or copy files itself -- you must reference the raw GLOBALROOT device path, and a missing trailing backslash on that path causes it to resolve incorrectly.",
         "attack_techniques": [
           "T1490"
         ],
@@ -3702,7 +3702,7 @@
           "MFTECmd (Eric Zimmerman) to parse the containing $MFT records",
           "hex/binary editor for manual $O index attribute analysis"
         ],
-        "extraction": "",
+        "extraction": "Uncertain -- verify: no dedicated KAPE target for $Extend\\$ObjId or $Extend\\$Quota specifically was found (Targets/Windows contains $Bitmap, $Boot, $J, $LogFile, $MFT, $MFTMirr, $SDS, and $T, but no $ObjId or $Quota target). These are raw NTFS metadata files under \\$Extend\\ with no live file-API access, similar to $MFT/$LogFile, so extraction requires a raw volume-level tool (FTK Imager, dc3dd, or a full forensic image) -- administrator is required for any raw access. Related KapeFiles/Velociraptor discussion (GitHub issue on $SECURE:$SDS handling) documents that files under $Extend can behave like directories to enumeration APIs, causing collection tools to skip them entirely. Gotcha: because of that directory-like behavior, a generic collection script can silently produce a zero-byte or missing result for these files instead of an error -- always confirm actual byte content was captured.",
         "attack_techniques": [],
         "anti_forensic_notes": "Because $ObjId tracks object identity independently of file name/path, it can retain a record of a file's prior identity even after an attacker renames or relocates it to evade filename-based detection; deleting the $Extend files themselves requires raw disk access and is not a normal user-level operation.",
         "interpretation": "",
@@ -3742,7 +3742,7 @@
           "Sysmon (Event ID 15, FileCreateStreamHash)",
           "The Sleuth Kit (istat/icat)"
         ],
-        "extraction": "",
+        "extraction": "ADS on ordinary NTFS files are accessible live through standard file APIs: dir /r lists stream names, and PowerShell's Get-Item -Path <file> -Stream * / Get-Content -Stream <name> reads them with the same permissions as the base file. Robocopy preserves data streams by default when copying (verified via community/Microsoft forum documentation), making it a safe collection method; administrator is only needed for files outside the examiner's own permissions. Gotcha: many everyday tools -- plain copy, some backup utilities, and AV/EDR quarantine actions -- are known to drop non-default streams silently, so a stream's prior existence can vanish before an examiner ever inspects the file; always check with dir /r or Get-Item -Stream * rather than assuming a copy preserved everything.",
         "attack_techniques": [
           "T1564.004"
         ],
@@ -3786,7 +3786,7 @@
           "Registry Explorer (Eric Zimmerman) for the Lxss registry structure",
           "wsl.exe --list --verbose / wsl.exe --export (live triage of installed distros and version)"
         ],
-        "extraction": "",
+        "extraction": "ext4.vhdx is a large virtual disk file that WSL holds open while any instance of that distro is running; wsl --shutdown releases the lock, after which it copies like a normal file. KAPE has verified per-distro targets for it (Targets/Windows/WSL/Ubuntu.tkape, Debian.tkape, Kali.tkape, openSUSE.tkape, SUSELinuxEnterpriseServer.tkape), each collecting %LOCALAPPDATA%\\Packages\\<PackageFamilyName>\\LocalState\\ext4.vhdx plus select rootfs config/log files. If the VHDX can't be unlocked in time, a Volume Shadow Copy or a raw/live imaging tool (FTK Imager) can capture it while in use; administrator is needed for another user's profile. Gotcha: the recovered VHDX must then be mounted (e.g., Mount-VHD) and its internal ext4 filesystem parsed with Linux-aware tools -- Windows cannot natively browse ext4 content.",
         "attack_techniques": [
           "T1202"
         ],
@@ -4007,7 +4007,7 @@
           "Get-NetNeighbor (PowerShell NetTCPIP module)",
           "netsh interface ipv4 show neighbors"
         ],
-        "extraction": "",
+        "extraction": "Purely memory-resident with no on-disk file -- the table lives only in the kernel's TCP/IP stack and is lost on reboot or once entries time out (dynamic entries typically expire within a few minutes of inactivity). The only extraction method is a live query, arp -a, which a standard user can run with no elevation; there is no offline/disk-image equivalent, so run it as early as possible relative to the incident.",
         "attack_techniques": [
           "T1557.002"
         ],
@@ -4041,7 +4041,7 @@
           "DB Browser for SQLite",
           "Hindsight"
         ],
-        "extraction": "",
+        "extraction": "Not a standalone file -- URL parameters live embedded inside the browser's own history database (Chrome/Edge History SQLite, Firefox places.sqlite), so extraction is the same as pulling browser history. That database is opened by the running browser process and can be lock-contended for a live plain copy; KAPE's WebBrowsers.tkape compound target (which invokes per-browser targets like Chrome.tkape and EdgeChromium.tkape) handles this via its locked-file-aware copy routine. A standard user can collect their own profile; local admin/SYSTEM is needed to reach other users' profiles offline.",
         "attack_techniques": [
           "T1614"
         ],
@@ -4081,7 +4081,7 @@
           "Get-DnsClientCache / Clear-DnsClientCache (PowerShell DnsClient module)",
           "DNSDataView (NirSoft)"
         ],
-        "extraction": "",
+        "extraction": "Purely memory-resident, maintained by the DNS Client (Dnscache) service with no on-disk file. Extraction is live-only via ipconfig /displaydns, which a standard user can run without elevation. Gotcha: entries expire per-record TTL, are wiped by reboot or ipconfig /flushdns, and if the Dnscache service is stopped/disabled the cache is empty or unavailable -- capture before any of those events.",
         "attack_techniques": [
           "T1071.004"
         ],
@@ -4118,7 +4118,7 @@
           "diff against a known-good baseline hosts file",
           "File-integrity monitoring or EDR alerting on writes to the etc\\hosts path"
         ],
-        "extraction": "",
+        "extraction": "A plain-text file at %SystemRoot%\\System32\\drivers\\etc\\hosts that is never locked, so it can be copied live with a simple file copy; reading it needs no special privilege (world-readable), though editing it requires admin. KAPE's HostsFile.tkape target collects it directly. Gotcha: the file has no extension, so review the full directory listing -- malware sometimes drops a look-alike or hidden copy alongside the real one rather than editing it in place.",
         "attack_techniques": [
           "T1556.006"
         ],
@@ -4155,7 +4155,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
-        "extraction": "",
+        "extraction": "Lives in the live SYSTEM and SOFTWARE registry hives (Tcpip\\Parameters\\Interfaces and NetworkList). These hive files are locked by the OS while running, so a raw file copy will fail or be inconsistent -- use reg export/reg save of the specific keys, or a full hive acquisition via KAPE's RegistryHivesSystem.tkape (which collects both SYSTEM and SOFTWARE), which uses a locked-file-safe copy method. Requires local administrator; offline (disk image) acquisition avoids the lock problem entirely.",
         "attack_techniques": [
           "T1016",
           "T1016.002"
@@ -4192,7 +4192,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
-        "extraction": "",
+        "extraction": "Held in the live SYSTEM hive at CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces. Query live with reg query (admin recommended) or export with reg export; the on-disk SYSTEM hive file itself is locked while Windows runs, so full-hive collection needs KAPE's RegistryHivesSystem.tkape (verified target) or an offline image rather than a plain copy. Gotcha: CurrentControlSet is a runtime pointer to ControlSet001/002 -- when working from an offline hive, check the Select key to resolve which ControlSet is actually current.",
         "attack_techniques": [
           "T1016"
         ],
@@ -4232,7 +4232,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "Held in the live SYSTEM hive at CurrentControlSet\\Control\\TimeZoneInformation. Standard users can typically read it live via reg query or the simpler tzutil /g (display name only); full hive export for offline analysis needs local admin via reg save or KAPE's RegistryHivesSystem.tkape. Capture this immediately in any engagement -- every other timestamp collected (event logs, file MACE times, browser history) must be normalized against this value to build an accurate UTC timeline.",
         "attack_techniques": [
           "T1124"
         ],
@@ -4271,7 +4271,7 @@
           "WirelessKeyView (NirSoft)",
           "Direct XML review of the Wlansvc\\Profiles\\Interfaces path"
         ],
-        "extraction": "",
+        "extraction": "On-disk XML files under %ALLUSERSPROFILE%\\Microsoft\\Wlansvc\\Profiles\\Interfaces\\{GUID}\\, but the folder's ACL restricts direct read access, so plain file copy as a standard admin often fails -- the practical live method is netsh wlan export profile key=clear folder=<path>, which requires local administrator and also decrypts the stored WiFi passphrase into the exported XML in cleartext (verified: password field only appears with key=clear, admin-only). No dedicated KAPE target for this artifact was found in the public KapeFiles repository (Targets/Windows and Targets/Compound checked directly) -- collection has to be scripted/manual. Gotcha: treat the exported XML as credential material once key=clear is used.",
         "attack_techniques": [
           "T1016.002"
         ],
@@ -4310,7 +4310,7 @@
           "Event Viewer",
           "SIEM ingestion (e.g. Microsoft Sentinel Windows Firewall connector)"
         ],
-        "extraction": "",
+        "extraction": "A plain-text log at %windir%\\System32\\LogFiles\\Firewall\\pfirewall.log that is off by default and must be enabled per-profile (netsh advfirewall) before it will exist. When enabled it's appended to, not exclusively locked, so it can be copied live; reading System32\\LogFiles requires local administrator. KAPE's WindowsFirewall.tkape target (verified, filemask pfirewall.*) collects it. Gotcha: the log has a small default max size (4 MB), so it rolls over/truncates the oldest entries quickly on a busy host -- pull it early.",
         "attack_techniques": [
           "T1562.004"
         ],
@@ -4348,7 +4348,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "A standard .evtx file, Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx, under System32\\winevt\\Logs. Extract live with wevtutil epl \"Microsoft-Windows-WLAN-AutoConfig/Operational\" <output>.evtx, which needs local administrator (event-log folder ACL). KAPE's generic EventLogs.tkape target (verified) collects the entire winevt\\Logs folder including this channel via its locked-file-safe copier, so no dedicated per-channel target is needed. Gotcha: this operational channel is disabled by default on many builds -- confirm with wevtutil gl before assuming an empty file means no WiFi activity occurred.",
         "attack_techniques": [
           "T1016.002"
         ],
@@ -4397,7 +4397,7 @@
           "wevtutil / Event Viewer",
           "plain text viewer (rasphone.pbk is an unencrypted, human-readable INI-style text file)"
         ],
-        "extraction": "",
+        "extraction": "The native Windows RAS phonebook, rasphone.pbk, is a plain-text file under %APPDATA%\\Microsoft\\Network\\Connections\\Pbk\\ and is not exclusively locked, so it can be copied live; a standard user can pull their own file, admin/SYSTEM is needed for other users' profiles offline. No dedicated KAPE target exists for this native artifact -- the public KapeFiles VPNClients.tkape compound target (verified) only bundles third-party clients (ProtonVPN, OpenVPN, GlobalProtect, FortiClient, PulseSecure), not rasphone.pbk, so it must be collected manually or via a custom target. Gotcha: the .pbk records connection configuration, not proof of use -- corroborate actual connection times with RasClient event log entries.",
         "attack_techniques": [
           "T1133"
         ],
@@ -4438,7 +4438,7 @@
           "Autoruns (Sysinternals)",
           "Registry Explorer (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "Held in the live SOFTWARE hive (and Wow6432Node) at Image File Execution Options. Live query with reg query (local administrator required) works without triggering the whole-hive lock issue; full offline acquisition uses reg save or KAPE's RegistryHivesSystem.tkape (verified, collects the SOFTWARE hive). Gotcha: AppInit_DLLs only actually loads if the sibling LoadAppInit_DLLs value under Windows\\CurrentVersion is set to 1 -- check that value too, since the DLL entry alone may be dormant.",
         "attack_techniques": [
           "T1546.012"
         ],
@@ -4471,7 +4471,7 @@
           "RegRipper (H. Carvey)",
           "Autoruns (Sysinternals)"
         ],
-        "extraction": "",
+        "extraction": "Split across the live SOFTWARE hive (HKLM, needs local administrator) and each user's NTUSER.DAT (HKCU, a standard user can read their own). Live enumeration via reg query works for both without hitting hive-lock issues; for full acquisition across all profiles (including inactive ones) use KAPE's RegistryHivesSystem.tkape (SOFTWARE) plus RegistryHivesUser.tkape (verified, collects NTUSER.DAT for every profile). Gotcha: a logged-on user's NTUSER.DAT is memory-mapped and its on-disk copy can lag current values -- for the active user, capture live via reg query in addition to collecting the on-disk hive.",
         "attack_techniques": [
           "T1547.001"
         ],
@@ -4507,7 +4507,7 @@
           "Autoruns (Sysinternals)",
           "TaskScheduler view + PECmd/Registry Explorer for TaskCache"
         ],
-        "extraction": "",
+        "extraction": "Per-task XML files (no file extension) live under C:\\Windows\\System32\\Tasks\\, mirrored in the SOFTWARE hive's Schedule\\TaskCache. The Tasks folder ACL restricts read access to SYSTEM/Administrators, so local admin is required; the files are not exclusively locked and can be copied live. KAPE's ScheduledTasks.tkape target (verified -- also grabs legacy *.job files, SchedLgU.txt, and PowerShell ScheduledJobs) collects them. Gotcha: a deleted malicious task's XML will be gone by acquisition time, but Security event log IDs 4698 (created) and 4699 (deleted) plus the TaskCache registry entries can still show it existed.",
         "attack_techniques": [
           "T1053.005"
         ],
@@ -4541,7 +4541,7 @@
           "Autoruns (Sysinternals)",
           "RegRipper (H. Carvey)"
         ],
-        "extraction": "",
+        "extraction": "Held in the live SYSTEM hive at CurrentControlSet\\Services\\<Name>. Most subkeys are readable by a standard user via sc query or reg query for enumeration, but full export for forensic use needs local administrator; on-disk hive acquisition (locked while running) uses reg save or KAPE's RegistryHivesSystem.tkape (verified). Gotcha: CurrentControlSet is a live pointer -- an offline copy of the SYSTEM hive won't have a CurrentControlSet key, so resolve the active ControlSet00x via the Select subkey.",
         "attack_techniques": [
           "T1543.003"
         ],
@@ -4575,7 +4575,7 @@
           "Autoruns (Sysinternals)",
           "manual file listing / KAPE"
         ],
-        "extraction": "",
+        "extraction": "Plain shortcut/executable files under %AppData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup (per-user) and the ProgramData equivalent (system-wide). Neither is locked, so live copy is straightforward -- standard user for their own folder, admin for other profiles or the ProgramData path. KAPE's StartupFolders.tkape target (verified, paths match exactly) collects both. Gotcha: this is a common low-privilege persistence technique (no admin needed to drop into the user's own Startup folder) -- capture the LNK's own metadata and embedded target path, not just its presence.",
         "attack_techniques": [
           "T1547.001"
         ],
@@ -4609,7 +4609,7 @@
           "python-cim / Get-WmiObject",
           "KAPE (WMI repository collection)"
         ],
-        "extraction": "",
+        "extraction": "The CIM repository (OBJECTS.DATA plus INDEX.BTR/MAPPING files) under C:\\Windows\\System32\\wbem\\Repository\\ is an actively-used ESE-style database held open by the Winmgmt service, so a naive live file copy can be inconsistent or fail; local admin is required to reach it. KAPE's WBEM.tkape target (verified, recursive on that path) uses a locked-file-safe copy method to acquire it live without manually stopping the service. For faster triage without touching the repository file, query live subscriptions directly as admin with Get-WmiObject -Namespace root\\subscription -Class __EventFilter (and __EventConsumer/__FilterToConsumerBinding). Gotcha: the repository is one shared blob for every WMI class on the system, not just subscriptions -- isolating root\\subscription entries happens at parse time, not extraction time.",
         "attack_techniques": [
           "T1546.003",
           "T1047"
@@ -4657,7 +4657,7 @@
           "esentutl",
           "Event Viewer"
         ],
-        "extraction": "",
+        "extraction": "The BITS queue database (qmgr.db, an ESE database on Windows 10+) sits under %ALLUSERSPROFILE%\\Microsoft\\Network\\Downloader\\ and is held open by the BITS service, so a plain live copy risks an inconsistent snapshot -- a volume shadow copy or offline image is the sound method; alternatively net stop bits (admin) before copying, accepting that this aborts in-flight jobs. KAPE's BITS.tkape target (verified, path and category Persistence match) collects the folder recursively. For live enumeration without touching the file, bitsadmin /list /allusers /verbose (admin) works. Gotcha: don't rely on a live plain-copy of qmgr.db as forensically sound -- treat it like any other actively-written database file.",
         "attack_techniques": [
           "T1197"
         ],
@@ -4702,7 +4702,7 @@
           "Autoruns",
           "Process Monitor"
         ],
-        "extraction": "",
+        "extraction": "The per-user path, HKCU\\Software\\Classes\\CLSID\\{GUID}\\InprocServer32, actually resolves to the UsrClass.dat hive; a standard user can query/export their own HKCU live via reg query, but the on-disk UsrClass.dat is locked while that user is logged on, so full acquisition needs KAPE's RegistryHivesUser.tkape (verified, explicitly collects UsrClass.dat) or an offline image. The HKLM equivalent lives in the SOFTWARE hive and needs local admin, via RegistryHivesSystem.tkape. Gotcha: because HKCU\\Software\\Classes overrides HKLM for that user's COM lookups, this hijack only requires standard-user write access -- don't assume admin rights were needed to plant it.",
         "attack_techniques": [
           "T1546.015",
           "T1112"
@@ -4747,7 +4747,7 @@
           "Event Viewer",
           "Sysmon"
         ],
-        "extraction": "",
+        "extraction": "Lives in the live SOFTWARE hive at Image File Execution Options\\sethc.exe (Debugger value). Query live with reg query (local administrator required); full acquisition via reg save or KAPE's RegistryHivesSystem.tkape (verified). Gotcha: the classic variant of this technique replaces C:\\Windows\\System32\\sethc.exe itself with a copy of cmd.exe and never touches the registry at all -- absence of the IFEO Debugger value does not rule out the backdoor, so hash-compare sethc.exe, utilman.exe, and osk.exe against known-good copies as well.",
         "attack_techniques": [
           "T1546.008",
           "T1546.012"
@@ -4790,7 +4790,7 @@
           "Microsoft Application Compatibility Toolkit / Compatibility Administrator (the GUI counterpart to sdbinst.exe)",
           "Manual binary/hex inspection of the proprietary .sdb format"
         ],
-        "extraction": "",
+        "extraction": "On-disk binary .sdb files under C:\\Windows\\AppPatch\\Custom\\ (and \\Custom64\\ for 64-bit shims). These are not locked, so a live copy is straightforward, but the AppPatch folder ACL restricts standard-user access, so local admin is required. KAPE's SDB.tkape target (verified, exact path and *.sdb filemask, category Executables) collects them. Gotcha: this is a different artifact from the AppCompatCache/ShimCache registry value (SYSTEM hive, an evidence-of-execution list) -- do not conflate the two; this one is the actual installed shim files that can inject a malicious DLL or redirect execution.",
         "attack_techniques": [
           "T1546.011"
         ],
@@ -5060,7 +5060,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
-        "extraction": "",
+        "extraction": "The SYSTEM hive is always loaded as HKEY_LOCAL_MACHINE\\SYSTEM while Windows runs, so this value reads live via reg query \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\ComputerName\\ComputerName\" without touching the underlying hive file. For a full forensic hive capture (to also recover ControlSet00x history versus the active CurrentControlSet), use reg save HKLM\\SYSTEM <path> or KAPE's RegistryHivesSystem target (verified: Targets/Windows/RegistryHivesSystem.tkape, collects SYSTEM/SOFTWARE/SECURITY/SAM plus their RegBack copies). A simple reg query needs only standard read access; reg save/full export requires administrator (SeBackupPrivilege). Gotcha: the RegBack copies under System32\\config\\RegBack are typically empty or stale on Windows 10 1803+, since Microsoft disabled the automatic registry backup task by default around that release -- don't rely on it as a fallback without checking first.",
         "attack_techniques": [
           "T1082"
         ],
@@ -5100,7 +5100,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
-        "extraction": "",
+        "extraction": "Same access pattern as the ComputerName key: this value is inside the always-loaded SOFTWARE hive, so reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\" reads it live with standard read access. A full offline hive capture uses reg save HKLM\\SOFTWARE <path> or KAPE's RegistryHivesSystem target (verified: Targets/Windows/RegistryHivesSystem.tkape, which collects the SOFTWARE hive alongside SYSTEM/SECURITY/SAM). Administrator is required for reg save/full export. Gotcha: UBR (update build revision) and DisplayVersion values under this key have been renamed/restructured across Windows 10 feature updates, so scripts written against one build's exact value names can silently return nothing on another.",
         "attack_techniques": [
           "T1082"
         ],
@@ -5137,7 +5137,7 @@
           "RegRipper (H. Carvey)",
           "Registry Explorer (Eric Zimmerman)"
         ],
-        "extraction": "",
+        "extraction": "HKLM Run/RunOnce keys read live via reg query with standard user rights since the SOFTWARE hive is always loaded; the parallel HKCU/NTUSER Run keys read live via reg query HKU\\<SID>\\... for a logged-on user. For forensic completeness, collect both hives: KAPE's RegistryHivesSystem target for SOFTWARE and RegistryHivesUser target for NTUSER.DAT (both verified: Targets/Windows/RegistryHivesSystem.tkape and RegistryHivesUser.tkape). Reading another user's loaded hive, or performing a full offline hive export, requires administrator. Gotcha: Run/RunOnce is only one of many autostart mechanisms (Services, Scheduled Tasks, Winlogon Shell/Userinit, Startup folders) -- treat it as one artifact in a broader persistence sweep, not a complete one.",
         "attack_techniques": [
           "T1547.001",
           "T1543.003"
@@ -5174,7 +5174,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
-        "extraction": "",
+        "extraction": "The ShutdownTime value sits in the always-loaded SYSTEM hive, so it reads live via reg query \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Windows\" with standard read access, no raw access needed. A full offline hive capture (to also compare against ControlSet00x) uses reg save HKLM\\SYSTEM <path> or KAPE's RegistryHivesSystem target (verified: Targets/Windows/RegistryHivesSystem.tkape); administrator is required for the save/export path. Gotcha: this value is stored as a Windows FILETIME in UTC and is overwritten on every shutdown, so it only ever reflects the most recent one -- it has no history of prior shutdowns.",
         "attack_techniques": [],
         "anti_forensic_notes": "ShutdownTime is a single value overwritten on every shutdown, so it only ever reflects the MOST RECENT shutdown - no history of prior shutdowns is retained here. Cross-reference System.evtx (e.g., Event ID 1074/6006 style shutdown/service-stop records) for a fuller shutdown/reboot history than this single registry value can provide on its own.",
         "interpretation": "Determining the last shutdown time can help detect user behavior and system anomalies. The value is stored in 64-bit Windows FILETIME format.",
@@ -5214,7 +5214,7 @@
           "WinUpdatesView (NirSoft)",
           "esentutl (built-in ESE database utility)"
         ],
-        "extraction": "",
+        "extraction": "The .etl files under C:\\Windows\\Logs\\WindowsUpdate\\ can be copied directly while Windows runs -- verified as an exact match to KAPE's WindowsUpdate target (Targets/Windows/WindowsUpdate.tkape), which collects WindowsUpdate*.etl from that path plus USO orchestrator ETLs, CBS logs, and the SoftwareDistribution\\DataStore. Raw ETLs aren't human-readable; Microsoft's Get-WindowsUpdateLog PowerShell cmdlet (verified: Microsoft Learn) merges and decodes them into a single WindowsUpdate.log, though for OS builds before 1709 that decoding requires reaching Microsoft's public symbol server. Administrator rights are required to run Get-WindowsUpdateLog and to read other users' copies of these files. Gotcha: Get-WindowsUpdateLog writes a static snapshot that does not auto-update -- re-run it after collecting fresh ETLs rather than trusting a previously decoded log.",
         "attack_techniques": [],
         "anti_forensic_notes": "Update history in DataStore.edb can be wiped by stopping wuauserv and deleting the SoftwareDistribution folder; raw ETL trace files are rotated and not retained indefinitely, so delayed triage can lose ETW-level detail even after a WindowsUpdate.log snapshot exists.",
         "interpretation": "",
@@ -5253,7 +5253,7 @@
           "Group Policy Management Console (GPMC)",
           "Get-GPPermission (GroupPolicy PowerShell module)"
         ],
-        "extraction": "",
+        "extraction": "The Microsoft-Windows-GroupPolicy/Operational channel is a standard event log, exportable live via wevtutil epl Microsoft-Windows-GroupPolicy/Operational <out>.evtx, or copied directly from System32\\winevt\\Logs\\ since evtx files allow concurrent read access. It's covered generically by KAPE's EventLogs target (verified: Targets/Windows/EventLogs.tkape, sweeps all *.evtx) -- note this is distinct from KAPE's separate GroupPolicy.tkape target (also verified), which instead collects GPO cache files (.pol/.ini, History folders) rather than this event channel. Exporting/reading it requires administrator or Event Log Readers group membership. Gotcha: operational channels like this default to a fixed, often modest size and overwrite oldest events first, so long-running systems may have far less GPO history than expected.",
         "attack_techniques": [
           "T1484.001",
           "T1615"
@@ -5298,7 +5298,7 @@
           "Elcomsoft Forensic Disk Decryptor",
           "Event Viewer / wevtutil for BitLocker-API log export"
         ],
-        "extraction": "",
+        "extraction": "The Microsoft-Windows-BitLocker-API/Management and /Operational channels are standard event logs under System32\\winevt\\Logs\\, exportable live via wevtutil epl Microsoft-Windows-BitLocker-API/Operational <out>.evtx (and the Management equivalent) or copied directly since evtx permits concurrent reads; covered by KAPE's generic EventLogs target (verified: Targets/Windows/EventLogs.tkape). Exporting/reading requires administrator or Event Log Readers membership. Gotcha: these channels log state-change events (enable/disable/suspend/resume/key changes) only -- they don't report current encryption status or the recovery key, which requires a separate live query via manage-bde -status or WMI.",
         "attack_techniques": [
           "T1486"
         ],
