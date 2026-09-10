@@ -29,6 +29,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1110.003",
           "T1078",
@@ -65,6 +66,7 @@
           "RegRipper (H. Carvey)",
           "Registry Explorer (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1078.004"
         ],
@@ -102,6 +104,7 @@
           "RegRipper (H. Carvey)",
           "Registry Explorer (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1078"
         ],
@@ -145,6 +148,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1078",
           "T1021"
@@ -182,6 +186,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1021.001"
         ],
@@ -221,6 +226,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1543.003",
           "T1489"
@@ -260,6 +266,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1078",
           "T1110"
@@ -298,6 +305,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1078",
           "T1087.001"
@@ -350,6 +358,7 @@
           "dploot",
           "Impacket secretsdump.py (retrieves DPAPI_SYSTEM key material)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1555",
           "T1555.003",
@@ -394,6 +403,7 @@
           "dploot",
           "vaultcmd.exe (native, listing only)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1555",
           "T1555.004"
@@ -438,6 +448,7 @@
           "SharpSecDump",
           "reg.exe (hive export, combined with offline decryption tooling)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1003.004"
         ],
@@ -475,6 +486,7 @@
           "WINHELLO2hashcat (Banaanhangwagen, GitHub) with dpapick3, for offline PIN hash extraction",
           "DPAPI forensic tooling (Mimikatz DPAPI module, dpapick) for the supporting master-key material"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "The NGC container never holds a plaintext private key on disk \u2014 material is TPM-sealed or DPAPI-wrapped with the PIN \u2014 so deleting the folder (or performing a Windows Hello PIN/face/fingerprint reset) destroys the credential rather than concealing evidence of its use; an attacker with SYSTEM and access to the SAM/SECURITY/SYSTEM hives can still stage an offline PIN-cracking attempt without modifying the container itself, leaving no direct on-disk trace in the NGC folder.",
         "interpretation": "",
@@ -513,6 +525,7 @@
           "BMC-Tools (ANSSI-FR)",
           "RdpCacheStitcher (BSI - German Federal Office for Information Security)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1021.001"
         ],
@@ -554,6 +567,7 @@
           "Mimikatz (sekurlsa::tickets, kerberos::list, kerberos::ptt)",
           "Rubeus"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1558",
           "T1558.001",
@@ -605,6 +619,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (amcache.pl plugin)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Deleting the binary from disk does not remove its Amcache record: the inventory snapshot persists in the hive until the next Compatibility Appraiser scheduled-task run, and the prior entry is often still recoverable from the Amcache.hve.LOG1/.LOG2 transaction logs even after that. An investigator who collects only the .hve file (not its .LOG1/.LOG2 companions) on a system that wasn't cleanly shut down can miss the most recent writes. Wiping or replacing Amcache.hve outright, or disabling the Microsoft Compatibility Appraiser task, stops new entries from being recorded going forward but is itself an unusual, noteworthy action to find during triage.",
         "interpretation": "",
@@ -638,6 +653,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (bam.pl plugin)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "BAM/DAM entries are automatically purged roughly 7 days after the recorded activity, and an entry is removed once its associated executable no longer exists at its original location, and again on the next reboot, so this artifact has a naturally short retention window even with no attacker interference. It only records executables launched from local storage; programs run from removable media or network shares are not captured. Because the data lives in the live SYSTEM hive rather than a separate log, wiping it requires direct registry-key deletion (an unusual, detectable action) rather than simple file deletion.",
         "interpretation": "",
@@ -673,6 +689,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1123",
           "T1125"
@@ -710,6 +727,7 @@
           "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
           "RegRipper (runmru.pl plugin)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1059"
         ],
@@ -745,6 +763,7 @@
           "TZWorks jmp",
           "Velociraptor (windows.forensics.jumplists artifact)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "The referenced file does not need to still exist for the Jump List entry to remain, aiding recovery after deletion; can be individually pruned via 'Remove from this list'.",
         "interpretation": "A Jump List entry is created the first time an application is used by that user account. It does NOT record whether an application is currently pinned to the taskbar, so it cannot be used to determine pinned-app status. Best used in combination with Prefetch, LNK files, RecentDocs, and Shellbags to strengthen an activity timeline rather than relied on alone.",
@@ -777,6 +796,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Like other ComDlg32 MRU keys, entries are only written once the dialog interaction completes, so activity in a dialog left open (or a process killed before the dialog closes) may not be captured. Entries persist after the referenced folder is renamed or deleted, so the recorded path can outlive the location it names.",
         "interpretation": "This key yields two distinct pieces of evidence in one place: which applications the user actually ran through a file dialog, and the last filesystem location each application touched - not necessarily the same as where the current file resides. Because the PIDL/path often points at directories with no other UI presence, this is a common source for identifying hidden or otherwise-unadvertised directories the user (or a GUI-driven malicious application) has visited.",
@@ -816,6 +836,7 @@
           "TZWorks Windows Prefetch Parser (pf)",
           "Velociraptor (windows.forensics.prefetch artifact)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1070.004"
         ],
@@ -853,6 +874,7 @@
           "AppCompatCacheParser (Eric Zimmerman)",
           "ShimCacheParser (Mandiant)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Critical version-dependent caveat: Shimcache reliability as proof of execution has changed across Windows releases. On Windows XP/2003 there is no execution flag at all, so presence alone was historically treated as a rough proxy for execution. On Windows Vista, 7, Server 2008, and Server 2012 a Process Execution Flag was added that distinguishes actual execution (TRUE) from mere presence, e.g. directory browsing (FALSE), though Mandiant notes the flag's true internal semantics were never officially documented by Microsoft. On Windows 8 and later the execution-flag behavior changed again and is widely reported as unreliable/removed, meaning an entry can exist for a file that was never executed. Because of this, Shimcache should never be used alone to prove execution on modern Windows. Always corroborate with Prefetch, Amcache, or BAM/DAM. The cache itself lives in memory and is only flushed to the registry hive periodically (typically at shutdown), so a hard power-off can lose recent updates, and clearing/rebuilding it requires kernel-level access rather than a simple deletion.",
         "interpretation": "",
@@ -888,6 +910,7 @@
           "KAPE + SRUM module",
           "Velociraptor (windows.forensics.srum artifact)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "SRUDB.dat can be deleted directly and Windows will recreate an empty one at next write, so a suspiciously short-lived SRUM history around an incident is itself a signal.",
         "interpretation": "Entries are written into the database in periodic (roughly hourly) blocks rather than at the moment activity occurs, so the exact time an action happened cannot be pinned down from SRUM alone. Treat its timestamps as approximate. SRUDB.dat is also not guaranteed to be flushed to disk on every shutdown, so the most recent activity before a crash or abrupt power-off may be missing entirely. Parsing the SOFTWARE hive alongside SRUDB.dat (most tools accept both together) is required to resolve the raw table GUIDs into human-readable field names.",
@@ -920,6 +943,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1204"
         ],
@@ -959,6 +983,7 @@
           "Didier Stevens's userassist.py",
           "Velociraptor Windows.Registry.UserAssist artifact"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1204"
         ],
@@ -996,6 +1021,7 @@
           "DB Browser for SQLite",
           "WxTCmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "ActivitiesCache.db is an ordinary SQLite file the current user account can delete or overwrite outright; Windows will simply recreate an empty database on next use, so a short-lived or newly-created file where a long history is expected is itself notable. Microsoft later deprecated the Timeline user interface, but the underlying ConnectedDevicesPlatform database and its population can continue running in the background on affected builds, so the absence of the visible Timeline UI does not mean the database stopped recording.",
         "interpretation": "Because the database captures full application paths, per-item content opened inside the application, and visited URLs together with start/end times, it is one of the few artifacts that ties 'what' (specific document or URL), 'how long' (session duration), and 'in what application' together in one place. Records populated by this feature persist in ActivitiesCache.db even on systems where the Timeline feature was later removed from the Windows 10 UI in a late-Win10 update, so absence of the visible feature does not mean absence of the underlying data - always check for the database file regardless of the build's UI state.",
@@ -1042,6 +1068,7 @@
           "Chainsaw",
           "DeepBlueCLI"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1059.001"
         ],
@@ -1087,6 +1114,7 @@
           "Event Viewer (Application log)",
           "BlueScreenView"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1003.001"
         ],
@@ -1131,6 +1159,7 @@
           "Event Viewer",
           "wevtutil"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1547.012",
           "T1068"
@@ -1175,6 +1204,7 @@
           "DB Browser for SQLite (manual ukg.db inspection)",
           "Recall Timeline (open-source EXIF-based timeline reconstruction tool)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1005"
         ],
@@ -1215,6 +1245,7 @@
           "Eric Zimmerman KapeFiles target definitions",
           "Velociraptor Windows.System.Powershell.PSReadline artifact"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1059.001",
           "T1070.003"
@@ -1257,6 +1288,7 @@
           "regrippy (Airbus CERT \u2014 sysinternals plugin)",
           "Velociraptor (Windows.Registry.Sysinternals.Eulacheck artifact)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1569.002",
           "T1570",
@@ -1304,6 +1336,7 @@
           "DB Browser for SQLite",
           "BrowsingHistoryView (NirSoft)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1217"
         ],
@@ -1339,6 +1372,7 @@
           "Manual JSON review",
           "DB Browser for SQLite (Firefox places.sqlite)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1217"
         ],
@@ -1373,6 +1407,7 @@
           "Hindsight",
           "BrowsingHistoryView (Nirsoft)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Downloads table entries can be cleared alongside general history clearing; the downloaded file itself, if kept, will separately carry Zone.Identifier MOTW evidence of its origin.",
         "interpretation": "This entry is downloads specifically; the browser's separate crash-recovery tab/window state is its own dedicated `session-restore` artifact, not part of this one. The two used to be combined here but were split to match the poster's own separate boxes.",
@@ -1409,6 +1444,7 @@
           "Hindsight (Chrome/Edge Preferences)",
           "Manual JSON review (text editor / JSON viewer)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Preferences/prefs.js is a live file rewritten frequently during normal use, so it reflects only the current/recent configuration; prior settings changes are not versioned unless captured through other means (backups, Volume Shadow Copies).",
         "interpretation": "Firefox's prefs.js exposes sync status, last sync time, and which artifact categories (history, passwords, bookmarks, etc.) are configured to sync. Useful for tracing data that may have propagated to another device. Chrome's per_host_zoom_levels, media_engagement, and site_engagement values are indirect but useful proxies for how much a user actually interacted with a given site, beyond a simple visit count. Edge preferences additionally carry account_info and clear_data_on_exit/sync settings.",
@@ -1442,6 +1478,7 @@
           "NirSoft ChromeCacheView (Chrome/Edge)",
           "NirSoft MZCacheView (Firefox)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Cache is typically cleared separately from History in browser \"clear data\" dialogs unless a user explicitly selects it, so an emptied History with an intact Cache (or vice versa) is common. Each should be checked independently.",
         "interpretation": "Cache provides a genuine snapshot in time of what a user was looking at, including the literal files rendered (images, scripts) rather than just a URL reference. Useful for confirming exactly what content a page displayed at a given moment. It is tied to the specific local user account whose profile holds it, and its two timestamps (first-saved vs. last-viewed) can separate a one-time visit from repeated return visits.",
@@ -1476,6 +1513,7 @@
           "DB Browser for SQLite",
           "Magnet AXIOM / Belkasoft (commercial)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Clearing browsing history removes rows from the SQLite tables but does not necessarily overwrite the underlying file pages, so carving deleted SQLite records can sometimes recover cleared history.",
         "interpretation": "",
@@ -1513,6 +1551,7 @@
           "Hindsight",
           "NirSoft ChromeCookiesView / MZCookiesView"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1539"
         ],
@@ -1546,6 +1585,7 @@
           "Manual manifest.json review",
           "Hindsight (extension parsing)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Removing an extension deletes its folder; the Preferences JSON's extension history or sync data may retain remnants briefly after removal.",
         "interpretation": "",
@@ -1575,6 +1615,7 @@
           "BrowsingHistoryView (Nirsoft)",
           "DB Browser for SQLite"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Deleting the whole profile folder removes all Firefox artifacts at once; profile folder can be copied off intact even after the browser is closed, as recommended by Mozilla for backups.",
         "interpretation": "",
@@ -1608,6 +1649,7 @@
           "DB Browser for SQLite",
           "Hindsight"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Web browser artifacts are stored per local user account, so history for one account tells you nothing about another; clearing history removes rows from the SQLite tables but does not necessarily overwrite the underlying database pages, so carving deleted records can sometimes recover cleared history.",
         "interpretation": "Always check for multiple profiles in Chromium-based browsers before concluding history is complete. A single \"History\" file query against the wrong profile folder silently misses activity in another profile. This is the general browsing-history counterpart to the more specific `browser-downloads` (download manager metadata) and `media-history` (audio/video playback) entries.",
@@ -1641,6 +1683,7 @@
         "parsing_tools": [
           "ccl_chrome_indexeddb (CCL / obsidianforensics: includes a FileSystem API module)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Clearing \"site data\" in browser settings removes File System storage for that origin; because it is a lesser-known storage mechanism, it is less commonly targeted for anti-forensic cleanup than history or cookies and can retain data longer as a result.",
         "interpretation": "A LevelDB database within the File System folder maps visited URLs/origins to the numbered subfolders that actually hold the stored files. Data splits between \"t\" (temporary, browser-managed, evictable) and \"p\" (permanent, explicitly requested by the site) storage. Content in permanent storage reflects a more deliberate site action and is generally more forensically interesting.",
@@ -1673,6 +1716,7 @@
           "ccl_chrome_indexeddb (CCL / obsidianforensics: LevelDB Local Storage parser)",
           "DB Browser for SQLite (Firefox webappstore.sqlite)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Web Storage is cleared only when a user clears \"site data\" (not just cookies/history) or removes the profile, so it survives many routine cleanup actions and is less commonly targeted precisely because it is less well known than cookies.",
         "interpretation": "Chrome and Edge store Local Storage as LevelDB databases: a binary key-value store requiring a LevelDB-aware parser rather than a text editor, since keys can remain in unflushed .log files. Firefox uses SQLite (webappstore.sqlite). Legacy IE/EdgeHTML stored the equivalent data in XML files.",
@@ -1708,6 +1752,7 @@
         "parsing_tools": [
           "DB Browser for SQLite"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Clearing browsing data through the standard browser history-clearing UI does not clear Media History, so surviving media playback records can corroborate or contradict a claim that all browsing history was wiped.",
         "interpretation": "Three primary tables link together: playbackSession (session-level playback events), origin (site-level aggregation), and playback (individual playback records). Join on their session/origin identifiers to reconstruct which site was played, when, and for how long. Because Media History is not cleared by normal history-clearing actions, its presence alongside an empty History file is itself significant.",
@@ -1743,6 +1788,7 @@
           "Manual JSON review (after jsonlz4/mozLz4 decompression, Firefox)",
           "Manual/hex review of Session_*/Tabs_* files (Chrome/Edge: no universal open-source parser)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Because these files exist specifically to survive crashes, even a normal, clean browser shutdown can leave the prior session's data in \"Last Session\"/backup files; fully suppressing this evidence requires clearing both the live session files and profile-level backups (e.g., sessionstore-backups\\).",
         "interpretation": "Session restore can retain far more than URLs: the actual HTML/JavaScript/XML/form data present on a page, the referring site, transition type (typed, link, reload), window size, and which tabs were pinned. A richer point-in-time capture of browsing state than history alone, useful for reconstructing exactly what was on-screen at shutdown or crash time.",
@@ -1776,6 +1822,7 @@
           "firefox_decrypt (Firefox logins.json + key4.db)",
           "firepwd.py (Firefox/Thunderbird credential decryption)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1555.003"
         ],
@@ -1815,6 +1862,7 @@
           "Generic SQLite browser (e.g. DB Browser for SQLite) for sync.db, streemsfs.db, and metrics.db",
           "Generic text/log viewer for Box_Streem logs"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1567.002"
         ],
@@ -1856,6 +1904,7 @@
           "DPAPI decryption tooling (requires the original user context/master key) for legacy filecache.dbx and config.dbx",
           "Generic JSON viewer for info.json"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1567.002"
         ],
@@ -1892,6 +1941,7 @@
           "Generic SQLite browser (e.g. DB Browser for SQLite) for metadata_sqlite_db table structure",
           "No verified dedicated public parser for the protobuf-encoded fields inside metadata_sqlite_db - manual protobuf decoding or a purpose-built parser is typically required to fully interpret those columns"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1567.002"
         ],
@@ -1930,6 +1980,7 @@
           "Generic text/log viewer for SyncDiagnostics.log and odl trace logs (plain-text/structured log format)",
           "Registry viewer (e.g. Registry Explorer) for NTUSER OneDrive Accounts keys"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1567.002"
         ],
@@ -1975,6 +2026,7 @@
           "extract-msg (open-source Python library for reading MSG/CFBF structure and MAPI properties)",
           "Any text editor (EML is plain text; headers are human-readable without a parser)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1114.001"
         ],
@@ -2014,6 +2066,7 @@
           "MFCMAPI (Microsoft, open-source on GitHub - low-level MAPI property browser, can convert between MSG/EML and inspect PR_TRANSPORT_MESSAGE_HEADERS)",
           "Kernel/Aid4Mail-class commercial e-discovery viewers for bulk PST/OST processing"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1114.001"
         ],
@@ -2052,6 +2105,7 @@
           "leveldb-dump / ccl_chrome_indexeddb (open-source LevelDB and Chromium IndexedDB record parsers)",
           "ChromeCacheViewer (Nirsoft, for the Chromium-format Cache_data attachment cache)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1213.005"
         ],
@@ -2086,6 +2140,7 @@
           "wpn (TZWorks)",
           "SQLite browser/CLI (DB Browser for SQLite, sqlite3)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Because notification content is cached independently of the originating application, deleting an alert or message in the source app does not remove the already-recorded entry in wpndatabase.db; entries do eventually expire/get pruned, and the database (including its WAL file) can be carved for deleted rows using tools such as bring2lite or fqlite.",
         "interpretation": "",
@@ -2124,6 +2179,7 @@
           "RBCmd (Eric Zimmerman)",
           "Autopsy"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1070.004"
         ],
@@ -2159,6 +2215,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1083"
         ],
@@ -2193,6 +2250,7 @@
           "Thumbcache Viewer (thumbcacheviewer / thumbsviewer.github.io)",
           "Magnet AXIOM"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1083"
         ],
@@ -2229,6 +2287,7 @@
           "Thumbs Viewer (thumbsviewer.github.io)",
           "vinetto"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1083"
         ],
@@ -2265,6 +2324,7 @@
           "Eric Zimmerman's Registry Explorer / RECmd (github.com/EricZimmerman)",
           "RegRipper"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1135"
         ],
@@ -2300,6 +2360,7 @@
           "ESEDatabaseView (NirSoft)",
           "libesedb / esedbexport (Joachim Metz)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1083"
         ],
@@ -2336,6 +2397,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Lower signal-to-noise than Security/System logs for security investigations; useful mainly to corroborate AV/EDR crash-based defense evasion.",
         "interpretation": "",
@@ -2366,6 +2428,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "A detected-and-quarantined threat still generates a 1116/1117 record even if the file itself is gone, making this log valuable when malware self-deletes; excluded paths configured via GPO produce no detection at all.",
         "interpretation": "",
@@ -2402,6 +2465,7 @@
           "EvtxECmd (Eric Zimmerman)",
           "Hayabusa"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1059.001",
           "T1027",
@@ -2441,6 +2505,7 @@
           "EvtxECmd (Eric Zimmerman)",
           "PowerShell Get-WinEvent -FilterHashtable"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1021.001"
         ],
@@ -2496,6 +2561,7 @@
           "EvtxECmd (Eric Zimmerman)",
           "Hayabusa"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1078",
           "T1136.001",
@@ -2552,6 +2618,7 @@
           "EvtxECmd (Eric Zimmerman)",
           "Hayabusa"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1055",
           "T1003.001",
@@ -2600,6 +2667,7 @@
           "EvtxECmd (Eric Zimmerman)",
           "Hayabusa"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1543.003",
           "T1569.002",
@@ -2645,6 +2713,7 @@
           "wevtutil",
           "Get-WinEvent (PowerShell)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1562.001"
         ],
@@ -2690,6 +2759,7 @@
           "Microsoft Defender for Endpoint advanced hunting (DeviceEvents table, Asr* ActionTypes)",
           "Windows Event Forwarding (WEF) for centralized collection"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1562.001"
         ],
@@ -2732,6 +2802,7 @@
           "KAPE",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -2769,6 +2840,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -2813,6 +2885,7 @@
           "USB Detective (commercial - parses setupapi.dev.log alongside registry USB artifacts into a unified device timeline)",
           "KAPE (Eric Zimmerman - collects setupapi.dev.log via built-in USB-related collection targets for offline review)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -2855,6 +2928,7 @@
           "Nirsoft USBDeview",
           "RegRipper (usbstor.pl, usb.pl plugins)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -2894,6 +2968,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -2934,6 +3009,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -2973,6 +3049,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1091",
           "T1052.001"
@@ -3017,6 +3094,7 @@
           "IEHistoryView (NirSoft) - for legacy index.dat/History.IE5",
           "BrowsingHistoryView (NirSoft)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1083",
           "T1039"
@@ -3054,6 +3132,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "This key only tracks documents opened long or interactively enough for Word to record a reading position, so a document opened only briefly may leave no entry here even though it does elsewhere (File MRU, Trust Records). Deleting the key removes reading-position history without affecting the separate File MRU list, so the two should be checked independently rather than assumed to rise and fall together.",
         "interpretation": "Cross-referencing the Date (last-closed) value here against the last-opened time recorded in the corresponding Office File MRU entry for the same document lets an analyst calculate an approximate session duration - how long the user actually had the document open - which neither artifact provides on its own.",
@@ -3086,6 +3165,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "As a standard Windows Event Log, OAlerts.evtx can be cleared wholesale via wevtutil or the Event Viewer UI, which itself generates a Security log clear-event (Event ID 1102) - correlating the two logs can reveal deliberate clearing. Because every Office application shares the single Event ID 300, the dialog message text is required to distinguish alert types; the ID alone is not diagnostic.",
         "interpretation": "All Office alert types share the same generic Event ID 300, so filtering on ID alone returns every kind of Office warning - the program name and message fields must be read together to determine what specific action (unsaved close, format warning, etc.) triggered a given entry.",
@@ -3118,6 +3198,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Because full path and a last-opened time are recorded directly in the value data (unlike the OS RecentDocs key, which requires MRUListEx ordering to establish sequence), this list is comparatively easy to read but just as easy to clear wholesale by deleting the File MRU subkey - removing the entire per-application history at once rather than one entry at a time.",
         "interpretation": "Unlike the general RecentDocs registry key, each Office application's File MRU stores the complete file path and an explicit last-opened time per entry rather than relying on binary MRUListEx ordering, making it a more directly readable and often more precise source for reconstructing when a specific document was opened in a specific Office application. On Microsoft 365 installs, checking the correct account-specific subkey (LiveId_#### vs AD_####) matters, since separate signed-in identities keep independent lists.",
@@ -3152,6 +3233,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1204.002"
         ],
@@ -3188,6 +3270,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1204.002"
         ],
@@ -3228,6 +3311,7 @@
           "KAPE: e.g. kape.exe --msource source-volume --mdest output-folder --module RECmd_UserActivity --mef csv",
           "Velociraptor (windows.registry.recentdocs artifact)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1083"
         ],
@@ -3264,6 +3348,7 @@
           "Eric Zimmerman's ShellBags Explorer / SBECmd (github.com/EricZimmerman)",
           "Magnet AXIOM"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1083"
         ],
@@ -3300,6 +3385,7 @@
           "TZWorks lp",
           "Velociraptor (windows.forensics.lnk artifact)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Persists after the target file is deleted, preserving path and volume evidence; the TrackerDataBlock MAC address can help attribute the originating machine when a file was moved across systems.",
         "interpretation": "A LNK file is created whenever a file or folder is created or opened, and Windows also creates LNK files for the parent and grandparent folders in the same operation, so the mere existence of a LNK file does not by itself prove the target file was actually opened, nor whether its contents were modified. Always interpret alongside other artifacts (Jump Lists, MRU keys) rather than in isolation.",
@@ -3341,6 +3427,7 @@
           "Velociraptor Windows.Forensics.Clipboard artifact",
           "Nirsoft DataProtectionDecryptor (legacy DPAPI only; does not decrypt DPAPI-NG-protected history)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1115"
         ],
@@ -3381,6 +3468,7 @@
           "MFTECmd (Eric Zimmerman, $LogFile support via the -f option)",
           "NTFS Log Tracker"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1070.006",
           "T1070.004"
@@ -3420,6 +3508,7 @@
           "analyzeMFT (David Kovar)",
           "NTFS Log Tracker"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1070.006"
         ],
@@ -3457,6 +3546,7 @@
           "PowerShell Get-Item -Stream Zone.Identifier",
           "dir /r (legacy) or forensic ADS-aware tools (FTK Imager, X-Ways)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1553.005"
         ],
@@ -3496,6 +3586,7 @@
           "The Sleuth Kit (istat)",
           "Registry Explorer / any $MFT-capable forensic suite"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1070.006"
         ],
@@ -3533,6 +3624,7 @@
           "MFTECmd (Eric Zimmerman)",
           "NTFS Log Tracker"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1070.006",
           "T1070.004"
@@ -3573,6 +3665,7 @@
           "Arsenal Image Mounter",
           "libvshadow / vshadowmount (libyal)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1490"
         ],
@@ -3609,6 +3702,7 @@
           "MFTECmd (Eric Zimmerman) to parse the containing $MFT records",
           "hex/binary editor for manual $O index attribute analysis"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Because $ObjId tracks object identity independently of file name/path, it can retain a record of a file's prior identity even after an attacker renames or relocates it to evade filename-based detection; deleting the $Extend files themselves requires raw disk access and is not a normal user-level operation.",
         "interpretation": "",
@@ -3648,6 +3742,7 @@
           "Sysmon (Event ID 15, FileCreateStreamHash)",
           "The Sleuth Kit (istat/icat)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1564.004"
         ],
@@ -3691,6 +3786,7 @@
           "Registry Explorer (Eric Zimmerman) for the Lxss registry structure",
           "wsl.exe --list --verbose / wsl.exe --export (live triage of installed distros and version)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1202"
         ],
@@ -3734,6 +3830,7 @@
           "Volatility 3 (Volatility Foundation) - windows.malfind / windows.malware.malfind",
           "Volatility 3 - windows.vadinfo / windows.vadyarascan for follow-up VAD inspection and YARA scanning of flagged regions"
         ],
+        "extraction": "Requires a full physical memory acquisition (WinPmem, Magnet RAM Capture, FTK Imager, or Magnet DumpIt \u2014 all needing a kernel-mode driver and local administrator rights) since injected/hollowed code exists only in process memory, not on disk. Detection itself is not part of extraction: it is performed afterward, offline, by running Volatility's malfind plugin (or the HollowFind/Volatility3 equivalents) against the acquired image to flag suspicious memory regions such as PAGE_EXECUTE_READWRITE at unusual base addresses. There is no live/on-box equivalent of malfind \u2014 the full image must exist first. Gotcha: acquisition tools themselves can be detected or blocked by kernel-mode malware, and the capture process alters some memory pages as a side effect.",
         "attack_techniques": [
           "T1055",
           "T1055.012"
@@ -3777,6 +3874,7 @@
           "EvtxECmd (Eric Zimmerman)",
           "Hayabusa"
         ],
+        "extraction": "Not memory-resident despite the category: this is reconstructed from durable, disk-based event logs \u2014 Security Event ID 4688 (requires the \"Audit Process Creation\" policy and, for full command lines, the \"Include command line in process creation events\" GPO to have been enabled beforehand) or Sysmon Event ID 1 in the Microsoft-Windows-Sysmon/Operational channel (requires Sysmon to already be installed and configured). Extraction is exporting the live .evtx file with wevtutil epl Security security.evtx (or the Sysmon channel name in place of Security) run from an elevated/administrator prompt \u2014 a standard user gets Access Denied since the file is actively held open by the Event Log service and can't be copied normally. Gotcha: if the relevant auditing/Sysmon was never enabled before the activity occurred, no command-line history exists to extract, regardless of privilege level.",
         "attack_techniques": [
           "T1059",
           "T1562.002",
@@ -3821,6 +3919,7 @@
         "parsing_tools": [
           "Volatility 3 (Volatility Foundation) - windows.netscan, windows.netstat"
         ],
+        "extraction": "Genuinely memory-resident and volatile: active connection state is not written to disk in a durable record, so it must be captured live. Standard method is a full physical memory image via WinPmem, Magnet RAM Capture, or FTK Imager (each requiring a loaded kernel driver and local administrator privileges), followed by offline extraction of socket/connection artifacts with Volatility's network-scanning plugins; a live-only alternative is running netstat -ano or Sysinternals TCPView at capture time, which is faster but only reflects that instant and isn't preserved for later re-analysis. Gotcha: connections torn down before acquisition leave no trace in either a live query or a memory image, so timing of capture relative to the incident matters.",
         "attack_techniques": [
           "T1049",
           "T1071"
@@ -3864,6 +3963,7 @@
           "Volatility 3 (Volatility Foundation) - windows.pslist, windows.pstree, windows.psscan, windows.dlllist, windows.handles",
           "volshell (Volatility 3 interactive shell) for manual EPROCESS/PEB inspection"
         ],
+        "extraction": "Genuinely memory-resident: this data does not persist to disk, so it must be captured before the process exits or the machine is powered off. Extraction requires a full physical memory acquisition using a dedicated tool \u2014 WinPmem, Magnet RAM Capture, FTK Imager, or Magnet DumpIt (the latter recommended on Windows 11 since WinPmem's newer driver is only test-signed) \u2014 after which process/handle/DLL listings are pulled from the image offline with a memory-analysis framework such as Volatility. These tools load a kernel-mode driver to read physical RAM, requiring local administrator privileges; a lighter live-triage alternative (Sysinternals pslist, listdlls, handle) captures current state without a full dump but misses anything the full-image analysis would later reveal. Gotcha: the acquisition process itself consumes and alters some memory pages, and a reboot before capture destroys this artifact permanently.",
         "attack_techniques": [
           "T1057",
           "T1014",
@@ -3907,6 +4007,7 @@
           "Get-NetNeighbor (PowerShell NetTCPIP module)",
           "netsh interface ipv4 show neighbors"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1557.002"
         ],
@@ -3940,6 +4041,7 @@
           "DB Browser for SQLite",
           "Hindsight"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1614"
         ],
@@ -3979,6 +4081,7 @@
           "Get-DnsClientCache / Clear-DnsClientCache (PowerShell DnsClient module)",
           "DNSDataView (NirSoft)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1071.004"
         ],
@@ -4015,6 +4118,7 @@
           "diff against a known-good baseline hosts file",
           "File-integrity monitoring or EDR alerting on writes to the etc\\hosts path"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1556.006"
         ],
@@ -4051,6 +4155,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1016",
           "T1016.002"
@@ -4087,6 +4192,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1016"
         ],
@@ -4126,6 +4232,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1124"
         ],
@@ -4164,6 +4271,7 @@
           "WirelessKeyView (NirSoft)",
           "Direct XML review of the Wlansvc\\Profiles\\Interfaces path"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1016.002"
         ],
@@ -4202,6 +4310,7 @@
           "Event Viewer",
           "SIEM ingestion (e.g. Microsoft Sentinel Windows Firewall connector)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1562.004"
         ],
@@ -4239,6 +4348,7 @@
           "Event Viewer",
           "EvtxECmd (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1016.002"
         ],
@@ -4287,6 +4397,7 @@
           "wevtutil / Event Viewer",
           "plain text viewer (rasphone.pbk is an unencrypted, human-readable INI-style text file)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1133"
         ],
@@ -4327,6 +4438,7 @@
           "Autoruns (Sysinternals)",
           "Registry Explorer (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1546.012"
         ],
@@ -4359,6 +4471,7 @@
           "RegRipper (H. Carvey)",
           "Autoruns (Sysinternals)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1547.001"
         ],
@@ -4394,6 +4507,7 @@
           "Autoruns (Sysinternals)",
           "TaskScheduler view + PECmd/Registry Explorer for TaskCache"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1053.005"
         ],
@@ -4427,6 +4541,7 @@
           "Autoruns (Sysinternals)",
           "RegRipper (H. Carvey)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1543.003"
         ],
@@ -4460,6 +4575,7 @@
           "Autoruns (Sysinternals)",
           "manual file listing / KAPE"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1547.001"
         ],
@@ -4493,6 +4609,7 @@
           "python-cim / Get-WmiObject",
           "KAPE (WMI repository collection)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1546.003",
           "T1047"
@@ -4540,6 +4657,7 @@
           "esentutl",
           "Event Viewer"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1197"
         ],
@@ -4584,6 +4702,7 @@
           "Autoruns",
           "Process Monitor"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1546.015",
           "T1112"
@@ -4628,6 +4747,7 @@
           "Event Viewer",
           "Sysmon"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1546.008",
           "T1546.012"
@@ -4670,6 +4790,7 @@
           "Microsoft Application Compatibility Toolkit / Compatibility Administrator (the GUI counterpart to sdbinst.exe)",
           "Manual binary/hex inspection of the proprietary .sdb format"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1546.011"
         ],
@@ -4711,6 +4832,7 @@
           "RegRipper (NTUSER-targeted plugins)",
           "Autoruns (Sysinternals), for per-user Run enumeration"
         ],
+        "extraction": "Locked while the owning profile is logged on (the hive is mounted under HKEY_USERS), so a plain file copy fails with a sharing violation; if the profile is not currently loaded, the file can be copied directly. Live acquisition of a mounted hive requires a tool that bypasses the OS lock \u2014 KAPE's verified RegistryHivesUser target, FTK Imager, or reading a Volume Shadow Copy snapshot of the file \u2014 and only standard/local-admin file-read access to the profile folder, no SYSTEM privileges needed. Gotcha: on a live box, VSS or a forensic copy tool is required even for an administrator, since Windows itself \u2014 not an ACL \u2014 holds the lock.",
         "attack_techniques": [
           "T1547.001"
         ],
@@ -4750,6 +4872,7 @@
           "Impacket secretsdump.py",
           "Volatility (hashdump / SAM-related plugins, live memory)"
         ],
+        "extraction": "Locked while Windows is running and cannot be copied with a normal file copy; live acquisition via reg save HKLM\\SAM sam.hive requires SYSTEM privileges specifically, not just local administrator, because the SAM key's ACL denies read access to Administrators \u2014 this is commonly done by running the command via PsExec -s or an admin session with SeBackupPrivilege enabled through a backup-aware tool. Always capture the paired SYSTEM hive alongside it, since SAM's contents are encrypted with a key stored there. Offline acquisition (mounted image, WinRE, or a Volume Shadow Copy) has no lock and no ACL enforcement, so it can be copied directly.",
         "attack_techniques": [
           "T1003.002"
         ],
@@ -4788,6 +4911,7 @@
           "Impacket secretsdump.py",
           "RegRipper"
         ],
+        "extraction": "Locked on a live system and, like SAM, its registry key ACL blocks read access to local Administrators \u2014 only the SYSTEM account can read it, so reg save HKLM\\SECURITY security.hive must be run as SYSTEM (e.g., via PsExec -s) rather than a merely-elevated admin shell. It contains LSA secrets and cached domain credentials, making it especially sensitive; the paired SYSTEM hive is needed to decrypt its contents during analysis. Offline sources (disk image, WinRE, VSS snapshot) bypass both the live lock and the ACL restriction.",
         "attack_techniques": [
           "T1003.004",
           "T1003.005"
@@ -4825,6 +4949,7 @@
           "RegRipper (run, uninstall plugins)",
           "Autoruns (Sysinternals)"
         ],
+        "extraction": "Locked while Windows is running, blocking a direct file copy, but unlike SAM/SECURITY its registry ACL permits local Administrators to read it \u2014 so reg save HKLM\\SOFTWARE software.hive from an elevated administrator prompt is sufficient, SYSTEM is not required. Offline acquisition from a mounted image, WinRE, or a Volume Shadow Copy also works and needs no special privilege beyond read access to the file. KAPE's RegistryHivesSystem target collects it automatically during triage.",
         "attack_techniques": [
           "T1547.001"
         ],
@@ -4865,6 +4990,7 @@
           "Nirsoft USBDeview (live system)",
           "Autoruns (Sysinternals) for service enumeration"
         ],
+        "extraction": "Locked while in use, so it must be saved rather than copied; reg save HKLM\\SYSTEM system.hive run as a local administrator is sufficient since this hive carries no special ACL restriction beyond normal admin rights. It should always be collected alongside SAM and SECURITY because it holds the boot key used to decrypt secrets in both. Offline collection from a mounted image, WinRE, or a VSS snapshot copies it with no lock to work around; KAPE's RegistryHivesSystem target also collects it.",
         "attack_techniques": [
           "T1543.003",
           "T1200"
@@ -4901,6 +5027,7 @@
           "Registry Explorer / RECmd (Eric Zimmerman)",
           "RegRipper"
         ],
+        "extraction": "Locked while the profile is active (mounted as the user's HKEY_CLASSES_ROOT), so it cannot be copied directly with the owning user logged on; if the profile is not loaded, a normal file copy succeeds. Live acquisition of the in-use file needs a lock-bypassing method \u2014 a Volume Shadow Copy snapshot or a forensic imaging tool (FTK Imager, KAPE) \u2014 and only standard file-read access, no elevated or SYSTEM privileges. KAPE's verified RegistryHivesUser target collects it together with NTUSER.DAT.",
         "attack_techniques": [],
         "anti_forensic_notes": "Shellbags entries in this hive are not tied to a file's own metadata and are not cleared when the referenced folder or volume is deleted or removed, so they can outlive the evidence they point to. An analyst can prove a folder was accessed even after the folder, and the drive it was on, are both gone. Because the hive loads only for its owning user, correlating it correctly requires matching the hive to the right SID/profile.",
         "interpretation": "",
@@ -4933,6 +5060,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1082"
         ],
@@ -4972,6 +5100,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1082"
         ],
@@ -5008,6 +5137,7 @@
           "RegRipper (H. Carvey)",
           "Registry Explorer (Eric Zimmerman)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1547.001",
           "T1543.003"
@@ -5044,6 +5174,7 @@
           "Registry Explorer (Eric Zimmerman)",
           "RegRipper (H. Carvey)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "ShutdownTime is a single value overwritten on every shutdown, so it only ever reflects the MOST RECENT shutdown - no history of prior shutdowns is retained here. Cross-reference System.evtx (e.g., Event ID 1074/6006 style shutdown/service-stop records) for a fuller shutdown/reboot history than this single registry value can provide on its own.",
         "interpretation": "Determining the last shutdown time can help detect user behavior and system anomalies. The value is stored in 64-bit Windows FILETIME format.",
@@ -5083,6 +5214,7 @@
           "WinUpdatesView (NirSoft)",
           "esentutl (built-in ESE database utility)"
         ],
+        "extraction": "",
         "attack_techniques": [],
         "anti_forensic_notes": "Update history in DataStore.edb can be wiped by stopping wuauserv and deleting the SoftwareDistribution folder; raw ETL trace files are rotated and not retained indefinitely, so delayed triage can lose ETW-level detail even after a WindowsUpdate.log snapshot exists.",
         "interpretation": "",
@@ -5121,6 +5253,7 @@
           "Group Policy Management Console (GPMC)",
           "Get-GPPermission (GroupPolicy PowerShell module)"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1484.001",
           "T1615"
@@ -5165,6 +5298,7 @@
           "Elcomsoft Forensic Disk Decryptor",
           "Event Viewer / wevtutil for BitLocker-API log export"
         ],
+        "extraction": "",
         "attack_techniques": [
           "T1486"
         ],

@@ -647,7 +647,7 @@ function getFiltered(){
   return allArtifacts.filter(function(a){
     if(activeGroup!=='all'&&a.group!==activeGroup)return false;
     if(!searchTerm)return true;
-    var hay=[a.name,a.purpose,a.location,a.interpretation,(a.key_fields||[]).join(' '),(a.anomalies||[]).join(' ')].join(' ').toLowerCase();
+    var hay=[a.name,a.purpose,a.location,a.interpretation,a.extraction,(a.key_fields||[]).join(' '),(a.anomalies||[]).join(' ')].join(' ').toLowerCase();
     return hay.indexOf(searchTerm)!==-1;
   });
 }
@@ -691,6 +691,7 @@ function buildCard(a){
       +'<div class="detail-row"><div class="detail-label">NORMAL BASELINE</div><div class="baseline-box">'+escapeHtml(a.normal_baseline)+'</div></div>'
       +'<div class="detail-row"><div class="detail-label">ANOMALIES TO FLAG</div><ul class="anomaly-box">'+anomalies+'</ul></div>'
       +(tools?'<div class="detail-row"><div class="detail-label">PARSING TOOLS</div><div class="tool-list">'+tools+'</div></div>':'')
+      +(a.extraction?'<div class="detail-row"><div class="detail-label">HOW TO EXTRACT</div><div class="detail-text">'+escapeHtml(a.extraction)+'</div></div>':'')
       +(attackChips?'<div class="detail-row"><div class="detail-label">ATT&amp;CK TECHNIQUES</div><div class="chip-row">'+attackChips+'</div></div>':'')
       +'<div class="detail-row"><div class="detail-label">ANTI-FORENSIC NOTES</div><div class="detail-text">'+escapeHtml(a.anti_forensic_notes)+'</div></div>'
       +(a.interpretation?'<div class="detail-row"><div class="detail-label">INTERPRETATION</div><div class="detail-text">'+escapeHtml(a.interpretation)+'</div></div>':'')
@@ -1244,6 +1245,10 @@ function copyMarkdown(id){
   }
   if((a.parsing_tools||[]).length){
     lines.push('**Parsing Tools:** '+a.parsing_tools.join(', '));
+    lines.push('');
+  }
+  if(a.extraction){
+    lines.push('**How to Extract:** '+a.extraction);
     lines.push('');
   }
   if((a.attack_techniques||[]).length){
