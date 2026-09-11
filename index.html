@@ -447,6 +447,7 @@ body.light .footer-credit-pill .credit-name{color:#0A6EA8;}
         <div class="nav-dropdown"><div class="nav-dropdown-inner">
           <a href="https://h3ad-sec.github.io/ARTIFEKTX/" target="_blank" rel="noopener" class="nav-current">ARTIFEKTX</a>
           <a href="https://h3ad-sec.github.io/CHRONIFY/" target="_blank" rel="noopener">CHRONIFY</a>
+          <a href="https://h3ad-sec.github.io/WIN-EVT/" target="_blank" rel="noopener">WIN-EVT</a>
         </div></div>
       </div>
       <a href="https://h3ad-sec.github.io/H3AD-IR/">H3AD-IR</a>
@@ -474,7 +475,7 @@ body.light .footer-credit-pill .credit-name{color:#0A6EA8;}
 </nav>
 
 <div class="nav-drawer" id="navDrawer">
-          <a href="https://h3ad-sec.github.io/H3AD/" onclick="closeDrawer()">H3AD</a>
+              <a href="https://h3ad-sec.github.io/H3AD/" onclick="closeDrawer()">H3AD</a>
     <a href="https://h3ad-sec.github.io/H3AD-X/" onclick="closeDrawer()">H3AD-X</a>
     <a href="https://h3ad-sec.github.io/IOC-VERDIKT/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ IOC-VERDIKT ↗</a>
     <a href="https://h3ad-sec.github.io/PARSE-X/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ PARSE-X ↗</a>
@@ -496,6 +497,7 @@ body.light .footer-credit-pill .credit-name{color:#0A6EA8;}
     <a href="https://h3ad-sec.github.io/H3AD-DF/" onclick="closeDrawer()">H3AD-DF</a>
     <a href="https://h3ad-sec.github.io/ARTIFEKTX/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub nav-current">↳ ARTIFEKTX ↗</a>
     <a href="https://h3ad-sec.github.io/CHRONIFY/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ CHRONIFY ↗</a>
+    <a href="https://h3ad-sec.github.io/WIN-EVT/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ WIN-EVT ↗</a>
     <a href="https://h3ad-sec.github.io/H3AD-IR/" onclick="closeDrawer()">H3AD-IR</a>
     <a href="https://h3ad-sec.github.io/H3AD-LEARN/" onclick="closeDrawer()">H3AD-LEARN</a>
     <a href="https://h3ad-sec.github.io/H3AD-LEARN/fundamentals/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ FUNDAMENTALS ↗</a>
@@ -857,6 +859,10 @@ function bootstrap(){
     renderAttackMap();
     renderPlaybooks();
     renderVolatility();
+    var hash=(location.hash||'').replace('#','');
+    if(hash && WINDOWS_ARTIFACTS.some(function(a){return a.id===hash;})){
+      jumpTo(hash);
+    }
   }).catch(function(){ /* ATT&CK Map / Playbooks / Volatility just stay empty if this fails; main grid load is independent */ });
 }
 
